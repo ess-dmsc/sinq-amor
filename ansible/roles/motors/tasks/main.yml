@@ -1,0 +1,72 @@
+- name: Make sure that /opt/amor/simfiles exists
+  file: path=/opt/amor/simfiles state=directory recurse=yes
+
+- name: be sure EL734 controller is installed
+  become: yes
+  copy:
+    src: el734controller.py
+    dest: /opt/amor/simfiles
+
+- name: be sure EL734 motor is installed
+  become: yes
+  copy:
+    src: el734motor.py
+    dest: /opt/amor/simfiles
+
+- name: make sure that parameters for the first motor controller are installed
+  become: yes
+  copy:
+    src: mota
+    dest: /opt/amor/simfiles
+
+
+- name: make sure that parameters for the second motor controller are installed
+  become: yes
+  copy:
+    src: motb
+    dest: /opt/amor/simfiles
+
+- name: make sure that parameters for the third motor controller are installed
+  become: yes
+  copy:
+    src: motc
+    dest: /opt/amor/simfiles
+
+- name: be sure motor simulation service file for mota is installed
+  become: yes
+  copy:
+    src: mota.service
+    dest: /usr/lib/systemd/system
+
+- name: be sure motor simulation service mota is enabled
+  become: yes
+  service:
+    name: mota
+    enabled: yes
+    state: stopped
+    
+- name: be sure motor simulation service file for motb is installed
+  become: yes
+  copy:
+    src: motb.service
+    dest: /usr/lib/systemd/system
+
+- name: be sure motor simulation service motb is enabled
+  become: yes
+  service:
+    name: motb
+    enabled: yes
+    state: stopped
+
+- name: be sure motor simulation service file for motc is installed
+  become: yes
+  copy:
+    src: motc.service
+    dest: /usr/lib/systemd/system
+
+- name: be sure motor simulation service motc is enabled
+  become: yes
+  service:
+    name: motc
+    enabled: yes
+    state: stopped

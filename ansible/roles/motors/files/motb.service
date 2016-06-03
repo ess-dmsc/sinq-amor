@@ -1,0 +1,9 @@
+[Unit]
+Description=Motor simulation motb
+After=rc-local.service
+
+[Service]
+ExecStart=/opt/amor/simfiles/el734controller.py 60002 /opt/amor/simfiles/motb > /tmp/motb.log
+
+[Install]
+WantedBy=multi-user.target

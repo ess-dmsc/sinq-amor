@@ -1,0 +1,9 @@
+[Unit]
+Description=Motor simulation mota
+After=rc-local.service
+
+[Service]
+ExecStart=/opt/amor/simfiles/el734controller.py 60001 /opt/amor/simfiles/mota > /tmp/mota.log
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,56 @@
+- name: be sure telnet is installed
+  become: yes
+  yum:
+    name: telnet
+    state: latest
+
+- name: be sure pip is installed
+  become: yes
+  yum:
+    name: python-pip
+    state: latest
+
+- name: be sure PyEPICS is installed
+  become: yes
+  pip:
+    name: pyepics
+    state: latest
+
+- name: be sure twisted is installed
+  become: yes
+  pip:
+    name: twisted
+    state: latest
+
+
+- name: download procServ
+  get_url:
+    url: https://sourceforge.net/projects/procserv/files/2.6.0/procServ-2.6.0.tar.gz/download
+    dest: /tmp/procServ.tar.gz
+
+- name: be sure procServ is unarchived
+  unarchive:
+    copy: no
+    src: /tmp/procServ.tar.gz
+    dest: /tmp
+
+- name: configure procServ
+  command: ./configure
+  args:
+    chdir: /tmp/procServ-2.6.0
+
+- name: build and install procServ
+  become: yes
+  command: make install
+  args:
+    chdir: /tmp/procServ-2.6.0
+
+- name: be sure procServ file is absent
+  file:
+    path: /tmp/procServ.tar.gz
+    state: absent
+
+- name: be sure procServ directory is absent
+  file:
+    path: /tmp/procServ-2.6.0
+    state: absent

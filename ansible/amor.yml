@@ -1,0 +1,5 @@
+- hosts: simulation
+  roles:
+    - common
+    - motors
+    
