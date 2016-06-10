@@ -3,7 +3,7 @@ Description=Motor simulation motc
 After=rc-local.service
 
 [Service]
-ExecStart=/opt/amor/simfiles/el734controller.py 60006 /opt/amor/simfiles/motc > /tmp/motc.log
+ExecStart=/opt/amor/simfiles/el734controller.py 60003 /opt/amor/simfiles/motc > /tmp/motc.log
 
 [Install]
 WantedBy=multi-user.target

@@ -1,0 +1,22 @@
+#---------------------------------------------
+# SINQ specific DB definitions
+#---------------------------------------------
+registrar(EL734Register) 
+registrar(NanotecRegister) 
+addpath "/opt/epics/modules/asyn/4.27.0/3.14.12.5/dbd"
+addpath "/opt/epics/bases/base-3.14.12.5/dbd"
+addpath "/opt/epics/modules/motor/6.10.0/3.14.12.5/dbd"
+#addpath "/usr/local/epics/support/std-3-1/dbd"
+#addpath "/usr/local/epics/anc350v17/dbd"
+include "asyn.dbd"
+include "motor.dbd"
+#include "motorSupport.dbd"
+
+#include "scalerRecord.dbd"
+#device(scaler,INST_IO,devScalerEL737,"asynScalerEL737")
+
+#--------- For lakeshore
+#addpath "/opt/epics/modules/streamdevice/2.6.0/3.14.12.5/dbd"
+#include "streamdevice.dbd"
+addpath "/opt/epics/modules/busy/1.6.0/3.14.12.5/dbd"
+include "busy.dbd"

@@ -6,6 +6,7 @@
   copy:
     src: el734controller.py
     dest: /opt/amor/simfiles
+    mode: 0755
 
 - name: be sure EL734 motor is installed
   become: yes
@@ -70,3 +71,24 @@
     name: motc
     enabled: yes
     state: stopped
+    
+- name: Make sure that /opt/amor/epics exists
+  file: path=/opt/amor/epics state=directory recurse=yes
+
+- name: be sure mota substitutions file is installed
+  become: yes
+  copy:
+    src: mota.substitutions
+    dest: /opt/amor/epics
+    
+- name: be sure motb substitutions file is installed
+  become: yes
+  copy:
+    src: motb.substitutions
+    dest: /opt/amor/epics
+
+- name: be sure motc substitutions file is installed
+  become: yes
+  copy:
+    src: motc.substitutions
+    dest: /opt/amor/epics
