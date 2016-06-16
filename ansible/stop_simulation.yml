@@ -1,0 +1,3 @@
+- hosts: simulation
+  tasks:
+    - include: simulation_state.yml new_state=stopped

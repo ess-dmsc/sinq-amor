@@ -31,10 +31,10 @@ dbLoadTemplate "motb.substitutions"
 dbLoadTemplate "motc.substitutions"
 
 
-#--------- load EL737 counter box, not enabled yet
-#drvAsynIPPortConfigure("cter1","narziss-ts:3003",0,0,0)
-#dbLoadRecords("$(ASYN)/db/asynRecord.db","P=NZ:,R=cter1,PORT=cter1,ADDR=0,OMAX=80,IMAX=80")
-#dbLoadRecords("${TOP}/db/el737Record.db")
+#--------- load EL737 counter box
+drvAsynIPPortConfigure("cter1","localhost:62000",0,0,0)
+dbLoadRecords("$(ASYN)/db/asynRecord.db","P=SQ:AMOR:,R=cter1,PORT=cter1,ADDR=0,OMAX=80,IMAX=80")
+dbLoadRecords("${TOP}/db/el737Record.db")
 
 #asynSetTraceIOMask("cter1",0,2)
 

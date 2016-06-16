@@ -20,6 +20,11 @@
     src: dbd
     dest: /opt/amor/epics
  
+- name: make sure that db files are installed
+  become: yes
+  copy:
+    src: db
+    dest: /opt/amor/epics
 
 - name: make sure that the st.cmd file is installed
   become: yes
@@ -27,3 +32,16 @@
     src: st.cmd
     dest: /opt/amor/epics
     mode: 0755
+
+- name: be sure  AMOR IOC service file is installed
+  become: yes
+  copy:
+    src: amor_ioc.service
+    dest: /usr/lib/systemd/system
+
+- name: be sure IOC service is enabled
+  become: yes
+  service:
+    name: amor_ioc
+    enabled: yes
+    state: stopped

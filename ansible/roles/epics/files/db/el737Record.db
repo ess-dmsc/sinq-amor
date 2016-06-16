@@ -1,0 +1,9 @@
+
+record(scaler,"")
+{
+        field(NAME,"SQ:AMOR:cter1")
+        field(DESC,"AMOR EL737 counter")
+	field(DTYP,"asynScalerEL737")
+	field(OUT,"INST_IO @asyn(cter1,0)")
+}
+

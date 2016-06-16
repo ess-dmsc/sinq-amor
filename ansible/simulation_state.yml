@@ -1,0 +1,25 @@
+- name: change motor mota simulation state
+  become: yes
+  service:
+    name: mota
+    state: "{{ new_state }}"
+
+- name: change motor motb simulation state
+  become: yes
+  service:
+    name: motb
+    state: "{{ new_state }}"
+
+- name: change motor motc simulation state
+  become: yes
+  service:
+    name: motc
+    state: "{{ new_state }}"
+
+
+- name: change AMOR IOC state
+  become: yes
+  service:
+    name: amor_ioc
+    state: "{{ new_state }}"
+
