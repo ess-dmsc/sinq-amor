@@ -44,3 +44,11 @@ The port for each IOC is defined in the corresponding `.service` file. The
 default values are
 
 - amor_ioc: `20001`
+
+## Getting rid of it
+
+The ansible playbook installs all files into /opt/amor. Thus getting
+rid of it means removing that directory. Then you have to disable and
+remove the installed services in  /usr/lib/systemd/system. As of now:
+mota, motb, motc and amor_ioc.
+
