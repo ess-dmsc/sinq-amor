@@ -43,7 +43,7 @@ The IOCs can be accessed using `telnet`. For this, run
 The port for each IOC is defined in the corresponding `.service` file. The
 default values are
 
-- amor_ioc: `20001`
+- amor_ioc:  localhost `20001`
 
 ## Getting rid of it
 
@@ -52,3 +52,27 @@ rid of it means removing that directory. Then you have to disable and
 remove the installed services in  /usr/lib/systemd/system. As of now:
 mota, motb, motc and amor_ioc.
 
+
+## Documentation
+
+Theres is some documentation on the instrument in the doc
+directory.
+
+*amorPub.pdf* is a recent publication on the AMOR instrument.
+
+*hand_out.ps* is a short user manual for the instrument. It also
+ contains a list of available motors and of their meaning in AMOR.
+ The EPICS name of the motor can be derived from the list in the
+ following way: There are three motor controller named A, B and
+ C. This maps to motor controllers SQ:AMOR:mota, SQ:AMOR:motb and
+ SQ:AMOR:motc. You get the full name of the motor recod by appending
+ the motor name to this. Exampe coz is SQ:AMOR:mota:coz. In addition
+ there is a scaler record called SQ:AMOR:cter1 for counting. The
+ standard EPICS scaler record does not support all status states of a
+ neutron counter. I therefore put additional status information into
+ the monitor S10. If S10 is 2, this means no beam, if it is 3, this
+ means paused.
+
+*distance.tex* is a description of how the AMOR geometry is calculated
+ from virtual motor positions. 
+ 

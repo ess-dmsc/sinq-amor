@@ -1,0 +1,509 @@
+\documentclass[10pt]{article}
+ \pagestyle{empty}
+ \usepackage{color}
+  \definecolor{gray}{gray}{0.4}
+  \definecolor{bg}{gray}{0.9}
+ \usepackage{graphics}
+ \parindent        0 mm
+ \topmargin      -32 mm
+ \oddsidemargin   -7 mm
+ \textheight     284 mm
+ \textwidth      180 mm
+ \unitlength       1 mm
+ \newcommand{\sclc}[1]{\newline\texttt{\color{blue}\phantom{xxx}#1}\newline }
+                %
+                \newcommand{\ts}[1]{\texttt{\textsl{#1}}}
+                \newcommand{\<}{$<$}
+                \renewcommand{\>}{\/$>$}
+                %
+                \newcommand{\sics}[1]{\mbox{\texttt{%
+                 {\color{gray} \rule[-0.3ex]{6ex}{1.9ex}}\hspace{-5.4ex}%
+                 {\color{white}SICS}\hspace{1ex} #1 }}%
+                }
+
+\begin{document}
+\sf
+\parbox[t]{80mm}{\textbf{\large short users' guide for \\[2ex] 
+                          \Huge Amor}} \hfill
+\parbox[t]{55mm}{
+\begin{tabular}[t]{@{}lr}
+ Amor cabin   & 056 310 3593 \\
+ Amor area    & '' 4605 \\
+ Jochen Stahn & '' 2518 \\
+ Thomas Geue  & '' 5988 \\
+ stand-by service & (0)079 820 2160
+\end{tabular}}%
+
+\rule{\textwidth}{0.8mm}
+
+\vfill
+\textbf{alignment:}\\[1mm]
+for alignment {\color{red}light} following the neutron path can be activated
+as alternative to the frame-overlap filter:
+ \sclc{conf light|filter}
+for the real measurements it is \textbf{essential} to return to the 
+configuration \textsl{filter} \\
+
+there are 3 principle set-ups: horizontal, deflected unpolarised, or 
+ deflected polarised;
+these are accessible via: 
+ \sclc{conf horizontal | polariser | deflector [<value>]}
+
+you can switch between single and area detector with:
+ \sclc{conf single|area}
+
+
+
+\vfill
+\textbf{important commands:}
+\begin{picture}(0,0)
+ \put(24,-43){
+  \begin{picture}(80,50)
+    \put(-01,039){\color{bg}\rule{14mm}{8mm}}
+    \put(059,039){\color{bg}\rule{17mm}{12mm}}
+    \put(077,039){\color{bg}\rule{16mm}{8mm}}
+    \put(090,023){\color{bg}\rule{12mm}{14mm}}
+   \thinlines
+    \put(092,025){\color{gray}\line(0,1){10}}
+    \put(100,025){\color{gray}\line(0,1){10}}
+    \put(000,046){\color{blue}\line(0,-1){11}}
+    \put(003,042){\color{blue}\line(0,-1){12}}
+    \put(030,050){\color{blue}\line(0,-1){34}}
+    \put(060,050){\color{blue}\line(0,-1){19}}
+    \put(078,046){\color{blue}\line(0,-1){15}}
+    \put(085,042){\color{blue}\line(0,-1){11}}
+    \put(030,008){\color{blue}\vector(0,1){3}}
+    \put(030,004){\color{blue}\vector(0,-1){3}}
+    \put(030,002){\color{blue}\vector(0,1){3}}
+    \put(030,010){\color{blue}\vector(0,-1){3}}
+    \put(030,015){\color{blue}\qbezier(9,-0)(9,2)(8,4)}
+    \put(030,015){\color{blue}\qbezier(-8,-4)(-10,0)(-8,4)}
+    \put(030,015){\color{blue}\line(1,0){20}}
+    \put(028,006){\color{blue}\line(1,0){14}}
+    \put(040,006){\color{blue}\line(0,1){9}}
+   \thicklines
+    \put(110,030){\line(-1,0){50}}
+    \put(103,028){\color{gray}\line(0,1){4}}
+    \put(106,031){\color{gray}\line(1,0){4}}
+    \put(106,029){\color{gray}\line(1,0){4}}
+    \put(060,030){\qbezier(0,0)(-4,-2)(-46,-23)}
+    \put(030,015){\qbezier(0,0)(-4,2)(-29,14.5)}
+   \put(000,048){\small detector}
+    \put(001,044){\small area}
+    \put(004,040){\small single}
+    \put(000,024){\color{cyan}\rule{1mm}{10mm}}
+    \put(002,027.7){\color{cyan}$\bullet$}
+   \put(031,048){\small sample}
+    \put(028,014.3){\color{red}\rule{4mm}{0.7mm}}
+    \put(031,008){\small STZ}
+    \put(041,010){\small ideal: 360\,mm}
+    \put(031,002){\small SOZ}
+    \put(040,016){\small $\color{red}\omega$=SOM}
+    \put(008,014){\small $\color{red}2\theta$=S2T}
+   \put(061,040){\small deflector}
+    \put(061,044){\small polariser}
+    \put(061,048){\small horizontal}
+    \put( 56,029.2){\rotatebox{14}{\color{gray}\rule{8mm}{0.7mm}}}
+   \put( 79,044){\small filter}
+    \put( 86,040){\small light}
+    \put( 70,029){\rotatebox{9}{\color{gray}\rule{8mm}{0.7mm}}}
+    \put(085,025.5){\color{red}\line(0,1){4.5}}
+    \put(081,018){\small \color{red}light}
+    \put(090,020){\small \color{gray}chopper}
+    \put(085,020){\color{red}\vector(0,1){5}}
+    \put(083,032){\color{gray}\line(1,-1){4}}
+    \put(006,030.7){\color{magenta}\small 5}
+     \put(006,027.7){\color{magenta}\rule{1mm}{2mm}}
+     \put(006,023.8){\color{magenta}\rule{1mm}{2mm}}
+    \put(023,022){\color{magenta}\small 4}
+     \put(023,019){\color{magenta}\rule{1mm}{2mm}}
+     \put(023,015.7){\color{magenta}\rule{1mm}{2mm}}
+    \put(036,022){\color{magenta}\small 3}
+     \put(036,019){\color{magenta}\rule{1mm}{2mm}}
+     \put(036,015.7){\color{magenta}\rule{1mm}{2mm}}
+    \put(046.3,030.2){\color{magenta}\small slit 2}
+     \put(052,027.2){\color{magenta}\rule{1mm}{2mm}}
+     \put(052,023){\color{magenta}\rule{1mm}{2mm}}
+    \put( 80.6,033.7){\color{magenta}\small 1}
+     \put( 81,030.7){\color{magenta}\rule{1mm}{2mm}}
+     \put( 81,027.5){\color{magenta}\rule{1mm}{2mm}}
+  \end{picture}
+ }
+\end{picture}
+
+
+check {\color{red}position} of \textsl{device}: 
+ \sclc{<device>} 
+
+{\color{red}drive} \textsl{device} to \textsl{value}: 
+ \sclc{dr <device> <value>} 
+ 
+{\color{red}redefine} the \textsl{value} for \textsl{device}: 
+ \sclc{sp <device> <value>} 
+
+to drive the vertical {\color{red}slit} \textsl{number} to \textsl{opening}: 
+ \sclc{slit <number> <opening>} 
+or, if all 5 slits should be changed: 
+ \sclc{slit <opening1> <opening2> <opening3> <opening4> <opening5>} 
+the present openings can be obtained by the command 
+ \sclc{slit}  
+
+\vfill
+\textbf{scan commands:}\\[1mm]
+{\color{red}center-scan} for \textsl{device} around \textsl{value} with \textsl{number}
+steps to either side of \textsl{width} with a monitor \textsl{pre-set}: 
+ \sclc{cscan <device> <center> <step-width> <number> <pre-set>} 
+
+{\color{red}step-scan} for \textsl{device} (and \textsl{device'}) from \textsl{value1} to \textsl{value2}
+with \textsl{number} points and monitor \textsl{pre-set}: 
+ \sclc{sscan <device> <value1> <value2> [<device'> <value1'> <value2'>] <number> <pre-set>}
+
+after a scan it is possible (please check the value reported back!)
+to get a peak maximum with
+ \sclc{peak} 
+and then to drive there with 
+ \sclc{center} 
+
+\vfill
+\textbf{magnets:}\\[1mm]
+\parbox[t]{110mm}{
+switch the {\color{red}polariser} [{\color{red}analyser}] to spin up
+or down neutrons, or off:
+ \sclc{spin +|0|- [+|0|-]}
+    
+drive the {\color{red}magnetic field} at the sample:
+ \sclc{dr hsy <field in Oe>}
+}   
+\parbox[t]{65mm}{%
+(re)mount polariser / analyser magnets:
+ \sclc{conf pby|aby}
+   
+mount / unmount 1\,T electro magnet:
+ \sclc{fmaset on|off}
+}  \\ 
+
+
+\vfill
+\textbf{TOF data acqusition:}\\[1mm]
+start a TOF {\color{red}measurement} for a monitor \textsl{pre-set}:
+ \sclc{count monitor <pre-set>}  
+the data file is created after finishing the data acquisition 
+(a \textsl{pre-set} of 1e7 corresponds to about 35\,min) \\
+
+a (simple) batch-job is a line-by-line list of the commands to be executed \\
+define a \textsl{directory} where the \textsl{batch-file}s are located:
+ \sclc{batchroot /home/amorlnsg/<your directory[/subdirectory]>}
+execute the \textsl{batch-job}:
+ \sclc{batchrun <batch-file>}
+\\[-6ex]
+
+\hfill{\color{gray}\tiny J.\ Stahn, \today}\\[-1.5ex]
+\rule{\textwidth}{0.8mm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+\clearpage
+\textbf{The Chopper}\\[1ex]
+
+In the standard configuration the {\color{red}ideal chopper speed is 1500\,rpm}.
+Higher frequences will lead to an overlap of the pulses (unless the
+chopper-detector distance and the frame overlap mirror are adjusted);
+lower frequences are just a waste of neutrons. \\
+
+To get the resolution $\Delta q_z/q_z$ constant it is essential to 
+operate the chopper discs at a {\color{red}phase of $-13.6^\circ$}. Since there is
+an offset at the second chopper disc, one has to give a value of
+$-12.8^\circ$ (2013).  \\
+Whenever the chopper is started it has problems to synchronise at
+a phase other than 0. This means you first should go to the wanted
+spped with phase 0 and then set the correct phase. \\
+
+Sometimes (not very often!) there is a problem with the chopper. 
+What can be wrong:
+           \begin{itemize}
+ \item The slave chopper disk lost its phase, master is still running: \\
+       drive the speed to 0 by: \\
+       press "F1" to access the master disk; \\
+       press "R" and enter 0; \dots
+ \item The cooling water failed (the red light at the cooling water 
+       controll pannel is on): \\
+       quit this state by pressing the red knop; \\
+       restart the cooling water pump with the green knop; \dots
+ \item The chopper controll computer has a problem: \\
+       switch it off and on (its a DOS computer!); \\
+       when booted enter \texttt{ncs} and wait; 
+       no callipration here!; \dots
+ \item[\dots] 
+       switch the key on the chopper controll pannel to "hand"; \\
+       press the button "reset"; \\
+       press the button "callibrate"; \\
+       switch the key back to "rechner";  \\
+          \end{itemize}
+Now the complete chopper system is ready to be started. To bring it to the
+right parameters perform the following stepps:
+          \begin{itemize}
+ \item press "F2" to access the slave disk;
+ \item press "P" and enter the phase 0;
+ \item press "F1" to access the master disk;
+ \item press "R" and enter the frequence (1500);
+       wait until this is reached;
+ \item press "F2" to access the slave disk;
+ \item press "P" and enter the phase;
+ \item check if the parameters are stable after some minute,
+       otherwise reset the phase or restart the complete 
+       procedure.
+           \end{itemize}
+The computer is really old and the software seems to be even older --- 
+so be patient. It takes several seconds before a single input is
+processed, even if it is only the change of controll with "F2" or "P". \\
+
+There is a controll pannel in the left rack close to the area entrance.
+If the chopper has a problem it will (most likely) be displayed there.
+So please have a look there first to find out the origin of a problem.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+\clearpage
+\textbf{Direct access to the motor controller} \\[1ex]
+ The sics commands \sics{mot\ts{\<x\>}} give the opportunity to check or 
+ change the parameters of the motor controllers.
+ It is also possible, to run a motor or to perform reference runs.\\
+
+ By using these commands you can destroy a lot! \\
+ So, please {\color{red}use it only when you are sure what to do}! \\
+ Other ways ask the instrument responsible! \\
+
+ Syntax: \\[1ex]
+  \sics{mot\ts{\<x\>} 
+        send \ts{\<key\>} 
+             \ts{\<slot\>} 
+             [\ts{\<val1\>} [\ts{\<val2\>}]]} \\[1ex]
+ with 
+  \begin{tabular}[t]{lll}
+   \ts{x}    & \textsf{A}, \textsf{B} or \textsf{C} 
+          the name of the controller &
+          table below \\
+   \ts{key}  & the parameter to be set/read or&
+          table next page \\ &
+          the action to be performed &                           \\
+   \ts{slot} & the slot-number of the device at 
+          controller \ts{x} & 
+          table below \\
+   \ts{val1} & the first value for parameter/action 
+          \ts{key} &
+          table next page  \\
+   \ts{val2} & the second value for parameter/action 
+          \ts{key} &
+          table next page  
+  \end{tabular}\\[1ex]
+
+ Example: Drive $\omega$ (device {\sf SOM}: controller \textsf{A}, slot 9) to $3.5^\circ$ \\[1ex]
+  \sics{mota send p 9 3.5} 
+
+
+ \vfill
+\begin{tabular}{c|rc|ll}
+controller & slot & device & group & motion  \\
+\hline \hline
+            &  1 &\sf COM & counter        & tilt \\
+ \textsf{A} &  2 &\sf COZ &                & $z$ translation \\
+            &  3 &\sf C3Z &                & $z$ position single counter\\
+            &  4 &\sf COX &                & $x$ translation \\
+            \cline{2-5}
+            &  5 &\sf EOZ &                & $z$ lift Selene support\\
+            &  6 &\sf XLZ &                & $z$ position distance laser\\
+            &  7 &\sf EOM &                & $\omega$ Selene support\\
+            &  8 &\sf --- &                & \\
+            \cline{2-5}
+            &  9 &\sf SOM & sample         & $\omega$ \\
+            & 10 &\sf SOZ &                & $z$ lift of base \\
+            & 11 &\sf STZ &                & $z$ translation on sample table \\
+            & 12 &\sf SCH &                & $\chi$ \\
+\hline \hline
+            &  1 &\sf AOM & analyser       & tilt \\
+ \textsf{B} &  2 &\sf AOZ &                & $z$ position of rotation axis \\
+            &  3 &\sf ATZ &                & $z$ position relative to rotation axis \\
+            &  4 &\sf --- &                & \\
+            \cline{2-5}
+            &  5 &\sf MOM & monochromator/ & tilt \\
+            &  6 &\sf MOZ & polariser      & $z$ position of rotation axis \\
+            &  7 &\sf MTZ &                & $z$ position relative to rotation axis \\
+            &  8 &\sf MTY &                & $y$ position \\
+            \cline{2-5}
+            &  9 &\sf FOM & frame-overlap  & tilt \\
+            & 10 &\sf --- &                & \\
+            & 11 &\sf FTZ &                & $z$ position relative to rotation axis \\
+            \cline{2-5}
+            & 12 &\sf     &                &              \\
+\hline \hline
+            &  1 &\sf D5V & diaphragms     & 5 vertical \\
+ \textsf{C} &  2 &\sf D5H &                & 5 horizontal \\
+            &  3 &\sf D1L &                & 1 left \\
+            &  4 &\sf D1R &                & 1 right \\
+            &  5 &\sf D3T &                & 3 opening \\
+            &  6 &\sf D3B &                & 3 $z$ position (lower edge) \\
+            &  7 &\sf D4T &                & 4 opening \\
+            &  8 &\sf D4B &                & 4 $z$ position (lower edge) \\
+            &  9 &\sf D1T &                & 1 opening \\
+            & 10 &\sf D1B &                & 1 $z$ position (lower edge) \\
+            & 11 &\sf D2T &                & 2 opening \\
+            & 12 &\sf D2B &                & 2 $z$ position (lower edge) \\
+\hline \hline
+ phytron    &  1 &\sf DST & luminous field & $y$ = transversal \\
+            &  2 &\sf DSL & diaphragm      & $x$ = longitudinal \\
+\hline \hline
+\end{tabular}
+
+           \clearpage
+           \begin{table}[b] 
+             \begin{tabular}{l|lcl|lll}
+              \hline
+  &\ts{key}    &\ts{slot}& value           & type& unit   & meaning                           \\
+              \hline
+  &\texttt{mn} &\ts{m}&[\ts{val1}]     & text&        & motor name                        \\
+  &\texttt{ec} &\ts{m}&[\ts{val1 val2}]& int &        & encoder mapping (type/number)     \\
+  &\texttt{ep} &\ts{m}&[\ts{val1}]     & int &        & encoder magic parameter           \\
+  &\texttt{a}  &\ts{m}&[\ts{val1}]     & int & digits & precision                         \\
+  &\texttt{fd} &\ts{m}&[\ts{val1 val2}]& int &        & encoder gearing (number/denom)     \\
+  &\texttt{fm} &\ts{m}&[\ts{val1 val2}]& int &        & motor   gearing (number/denom)     \\
+  &\texttt{d}  &\ts{m}&[\ts{val1}]     & real& deg?   & inertia tolerance                 \\
+  &\texttt{e}  &\ts{m}&[\ts{val1 val2}]& int & kHz/s  & start/stop ramp          \\
+  &\texttt{f}  &\ts{m}&[\ts{val1}]     & int &        & open loop/closed loop (0/1)       \\
+  &\texttt{g}  &\ts{m}&[\ts{val1}]     & int & ms/s   & start/stop frequency  \\
+  &\texttt{h}  &\ts{m}&[\ts{val1 val2}]& real& deg/mm & low/high software limits          \\
+    \rotatebox{90}{\makebox[1ex]{parameter}}
+  &\texttt{j}  &\ts{m}&[\ts{val1}]     & int & ms/s   & top speed                         \\
+  &\texttt{k}  &\ts{m}&[\ts{val1}]     & int &        & reference mode :                  \\
+  &            &      &                &     &        &--11  low limit + index is reference point.\\
+  &            &      &                &     &        & --1  low limit is reference point.        \\
+  &            &      &                &     &        &   0  absolute encoder              \\
+  &            &      &                &     &        &   1  high limit is reference point.        \\
+  &            &      &                &     &        &   2  separate reference point.        \\
+  &            &      &                &     &        &  11  high limit + index is reference point.\\
+  &            &      &                &     &        &  12  separate + index is reference point.\\
+  &\texttt{l}  &\ts{m}&[\ts{val1}]     & int & ms     & backlash                          \\
+  &\texttt{m}  &\ts{m}&[\ts{val1}]     & int & es     & position tolerance                \\
+  &\texttt{q}  &\ts{m}&[\ts{val1}]     & ?   &        & reference switch width            \\
+  &\texttt{t}  &\ts{m}&[\ts{val1}]     & int &        & one-sided operation flag (0 = no) \\
+  &\texttt{v}  &\ts{m}&[\ts{val1}]     & int &        & null point                        \\
+  &\texttt{w}  &\ts{m}&[\ts{val1}]     & int &        & air cushion dependency            \\
+  &\texttt{z}  &\ts{m}&[\ts{val1}]     & int & es     & circumf. of encoder               \\
+              \hline
+             %\end{tabular} 
+           %\end{table}
+           %
+           %\begin{table}[b] 
+           % \caption{ \label{controlleract}
+           %Commands for the step-motor controller EL734.
+           % }
+           % \begin{tabular}{lcl|lll}
+           %\hline
+           %\ts{key} & slot & value & type & unit & meaning                           \\
+           %\hline
+  &\texttt{am} &        &           & hex & \#   & active motors, status                          \\
+  &\texttt{u}  & \ts{m} &[\ts{val1}]& real& deg  & set actual value (\texttt{v} recalculated)  \\
+  &\texttt{uu} & \ts{m} &           & real& deg  & set actual value (\texttt{v} unchanged)     \\
+  &\texttt{ud} & \ts{m} &           & hex & ds   & read actual value                           \\
+  &\texttt{p}  & \ts{m} &           & real& deg  & read last target value                     \\
+  &\texttt{p}  & \ts{m} &[\ts{val1}]& real& deg  & drive motor to target value                \\
+  &\texttt{pd} & \ts{m} &[\ts{val1}]& hex & ds   & drive motor to target value                \\
+  &\texttt{pr} & \ts{m} &[\ts{val1}]& int & ms   & drive motor d steps                    \\
+  &\texttt{n}  & \ts{m} &           &     &      & drive free from end switch             \\
+  &\texttt{s}  &[\ts{m}]&           &     &      & stop [all] motor[s]                    \\
+  &\texttt{r}  & \ts{m} &           &     &      & reference run (\texttt{u} changed)     \\
+  &\texttt{rf} & \ts{m} &           &     &      & reference run (\texttt{u} unchanged)   \\
+  &\texttt{ff} & \ts{m} &[\ts{val1}]& int & ms/s & drive forward with ramp and frequency \ts{val1}   \\
+  &\texttt{fb} & \ts{m} &[\ts{val1}]& int & ms/s & drive backward with ramp and frequency \ts{val1}  \\
+  &\texttt{sf} & \ts{m} &[\ts{val1}]& int & ms/s & drive forward with frequency f            \\
+  &\texttt{sb} & \ts{m} &[\ts{val1}]& int & ms/s & drive backward with frequency f           \\
+  &\texttt{ac} & \ts{m} &           & int & \#   & status air cushions (on/of: 1/0)       \\
+    \rotatebox{90}{\makebox[1ex]{commands}}
+  &\texttt{ac} & \ts{m} &[\ts{val1}]& int & \#   & de-/activate air cushions (0/1)        \\
+  &\texttt{so} & \ts{m} &[\ts{val1}]& int & \#   & set output high/low (1/0)              \\
+  &\texttt{ri} &        &           & bin & \#   & read all inputs                                \\
+  &\texttt{ri} & \ts{m} &           & int & \#   & read input m                           \\
+  &\texttt{msr}& \ts{m} &           & hex & \#   & run status m                            \\
+  &\texttt{ss} & \ts{m} &           & hex & \#   & show status flags ...                  \\
+  &\texttt{de} & \ts{m} &           &     &      & set default all parameters             \\
+  &\texttt{echo}&       &[\ts{val1}]& int & \#   & 0 host-mode without echo                      \\
+  &            &        &           &     &      & 1 terminal-mode with echo                     \\
+  &            &        &           &     &      & 2 host-mode, messages delayed                 \\
+  &\texttt{rmt}&        & \ts{val1} & int & \#   & set remote flag (1/0)                          \\
+  &\texttt{rmt}&        &           & int & \#   & read remote (0: offline, 1: host-port active)   \\
+  &\texttt{\%} &        &           &     &      & stop all motors, reset with default parameters \\
+  &\texttt{?}  &        &           &     &      & help                                           \\
+  &\texttt{?c} &        &           &     &      & command list                                   \\
+  &\texttt{?m} &        &           &     &      & message list                                   \\
+  &\texttt{?p} &        &           &     &      & parameter list                                 \\
+                 \hline
+ \multicolumn{7}{l}{deg=degree, ms=motor steps, ms/s=motor steps per second, es=encoder steps,
+    ds= ? steps}\\
+            \end{tabular}
+           \end{table}
+
+%======================================================================
+\clearpage
+
+\texttt{amorreducer} \\
+
+The perl program \texttt{amorreducer} can be used to extract data 
+stored in \texttt{.hdf} format and to correct (better \textsl{normalyse})
+them to get real reflectivity curves $R(q_z,q_x)$ instead of 
+intensity vs. time $I(t,z)$, where $t$ is the flight time from the
+chopper to the detector.  
+$z$ is the vertical position on the area detector.
+The raw data $I(t,z)$ are not corrected for the
+wavelength dependence of the incomming beam intensity $I_0(\lambda)$.  \\
+
+Conversion of $I(t,z)$ to $R(q_z,q_x)$:  \\
+\begin{tabular}{llp{120mm}}
+1.&normalisation:
+  &$R(t,z) = \mbox{scale} \cdot I(t,z)/I_0(t)$ \\
+2.&convert $t$ to $\lambda$:
+  &$\lambda = ??? \cdot t / \mbox{chopper-to-detector-distance}$ \\
+3.&convert $\lambda$ and $z$ to $q_z$ and $q_x$: 
+  &$q_z = (\sin \alpha_i + \sin \alpha_f)\,2\pi/\lambda $ \\ &
+  &$q_x = (\cos \alpha_i - \cos \alpha_f)\,2\pi/\lambda$ \\ 
+  &&{with the angle of incidence $\alpha_i$ and
+   the final angle $\alpha_f$;
+   for the specular case $\alpha_f=\alpha_i=\theta$, $q_x=0$ 
+   (mind the different coordinate systems!).} 
+\end{tabular} \\
+
+The scale factor has to be taken from theory (if the sample is much
+larger than the beam or is completly bathed) including diaphragm opeings
+OR it has to be adjusted by a sophisticated method (i.e. by eye). \\
+
+usage: \\
+\texttt{amorreducer} <file> \\
+where file contains the order to \texttt{amorreducer} what to do
+with the according parameters. A typical parameter file looks like
+this:
+
+...
+
+Everythig after a \# on a line is ignored!
+
+Each action starts with the keyword \texttt{output}: the default
+values are set (there are defauts for everything, but the data file
+number). The activity is started with the key word \texttt{end}.
+Everything in between is changing the default values. 
+
+
+Several measurements can be merged together on 2 levels: 
+- if all experimental parameters are identical one can just add
+the data sets on the $I(t,z)$ level by giving several 
+\texttt{input} or \texttt{direct} lines in the parameter file.
+
+- to join several measurements at various $\omega$ values to get
+one $R(q_z)$ curve one can use the following lines in the
+amorreducer:
+
+\texttt{output  | } \\
+\texttt{grid    | } \\
+\texttt{merge   | } 
+
+
+
+
+
+\end{document}
