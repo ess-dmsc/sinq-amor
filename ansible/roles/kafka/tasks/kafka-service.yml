@@ -1,0 +1,9 @@
+- name: Install the Kafka service handler
+  copy: src=roles/kafka/init.d/kafka dest=/etc/init.d/ mode=0755
+
+- name: Install the Zookeper service handler
+  copy: src=roles/kafka/init.d/zookeeper dest=/etc/init.d/ mode=0755
+  
+- name: Updating chkconfig
+  shell: chkconfig --add kafka && chkconfig --add zookeper
+

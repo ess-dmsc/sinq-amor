@@ -1,0 +1,39 @@
+---
+- name: Install OpenJDK
+  become: yes
+  become_method: sudo
+  yum: name=java-1.8.0-openjdk-headless.x86_64 state=present
+  when:  "'$ansible_pkg_mgr' == 'yum'"
+
+- name: Install OpenJDK
+  become: yes
+  become_method: sudo
+  apt: name=java-1.8.0-openjdk-headless.x86_64 state=present
+  when: "'$ansible_pkg_mgr' == 'apt'"
+  
+- name: Download Gradle
+  get_url: url="{{ gradle_url }}/gradle-{{ gradle_version }}-bin.zip" dest="/tmp/gradle-{{ gradle_version }}-bin.zip"  mode=0644 force=no
+
+- name: Unpack Gradle
+  shell: "unzip /tmp/gradle-{{ gradle_version }}-bin.zip chdir=/tmp/ creates=/tmp/gradle-{{ gradle_version }}-zip"
+  
+- name : Download Kafka
+  get_url: url="http://www.mirrorservice.org/sites/ftp.apache.org/kafka/{{ kafka_version }}/kafka-{{ kafka_version }}-src.tgz" dest="/tmp/kafka-{{ kafka_version }}-src.tar.gz" mode=0644 force=no
+
+- name : Unpack Kafka
+  shell: "tar -xzvf /tmp/kafka-{{ kafka_version }}-src.tar.gz chdir=/tmp/ creates=/tmp/kafka-{{ kafka_version }}-src"
+  
+- name: run SBT update
+  shell: "sbt update chdir=/tmp/kafka-{{ kafka_version }}-src creates={{ kafka_dir }}-{{ kafka_version }}"
+
+- name: run SBT package
+  shell: "sbt package chdir=/tmp/kafka-{{ kafka_version }}-src creates={{ kafka_dir }}-{{ kafka_version }}"
+
+- name: Copy Kafka into place
+  shell: "mv /tmp/kafka-{{ kafka_version }}-src {{ kafka_dir }}-{{ kafka_version }} creates={{ kafka_dir }}-{{ kafka_version }}"
+
+- name: Symlink /usr/local/kafka to this version
+  shell: "ln -s kafa-{{ kafka_version }} kafka chdir=/usr/local creates={{ kafka_dir }}"
+
+- name: Run Gradle to build Kafka
+  shell: "./gradlew jar chdir={{ kafka_dir }} creates={{ kafka_dir }}/core/build/"

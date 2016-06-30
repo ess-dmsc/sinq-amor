@@ -3,4 +3,12 @@
     - common
     - motors
     - epics
- 
+
+- hosts: localhost
+  tags:
+    - kafka
+  vars:
+    use_kafka: true
+#    is_kafka_sever: true -> see roles/kafka/vars/main.yml
+  roles:
+    - { role: kafka, when: "{{ use_kafka }} == true" }
