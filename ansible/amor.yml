@@ -4,7 +4,7 @@
     - motors
     - epics
 
-- hosts: localhost
+- hosts: kafka
   tags:
     - kafka
   vars:

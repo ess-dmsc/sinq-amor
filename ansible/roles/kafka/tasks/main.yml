@@ -4,7 +4,7 @@
 
 - name: Install kafka
   include: install-kafka.yml
-  when: "{{ is_kafka_server }} == true" and not kafka_dir.stat.exists
+  when: ("{{ is_kafka_server }} == true") and not kafka_dir.stat.exists
 
 - name: Runk kafka and zookeper as services
   include: kafka-service.yml

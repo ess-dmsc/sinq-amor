@@ -11,29 +11,37 @@
   apt: name=java-1.8.0-openjdk-headless.x86_64 state=present
   when: "'$ansible_pkg_mgr' == 'apt'"
   
-- name: Download Gradle
-  get_url: url="{{ gradle_url }}/gradle-{{ gradle_version }}-bin.zip" dest="/tmp/gradle-{{ gradle_version }}-bin.zip"  mode=0644 force=no
+#- stat: path="/tmp/gradle-{{ gradle_version }}"
+#  register: gradle_folder
 
-- name: Unpack Gradle
-  shell: "unzip /tmp/gradle-{{ gradle_version }}-bin.zip chdir=/tmp/ creates=/tmp/gradle-{{ gradle_version }}-zip"
+#- file: state=directory path="/tmp/gradle-{{ gradle_version }}"
+#  when: not gradle_folder.stat.exists
   
-- name : Download Kafka
-  get_url: url="http://www.mirrorservice.org/sites/ftp.apache.org/kafka/{{ kafka_version }}/kafka-{{ kafka_version }}-src.tgz" dest="/tmp/kafka-{{ kafka_version }}-src.tar.gz" mode=0644 force=no
+#- name: Download and unpack Gradle
+#  unarchive: src="{{ gradle_url }}/gradle-{{ gradle_version }}-bin.zip" dest="/tmp/gradle-{{ gradle_version }}" copy=no
+#  when: not gradle_folder.stat.exists
+  
+- file: state=directory path="/tmp/kafka/kafka-{{ kafka_version }}-src"
+
+- file: state=directory path="{{ kafka_home }}-{{ kafka_version }}"
+  become: yes
+  become_method: sudo
+
+#- name: Download Kafka 
+#  get_url: url="{{ kafka_src }}" dest=/tmp/
 
 - name : Unpack Kafka
-  shell: "tar -xzvf /tmp/kafka-{{ kafka_version }}-src.tar.gz chdir=/tmp/ creates=/tmp/kafka-{{ kafka_version }}-src"
-  
-- name: run SBT update
-  shell: "sbt update chdir=/tmp/kafka-{{ kafka_version }}-src creates={{ kafka_home }}-{{ kafka_version }}"
-
-- name: run SBT package
-  shell: "sbt package chdir=/tmp/kafka-{{ kafka_version }}-src creates={{ kafka_home }}-{{ kafka_version }}"
-
-- name: Copy Kafka into place
-  shell: "mv /tmp/kafka-{{ kafka_version }}-src {{ kafka_home }}-{{ kafka_version }} creates={{ kafka_home }}-{{ kafka_version }}"
+  become: yes
+  become_method: sudo
+  unarchive: src="{{ kafka_src }}" dest=/usr/local copy=no
 
 - name: Symlink /usr/local/kafka to this version
-  shell: "ln -s kafka-{{ kafka_version }} kafka chdir=/usr/local creates={{ kafka_home }}"
+  become: yes
+  become_method: sudo
+  file: src="/usr/local/kafka_2.11-{{ kafka_version }}" dest="{{ kafka_home }}" state=link
 
-- name: Run Gradle to build Kafka
-  shell: "./gradlew jar chdir={{ kafka_home }} creates={{ kafka_home }}/core/build/"
+#- name: Run Gradle to build Kafka
+#  become: yes
+#  become_method: sudo
+#  shell: "./gradlew jar chdir={{ kafka_home }} creates={{ kafka_home }}/core/build/"
+
