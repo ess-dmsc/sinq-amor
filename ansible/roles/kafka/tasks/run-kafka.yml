@@ -3,9 +3,10 @@
 - name: Run the Zookeeper service
   become: yes
   become_method: sudo
-  service: name=zookeeper state=started enabled=yes
+  shell: "{{ kafka_home }}/bin/zookeeper-server-start.sh -daemon {{ kafka_home }}/config/zookeeper.properties"
 
 - name: Run the Kafka service
   become: yes
   become_method: sudo
-  service: name=kafka state=started enabled=yes
+  shell: "{{ kafka_home }}/bin/kafka-server-start.sh -daemon {{ kafka_home }}/config/kafka.properties"
+
