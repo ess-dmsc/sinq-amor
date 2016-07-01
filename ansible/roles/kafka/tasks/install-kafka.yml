@@ -21,7 +21,7 @@
 #  unarchive: src="{{ gradle_url }}/gradle-{{ gradle_version }}-bin.zip" dest="/tmp/gradle-{{ gradle_version }}" copy=no
 #  when: not gradle_folder.stat.exists
   
-- file: state=directory path="/tmp/kafka/kafka-{{ kafka_version }}-src"
+#- file: state=directory path="/tmp/kafka/kafka-{{ kafka_version }}-src"
 
 - file: state=directory path="{{ kafka_home }}-{{ kafka_version }}"
   become: yes

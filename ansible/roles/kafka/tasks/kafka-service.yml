@@ -1,9 +1,15 @@
 - name: Install the Kafka service handler
+  become: yes
+  become_method: sudo
   copy: src=roles/kafka/init.d/kafka dest=/etc/init.d/ mode=0755
 
 - name: Install the Zookeper service handler
+  become: yes
+  become_method: sudo
   copy: src=roles/kafka/init.d/zookeeper dest=/etc/init.d/ mode=0755
   
 - name: Updating chkconfig
-  shell: chkconfig --add kafka && chkconfig --add zookeper
+  become: yes
+  become_method: sudo
+  shell: chkconfig --add kafka && chkconfig --add zookeeper
 

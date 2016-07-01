@@ -1,7 +1,11 @@
 ---
 
-- name: Run the Zookeper service
-  service: name=zookeper state=started enabled=yes
+- name: Run the Zookeeper service
+  become: yes
+  become_method: sudo
+  service: name=zookeeper state=started enabled=yes
 
 - name: Run the Kafka service
+  become: yes
+  become_method: sudo
   service: name=kafka state=started enabled=yes
