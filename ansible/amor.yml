@@ -1,4 +1,4 @@
-- hosts: simulation
+- hosts: simulations
   roles:
     - common
     - motors
@@ -9,6 +9,5 @@
     - kafka
   vars:
     use_kafka: true
-#    is_kafka_sever: true -> see roles/kafka/vars/main.yml
   roles:
-    - { role: kafka, when: "{{ use_kafka }} == true" }
+    - { role: kafka, is_kafka_server: false , wants_rdkafka: true, when: "{{ use_kafka }} == true" }

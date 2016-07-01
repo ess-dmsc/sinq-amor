@@ -24,16 +24,16 @@
   shell: "tar -xzvf /tmp/kafka-{{ kafka_version }}-src.tar.gz chdir=/tmp/ creates=/tmp/kafka-{{ kafka_version }}-src"
   
 - name: run SBT update
-  shell: "sbt update chdir=/tmp/kafka-{{ kafka_version }}-src creates={{ kafka_dir }}-{{ kafka_version }}"
+  shell: "sbt update chdir=/tmp/kafka-{{ kafka_version }}-src creates={{ kafka_home }}-{{ kafka_version }}"
 
 - name: run SBT package
-  shell: "sbt package chdir=/tmp/kafka-{{ kafka_version }}-src creates={{ kafka_dir }}-{{ kafka_version }}"
+  shell: "sbt package chdir=/tmp/kafka-{{ kafka_version }}-src creates={{ kafka_home }}-{{ kafka_version }}"
 
 - name: Copy Kafka into place
-  shell: "mv /tmp/kafka-{{ kafka_version }}-src {{ kafka_dir }}-{{ kafka_version }} creates={{ kafka_dir }}-{{ kafka_version }}"
+  shell: "mv /tmp/kafka-{{ kafka_version }}-src {{ kafka_home }}-{{ kafka_version }} creates={{ kafka_home }}-{{ kafka_version }}"
 
 - name: Symlink /usr/local/kafka to this version
-  shell: "ln -s kafa-{{ kafka_version }} kafka chdir=/usr/local creates={{ kafka_dir }}"
+  shell: "ln -s kafka-{{ kafka_version }} kafka chdir=/usr/local creates={{ kafka_home }}"
 
 - name: Run Gradle to build Kafka
-  shell: "./gradlew jar chdir={{ kafka_dir }} creates={{ kafka_dir }}/core/build/"
+  shell: "./gradlew jar chdir={{ kafka_home }} creates={{ kafka_home }}/core/build/"

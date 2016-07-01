@@ -1,10 +1,23 @@
 ---
-  - name: Install kafka
-    include: install-kafka.yml
-    when: "{{ is_kafka_server }} == true"
+- stat: path="{{ kafka_home }}"
+  register: kafka_dir
 
-  - name: Runk kafka and zookeper as services
-    include: kafka-service.yml
+- name: Install kafka
+  include: install-kafka.yml
+  when: "{{ is_kafka_server }} == true" and not kafka_dir.stat.exists
 
-  - name: Run kafka
-    include: run-kafka.yml
+- name: Runk kafka and zookeper as services
+  include: kafka-service.yml
+
+- name: Run kafka
+  include: run-kafka.yml
+
+- stat: path="{{ rdkafka_home }}/include/librdkafka/rdkafka.h"
+  register: rdkafka_inc
+
+- stat: path="{{ rdkafka_home }}/lib/librdkafka.so"
+  register: rdkafka_lib
+
+- name: Install rdkafka
+  include: rdkafka.yml
+  when: ( "{{ wants_rdkafka }} == True" ) and not ( rdkafka_inc.stat.exists and rdkafka_lib.stat.exists )

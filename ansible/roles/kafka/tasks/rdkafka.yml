@@ -1,0 +1,16 @@
+---
+- name: check rdkafka source
+  stat: path=/tmp/rdkafka
+  register: kafka_src_folder
+  
+- name: Clone rdkafka library
+  git: repo="{{ rdkafka_src }}" dest=/tmp/rdkafka force=yes
+  when: kafka_src_folder.stat.exists == true
+  
+- name: Configure, compile and install rdkafka
+  shell: ./configure --prefix="{{ rdkafka_home }}" && make clean && make chdir=/tmp/rdkafka/
+
+- name: Install rdkafka
+  become_method: sudo
+  shell: sudo make install chdir=/tmp/rdkafka/
+      
