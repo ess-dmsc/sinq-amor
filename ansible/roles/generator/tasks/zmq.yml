@@ -1,0 +1,5 @@
+---
+- name: Install 0MQ
+  become: yes
+  become_method: sudo
+  yum: name=zeromq-devel state=present

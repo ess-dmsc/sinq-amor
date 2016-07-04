@@ -1,2 +1,2 @@
-generator_src: git@bitbucket.org:europeanspallationsource/sinq-amorsim.git
+generator_src: https://mib_mic@bitbucket.org/europeanspallationsource/sinq-amorsim.git
 generator_home: /opt/amor/simfiles

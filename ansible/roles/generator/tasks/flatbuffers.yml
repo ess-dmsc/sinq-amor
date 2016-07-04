@@ -1,0 +1,14 @@
+---
+- name: Clone flatbuffers
+  git: repo=https://github.com/google/flatbuffers.git dest=/tmp/flatbuffers
+
+- name: Create build folder
+  file: path=/tmp/flatbuffers/build state=directory
+
+- name: Compile flatbuffers
+  shell: cmake ../ && make chdir=/tmp/flatbuffers/build
+
+- name: Install flatbuffers
+  become: yes
+  become_method: sudo
+  shell: make install chdir=/tmp/flatbuffers/build

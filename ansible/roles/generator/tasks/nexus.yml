@@ -1,0 +1,22 @@
+---
+- name: Install HDF5
+  become: yes
+  become_method: sudo
+  yum: name=hdf5-devel.x86_64 state=present
+  
+- name: Download NeXus library
+  git: repo=https://github.com/nexusformat/code.git dest=/tmp/nexusformat
+  
+- name: Create build folder
+  file: path=/tmp/nexusformat/build state=directory
+  
+- name: Compile NeXus library
+  environment:
+    HDF5_INCLUDE_DIRS: /usr/include
+    HDF5_LIBRARIES: /usr/lib64
+  shell: cmake -DENABLE_HDF5=1 -DENABLE_CXX=1 -DENABLE_APPS=ON ../ && make chdir=/tmp/nexusformat/build
+
+- name: Install NeXus
+  become: yes
+  become_method: sudo
+  shell: make install chdir=/tmp/nexusformat/build

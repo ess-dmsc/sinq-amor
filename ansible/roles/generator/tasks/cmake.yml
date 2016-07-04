@@ -1,0 +1,5 @@
+---
+- name: Install cmake
+  become: yes
+  become_method: sudo
+  yum: name=cmake.x86_64 state=present

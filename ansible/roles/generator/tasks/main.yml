@@ -1,7 +1,48 @@
 ---
+- name: Cmake
+  include: cmake.yml 
+
+- name: NeXus library
+  include: nexus.yml 
+
+- name: 0MQ library
+  include: zmq.yml
+  
+- name: flatbuffers library
+  include: flatbuffers.yml 
+
+- name: Install libsodium
+  become: yes
+  become_method: sudo
+  yum: name=libsodium.x86_64 state=present
+
+- name: Create destination folder
+  become: yes
+  become_method: sudo
+  file: path="{{ generator_home }}" state=directory
+  file: path="{{ generator_home }}/sample" state=directory
+  
 - stat: path="{{ generator_home }}"
   register: generator_dir
 
 - name: Clone generator from repository
-  git: repo="{{ generator_src }}" dest=/tmp/neventGenerator force=yes
-  when: not generator_dir.stat.exists
+  git: repo="{{ generator_src }}" dest=/tmp/neventGenerator force=yes accept_hostkey=yes
+
+- name: Compile generator
+  shell: make  chdir=/tmp/neventGenerator/neventGenerator
+
+- name: Copy files to execution folder
+  become: yes
+  become_method: sudo
+  copy: src="/tmp/neventGenerator/neventGenerator/{{ item }}" dest="{{ generator_home }}/{{ item }}" remote_src=yes
+  with_items:
+    - AMORgenerator
+    - control.in
+    - el737counter.py
+    - header.amor
+    - sample/amor2015n001774.hdf
+
+- name: Make generator executable
+  file: path="{{ generator_home }}/AMORgenerator" mode="a+x"
+  
+
