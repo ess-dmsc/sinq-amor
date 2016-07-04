@@ -1,0 +1,7 @@
+---
+- stat: path="{{ generator_home }}"
+  register: generator_dir
+
+- name: Clone generator from repository
+  git: repo="{{ generator_src }}" dest=/tmp/neventGenerator force=yes
+  when: not generator_dir.stat.exists
