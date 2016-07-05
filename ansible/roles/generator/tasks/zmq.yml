@@ -3,3 +3,8 @@
   become: yes
   become_method: sudo
   yum: name=zeromq-devel state=present
+
+- name: Create link
+  become: yes
+  become_method: sudo
+  file: src=/usr/lib64/libzmq.so dest=/usr/lib64/libzmq.so.5 state=link

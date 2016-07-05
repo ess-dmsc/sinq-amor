@@ -1,0 +1,3 @@
+// the configured options and settings for neventGenerator
+#define neventGenerator_VERSION_MAJOR @neventGenerator_VERSION_MAJOR@
+#define neventGenerator_VERSION_MINOR @neventGenerator_VERSION_MINOR@

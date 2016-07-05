@@ -15,8 +15,19 @@
 - name: Clone generator from repository
   git: repo="{{ generator_src }}" dest=/tmp/neventGenerator force=yes accept_hostkey=yes
 
+#- name: Compile generator
+#  shell: make  chdir=/tmp/neventGenerator/neventGenerator
+
+- name: Create build folder
+  file: path=/tmp/neventGenerator/neventGenerator/build state=directory
+  
 - name: Compile generator
-  shell: make  chdir=/tmp/neventGenerator/neventGenerator
+  shell: cmake -DRDKAFKA_DIR=/usr/local -DNEXUS_DIR=/usr -DFLATBUFFERS_DIR=/usr/local/lib64 ../ && make chdir=/tmp/neventGenerator/neventGenerator/build
+  
+- name: Copy cJSON library to /usr/local/lib
+  become: yes
+  become_method: sudo
+  copy: src=/tmp/neventGenerator/neventGenerator/cJSON/libcjson.so dest=/usr/local/lib remote_src=true
 
 - name: Copy files to execution folder
   become: yes
