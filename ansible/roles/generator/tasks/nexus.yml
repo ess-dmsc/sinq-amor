@@ -21,5 +21,15 @@
   become_method: sudo
   shell: make install chdir=/tmp/nexusformat/build
 
+- name: Create link1
+  become: yes
+  become_method: sudo
+  file: src=/usr/local/lib64/libNeXus.so dest=/usr/local/lib64/libNeXus.so.0 state=link
+  
+- name: Create link2
+  become: yes
+  become_method: sudo
+  file: src=/usr/local/lib64/libNeXusCPP.so dest=/usr/local/lib64/libNeXusCPP.so.0 state=link
+  
 - name: Export environment
   shell: export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64
