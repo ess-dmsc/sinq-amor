@@ -13,7 +13,13 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/neventGeneratorConfig.h.in"
   "${PROJECT_BINARY_DIR}/neventGeneratorConfig.h"
   )
- 
+
+add_custom_target(
+  extern_lib
+  COMMAND make
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/cJSON
+)
+
 # add the binary tree to the search path for include files
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${RDKAFKA_DIR}/include")
@@ -32,5 +38,6 @@ link_directories("${PROJECT_SOURCE_DIR}/cJSON")
 add_executable(AMORgenerator AMORgenerator.cpp)
 target_link_libraries (AMORgenerator zmq rdkafka rdkafka++ NeXus NeXusCPP sodium cjson)
 
+add_dependencies(AMORgenerator extern_lib)
 
  
