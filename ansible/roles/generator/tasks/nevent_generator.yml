@@ -3,6 +3,11 @@
   become_method: sudo
   yum: name=libsodium.x86_64 state=present
 
+- name: Create link
+  become: yes
+  become_method: sudo
+  file: src=/usr/lib64/libsodium.so.13 dest=/usr/lib64/libsodium.so state=link
+
 - name: Create destination folder
   become: yes
   become_method: sudo

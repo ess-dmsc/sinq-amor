@@ -11,4 +11,7 @@
     use_kafka: true
   roles:
     - { role: kafka, is_kafka_server: false , wants_rdkafka: true, when: "{{ use_kafka }} == true" }
+  tags:
+    - generator
+  roles:
     - generator
