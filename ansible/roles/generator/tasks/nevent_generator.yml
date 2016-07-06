@@ -1,27 +1,38 @@
+- stat: path=/usr/lib64/libsodium.so
+  register: st
+  
 - name: Install libsodium
   become: yes
   become_method: sudo
   yum: name=libsodium.x86_64 state=present
-
+  when: not st.stat.exists
+  
 - name: Create link
   become: yes
   become_method: sudo
   file: src=/usr/lib64/libsodium.so.13 dest=/usr/lib64/libsodium.so state=link
-
-- name: Create destination folder
-  become: yes
-  become_method: sudo
-  file: path="{{ generator_home }}" state=directory
-  file: path="{{ generator_home }}/sample" state=directory
+  when: not st.stat.exists
   
 - stat: path="{{ generator_home }}"
   register: generator_dir
 
+- name: Create generator_home folder
+  become: yes
+  become_method: sudo
+  file: path="{{ generator_home }}" state=directory
+  when: not generator_dir.stat.exists
+
+- stat: path="{{ generator_home }}/sample"
+  register: st
+
+- name: Create generator_home/sample folder
+  become: yes
+  become_method: sudo
+  file: path="{{ generator_home }}/sample" state=directory
+  when: not st.stat.exists
+
 - name: Clone generator from repository
   git: repo="{{ generator_src }}" dest=/tmp/neventGenerator force=yes accept_hostkey=yes
-
-#- name: Compile generator
-#  shell: make  chdir=/tmp/neventGenerator/neventGenerator
 
 - name: Create build folder
   file: path=/tmp/neventGenerator/neventGenerator/build state=directory

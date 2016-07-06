@@ -2,15 +2,33 @@
 - name: Cmake
   include: cmake.yml 
 
+- stat: path=/usr/local/lib64/libNeXus.so
+  register: st
+
 - name: NeXus library
   include: nexus.yml 
+  when: not st.stat.exists
 
+- stat: path=/usr/lib64/libzmq.so
+  register: st
+  
 - name: 0MQ library
   include: zmq.yml
+  when: not st.stat.exists
   
+- stat: path="{{ rdkafka_home }}/lib/librdkafka.so"
+  register: st
+
+- name: Install rdkafka
+  include: rdkafka.yml
+  when: not st.stat.exists
+
+- stat: path="/usr/local/lib/libflatbuffers.a"
+  register: st
+
 - name: flatbuffers library
   include: flatbuffers.yml 
-
+  when: not st.stat.exists
+  
 - name: neventGenerator
   include: nevent_generator.yml 
-

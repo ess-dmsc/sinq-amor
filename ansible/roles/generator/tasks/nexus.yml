@@ -3,7 +3,7 @@
   become: yes
   become_method: sudo
   yum: name=hdf5-devel.x86_64 state=present
-  
+    
 - name: Download NeXus library
   git: repo=https://github.com/nexusformat/code.git dest=/tmp/nexusformat
   
