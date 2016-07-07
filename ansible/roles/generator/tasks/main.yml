@@ -32,3 +32,9 @@
   
 - name: neventGenerator
   include: nevent_generator.yml 
+
+- name: add extra_path to ld_library_path
+  become: yes
+  become_method: sudo
+  lineinfile: dest=/etc/environment line='export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib:/usr/local/lib64'
+    
