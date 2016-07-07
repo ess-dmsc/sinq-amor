@@ -1,0 +1,16 @@
+---
+- file: state=directory path=/tmp/rdkafka
+  
+- name: Clone rdkafka library
+  git: repo="{{ rdkafka_src }}" dest=/tmp/rdkafka force=yes
+  
+- name: Configure, compile and install rdkafka
+  shell: ./configure && make clean && make chdir=/tmp/rdkafka/
+
+- name: Install rdkafka
+  become: yes
+  become_method: sudo
+  shell: make install chdir=/tmp/rdkafka/
+
+- name: Export environment
+  shell: export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
