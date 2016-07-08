@@ -1,0 +1,36 @@
+- name: Make sure that /opt/amor/simfiles exists
+  file: path=/opt/amor/simfiles state=directory recurse=yes
+
+- name: be sure SLSVME is installed
+  become: yes
+  copy:
+    src: SLSVME.py
+    dest: /opt/amor/simfiles
+    mode: 0755
+
+- name: be sure Magnet is installed
+  become: yes
+  copy:
+    src: Magnet.py
+    dest: /opt/amor/simfiles
+
+- name: be sure simulation service file for amormagnet is installed
+  become: yes
+  copy:
+    src: amormagnet.service
+    dest: /usr/lib/systemd/system
+
+
+- name: be sure magnet simulation service amormagnet is enabled
+  become: yes
+  service:
+    name: amormagnet
+    enabled: yes
+    state: stopped
+
+
+#- name: be amormagnet DB file is installed
+#  become: yes
+#  copy:
+#    src: motc.substitutions
+#    dest: /opt/amor/epics
