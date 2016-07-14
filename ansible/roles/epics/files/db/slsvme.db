@@ -1,0 +1,94 @@
+# Database definition for the SLS VME magnets as installed at AMOR
+
+## 
+## Read the High Limit
+##  
+record(ai, "$(PREFIX)HighLim") {
+  field(DTYP, "stream")
+  field(DESC, "High Current Limit")
+  field(INP, "@slsvme.proto read($(NO),hl) slsvme 0")
+  field(SCAN, "1 second")
+  field(PREC, "3")
+  field(EGU, "A")
+}
+
+## 
+## Read the High Limit
+##  
+record(ai, "$(PREFIX)LowLim") {
+  field(DTYP, "stream")
+  field(DESC, "Low Current Limit")
+  field(INP, "@slsvme.proto read($(NO),ll) slsvme 0")
+  field(SCAN, "1 second")
+  field(PREC, "3")
+  field(EGU, "A")
+}
+
+## 
+## Read the Error code
+##  
+record(ai, "$(PREFIX)ErrCode") {
+  field(DTYP, "stream")
+  field(DESC, "Error Code")
+  field(INP, "@slsvme.proto read($(NO),err) slsvme 0")
+  field(SCAN, "1 second")
+  field(PREC, "3")
+  field(EGU, "A")
+}
+
+## 
+## Read the textual representation of the error.
+##
+record(stringin, "$(PREFIX)ErrText") {
+  field(DTYP, "stream")
+  field(INP, "@slsvme.proto readErrTxt($(NO)) slsvme 0")
+  field(SCAN, "1 second")
+  field(PINI, "YES")
+}
+
+
+## 
+## Read the Current
+##  
+record(ai, "$(PREFIX)CurRBV") {
+  field(DTYP, "stream")
+  field(DESC, "Low Current Limit")
+  field(INP, "@slsvme.proto read($(NO),cur) slsvme 0")
+  field(SCAN, "1 second")
+  field(PREC, "3")
+  field(EGU, "A")
+}
+
+## 
+## Set the current
+##
+record(ao, "$(PREFIX)CurSet") {
+  field(DTYP, "stream")
+  field(DESC, "Setpoint current")
+  field(OUT, "@slsvme.proto write($(NO),cur) slsvme 0")
+  field(PREC, "3")
+  field(EGU, "A")
+}
+
+##
+## Read power status of the magnet
+##
+record(bi, "$(PREFIX)PowerStatusRBV") {
+  field(DESC, "Readback of the power status")
+  field(DTYP, "stream")
+  field(INP, "@slsvme.proto readonoff($(NO)) slsvme 0")
+  field(SCAN, "1 second")
+  field(ZNAM, "off")
+  field(ONAM, "on")
+}
+
+## 
+## Set the power status
+##
+record(bo, "$(PREFIX)PowerStatus") {
+  field(DESC, "Set the power status")
+  field(DTYP, "stream")
+  field(OUT, "@slsvme.proto setpower($(NO)) slsvme 0")
+  field(ZNAM, "on")
+  field(ONAM, "off")
+}

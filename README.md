@@ -65,14 +65,44 @@ directory.
  The EPICS name of the motor can be derived from the list in the
  following way: There are three motor controller named A, B and
  C. This maps to motor controllers SQ:AMOR:mota, SQ:AMOR:motb and
- SQ:AMOR:motc. You get the full name of the motor recod by appending
- the motor name to this. Exampe coz is SQ:AMOR:mota:coz. In addition
- there is a scaler record called SQ:AMOR:cter1 for counting. The
- standard EPICS scaler record does not support all status states of a
- neutron counter. I therefore put additional status information into
- the monitor S10. If S10 is 2, this means no beam, if it is 3, this
- means paused.
+ SQ:AMOR:motc. You get the full name of the motor record by appending
+ the motor name to this. Example: coz is SQ:AMOR:mota:coz. 
 
 *distance.tex* is a description of how the AMOR geometry is calculated
  from virtual motor positions. 
  
+## Documentation for Additional Hardware
+
+There is a scaler record called SQ:AMOR:cter1 for counting. This
+record controls counting. In the SINQ and simulation implementation it
+also starts streaming neutron events. The standard EPICS scaler record does not support all status states of a
+neutron counter. I therefore put additional status information into
+the monitor S10. If S10 is 2, this means no beam, if it is 3, this
+means paused.
+
+
+AMOR also has three magnets:
+
+* *PBY*  the polarizer magnet
+* *ABY*  the analyzer magnet
+* *FMA* the sample magnet
+
+Polarizer and analyzer magnets can be driven in the range between -40
+to 40 A; the sample magnet FMA between -100 to 100 A. In EPICS, these
+magnets are represented by prefixes SQ:AMOR:PBY, SQ:AMOR:FMA and
+SQ:AMOR:ABY. Each magnet has sub records:
+
+* *HighLim*  The upper limit for setting the current
+* *LowLim*  The lower limit for setting the current
+* *ErrCode*  The error code of the magnet
+* *ErrText*  A human readable representation of the magnet error
+* *PowerStatusRBV* For reading back if the magnet is on or off
+* *PowerStatus* A switch for switching the magnet on or off
+* *CurSet* For setting the magnet current
+* *CurRBV* For reading back the current value
+
+The AMOR magnets are simulated by SLSVME.py. The EPICS support happens
+via a streamdevice driver living in slsvme.proto and an EPICS database
+slsvme.db.
+
+

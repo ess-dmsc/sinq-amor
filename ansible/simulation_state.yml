@@ -16,6 +16,11 @@
     name: motc
     state: "{{ new_state }}"
 
+- name: change AMOR magnet simulation state
+  become: yes
+  service:
+    name: amormagnet
+    state: "{{ new_state }}"
 
 - name: change AMOR IOC state
   become: yes

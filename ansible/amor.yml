@@ -1,7 +1,8 @@
-- hosts: simulations
+- hosts: simulation
   roles:
     - common
     - motors
+    - magnet 
     - epics
 
 - hosts: kafka_server
@@ -9,7 +10,6 @@
     - kafkaServer
   vars:
     use_kafka: true
-    is_kafka_server: true
   roles:
     - { role: kafka, when: "{{ is_kafka_server }} == true" }
 

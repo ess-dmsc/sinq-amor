@@ -38,6 +38,22 @@ dbLoadRecords("${TOP}/db/el737Record.db")
 
 #asynSetTraceIOMask("cter1",0,2)
 
+#----------- load Magnets
+drvAsynIPPortConfigure("slsvme", "localhost:60066",0,0,0)
+#drvAsynIPPortConfigure("slsvme", "localhost:8080",0,0,0)
+
+dbLoadRecords("$(ASYN)/db/asynRecord.db","P=SQ:AMOR:,R=slsvme,PORT=slsvme,ADDR=0,OMAX=80,IMAX=80")
+
+epicsEnvSet ("STREAM_PROTOCOL_PATH", "$(TOP)/db:.")
+
+cd ${TOP}/iocBoot/iocsinqEPICS
+dbLoadRecords("$(TOP)/db/slsvme.db","PREFIX=SQ:AMOR:PBY:,NO=1")
+dbLoadRecords("$(TOP)/db/slsvme.db","PREFIX=SQ:AMOR:FMA:,NO=2")
+dbLoadRecords("$(TOP)/db/slsvme.db","PREFIX=SQ:AMOR:ABY:,NO=3")
+
+
+
+
 iocInit
 
 ## Start any sequence programs

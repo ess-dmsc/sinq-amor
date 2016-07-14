@@ -10,6 +10,12 @@
     name: python-pip
     state: latest
 
+- name: be sure python2-crypto is installed
+  become: yes
+  yum:
+    name: python2-crypto
+    state: latest
+
 - name: be sure PyEPICS is installed
   become: yes
   pip:

@@ -1,0 +1,31 @@
+# Streamdevice protocol file for the PSI SLS VME magnet controller used at AMOR
+
+InTerminator = "\n";
+OutTerminator = "\r\n";
+#ExtraInput = Ignore;
+
+read {
+     out "r \$1 \$2";
+     in  "\$1 \$2 %f";
+}
+
+readErrTxt {
+     out "r \$1 errtext";
+     in  "\$1 errtext %s";
+}
+
+
+write {
+      out "w \$1 \$2 %f";
+      in "OK";
+}
+
+readonoff {
+	  out "r \$1 onoff";
+	  in "\$1 onoff %{off|on}";
+}
+
+setpower {
+	 out "w \$1 %{on|off}";
+	 in "OK";
+}
