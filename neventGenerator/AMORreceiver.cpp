@@ -8,7 +8,8 @@
 
 typedef nexus::Amor Instrument;
 typedef nexus::NeXusSource<Instrument> Source;
-typedef control::CommandlineControl Control;
+
+typedef control::NoControl Control;
 
 
 typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
@@ -16,29 +17,22 @@ typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
 
 ///////////////////////
 // In the end we want to use kafka, I will use 0MQ for development purposes
-typedef ZmqGen<0> generator_t;
-//typedef KafkaGen generator_t;
-//typedef FileWriterGen generator_t;
+//typedef ZmqRecv Transport;
+typedef ZmqGen<1> Transport;
+//typedef KafkaGen Transport;
+//typedef FileWriterGen Transport
 
 
 uparam::Param parse(int, char **);
-
-///////////////////////////////////////////////
-///////////////////////////////////////////////
-///
-/// Main program for using the flexible event generator
-///
-///  \author Michele Brambilla <mib.mic@gmail.com>
-///  \date Wed Jun 08 15:14:10 2016
 int main(int argc, char **argv) {
 
   uparam::Param input = parse(argc,argv);
   // default values
   
-  Source stream(input);  
-  Generator<generator_t,HeaderJson,Control,Serialiser> g(input);
+  Generator<Transport,HeaderJson,Control,Serialiser> g(input);
 
-  g.run(&(stream.begin()[0]),stream.count());
+  uint64_t* stream = NULL;
+  g.listen(stream);
 
   return 0;
 }
@@ -59,10 +53,11 @@ uparam::Param parse(int argc, char **argv) {
   input["brokers"] = "localhost";
   input["filename"] = "sample/amor2015n001774.hdf";
   input["header"] = "header.amor";
+  input["host"] = "localhost";
 
   opterr = 0;
   int opt;
-  while ((opt = getopt (argc, argv, "a:b:c:f:p:s:t:e:")) != -1) {
+  while ((opt = getopt (argc, argv, "a:b:c:f:p:s:t:e:o:")) != -1) {
     switch (opt) {
     case 'a': //area
       input["2D"] = std::string(optarg);
@@ -87,6 +82,9 @@ uparam::Param parse(int argc, char **argv) {
       break;
     case 'e':
       input["header"] = std::string(optarg);
+      break;
+    case 'o':
+      input["host"] = std::string(optarg);
       break;
     case '?':
       // TODO help

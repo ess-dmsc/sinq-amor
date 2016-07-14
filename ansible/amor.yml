@@ -4,16 +4,17 @@
     - motors
     - epics
 
-- hosts: kafka
+- hosts: kafka_server
   tags:
     - kafkaServer
   vars:
     use_kafka: true
+    is_kafka_server: true
   roles:
-    - { role: kafka, is_kafka_server: false , wants_rdkafka: true, when: "{{ use_kafka }} == true" }
+    - { role: kafka, when: "{{ is_kafka_server }} == true" }
 
 
-- hosts: kafka
+- hosts: generator_host
   tags:
     - neventGenerator
   roles:

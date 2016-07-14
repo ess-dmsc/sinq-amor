@@ -208,7 +208,7 @@ namespace nexus {
           offset = dim[2]*(j+dim[1]*i);
           for(int k = 0; k < dim[2]; ++k) {
             nCount = data[offset+k];
-            x.high = round(tof[k]/10.);
+            x.high = std::round(tof[k]/10.);
             x.low  = 1 << 31 | 1 << 30 | 1 << 29 | 1 << 28 | 2 << 24 | detID;
             for(int l = 0;l< nCount; ++l) {
               signal.push_back(x.value);

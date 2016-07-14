@@ -58,14 +58,6 @@ class EL737Controller(LineReceiver):
     def lineReceived(self, data):
         print "lineReceived:", data
 
-        if self.remotestate == 0:
-            if data.startswith('init'):
-                l = data.split()
-                print l
-                reactor.spawnProcess(self.proc,l[1],l[1:],env=os.environ)
-#                reactor.spawnProcess(self.proc,"./main",['./main','-f','../../neventGenerator/amor2015n001774.hdf'],env=os.environ)
-                return
-
         data = data.lower().strip()
 
         if self.remotestate == 0:
@@ -78,6 +70,7 @@ class EL737Controller(LineReceiver):
 
         if self.remotestate == 1:
             if data.startswith('echo 2'):
+                reactor.spawnProcess(self.proc,"./AMORgenerator",['./AMORgenerator',l[1:]],env=os.environ)
                 self.remotestate = 2
                 self.write("\r")
             else:

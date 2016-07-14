@@ -20,7 +20,6 @@
 
 #include "control.hpp"
 
-#include "serialiser.hpp"
 
 extern "C" {
 #include "cJSON/cJSON.h"
@@ -77,18 +76,28 @@ struct Generator {
   
   template<class T>
   void run(T* stream, int nev = 0) {
-    std::thread t1(&self_t::run_impl<uint64_t>,this,stream,nev);
+    std::thread ts(&self_t::run_impl<T>,this,stream,nev);
     c.read();
-    t1.join();
+    ts.join();
   }
+
   
+  template<class T>
+  void listen(T* stream, int nev = 0) {
+
+    std::thread tr(&self_t::listen_impl<T>,this,stream);
+    //    c.read();
+    tr.join();
+
+    listen_impl<T>(stream);
+  }
 
 private:
   
   int multiplier;
   Streamer streamer;
   Header head;
-  Control c,other;
+  Control c;
   Serialiser s;
 
   template<class T>
@@ -98,44 +107,23 @@ private:
     int count = 0;
     double rate = c.rate();
     
-    Control other(c);
-
     using std::chrono::system_clock;
     auto start = system_clock::now();
     auto now = system_clock::now();
 
-
     while(!c.stop()) {
 
       now += std::chrono::microseconds((uint64_t)(1e6/rate));
-      head.set(pulseID,time(0),1234567,nev,rate);
-      
-      if(!Serialiser::is_serialised::value) {
-        if(c.run()) {
-          streamer.send(&head.get()[0],head.size(),ZMQ_SNDMORE);
-          streamer.send(stream,nev,0);
-          ++count;
-        }
-        else {
-          streamer.send(&head.get()[0],head.size(),0);
-        }        
+
+      if(c.run()) {
+        head.set(pulseID,time(0),1234567,nev,rate);
+        streamer.send(head.get(),stream,nev,Serialiser());
+        ++count;
       }
       else {
-        if(c.run()) {
-          std::cout << "RUN pid = " << pulseID;
-          s(head.get(),stream,nev);
-          streamer.send(s(),s.size(),0);
-          ++count;
-          std::cout << "\tdone" << std::endl;
-        }
-        else {
-          std::cout << "PAUSE pid = " << pulseID;          
-          std::cout << "\t(" << s(head.get(),NULL,0);
-          std::cout << "," << s.size() << ")";
-          streamer.send(s(head.get(),stream,0),s.size(),0);
-          std::cout << "\tdone" << std::endl;                    
-        }  
-      }
+        head.set(pulseID,time(0),1234567,0  ,rate);
+        streamer.send(head.get(),stream,0,Serialiser());
+      }        
    
       ++pulseID;
 
@@ -147,13 +135,57 @@ private:
                   << std::endl;
         c.update();
         rate = c.rate();
-        other = c;
         count = 0;
         now = start = system_clock::now();
       }
     }
     
   }
+
+
+
+  template<class T>
+  void listen_impl(T* stream) {
+    
+    int pulseID = -1, missed = -1, pid;
+    int count = 0,nev, maxsize = 0,len;
+    int recvmore;
+
+    using std::chrono::system_clock;
+    auto start = system_clock::now();
+
+    char* h = new char[Streamer::max_header_size];
+
+    while(1) {
+        
+      pid = streamer.recv(h,stream,nev,Serialiser());
+      std::cout << "pid = "      << pid 
+                <<"\tpulseID = " << pulseID
+                << std::endl;
+      if(pid - pulseID != 1) {
+        std::cout << "packet lost" << std::endl;
+        pulseID = pid;
+      }
+      else {
+        if(nev > 0)
+          ++count;
+      }
+      pulseID++;
+
+      if(std::chrono::duration_cast<std::chrono::seconds>(system_clock::now() - 
+                                                          start).count() > 10 ) {
+        std::cout << "Missed " << missed << " packets"
+                  << " @ " << count/10 << "packets/s"
+                  << std::endl;
+        count = 0;
+        missed = 0;
+        start = system_clock::now();
+      }
+
+    }
+  }
+
+
  
 };
 
@@ -186,9 +218,9 @@ struct HeaderJson {
     //////////////////////
     // !!! cJSON does not modify valueint vars: use valuedouble
     cJSON_GetObjectItem(root,"pid")->valuedouble = pid;
-    cJSON_GetObjectItem(root, "st")->valuedouble = st;
-    cJSON_GetObjectItem(root, "ts")->valuedouble = ts;
-    cJSON_GetObjectItem(root, "tr")->valuedouble = tr;
+    cJSON_GetObjectItem(root,"st")->valuedouble = st;
+    cJSON_GetObjectItem(root,"ts")->valuedouble = ts;
+    cJSON_GetObjectItem(root,"tr")->valuedouble = tr;
 
     cJSON* item = cJSON_GetObjectItem(root,"ds");
     cJSON_GetArrayItem(item,1) -> valuedouble = nev;
@@ -199,7 +231,7 @@ struct HeaderJson {
   //  const std::string get() { return content; }
   std::string get() { return content; }
 
-  const int size() { return len; }
+  const int size() { return content.size(); }
 
   std::string content;
   int len;

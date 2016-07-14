@@ -14,6 +14,29 @@
 
 namespace control {
 
+  struct NoControl {
+
+    NoControl(const NoControl&    ) { }
+    NoControl(const uparam::Param&) { }
+    NoControl(const std::string&  ) { }
+
+    void read()     const { } ;
+    void update()   const { }
+    void finalize() const { };
+
+
+    bool run()   const { return true; }
+    bool pause() const { return false; }
+    bool stop()  const { return false; }
+
+    int rate() const   { return 140; }
+    
+
+    void operator [](const std::string&) const { }
+    
+  };
+
+
   struct FileControl {
 
     FileControl(const FileControl& other) : 
@@ -92,10 +115,12 @@ namespace control {
     }
     int& rate()    { return _rate; }
 
-    std::string& operator [](std::string // key
-                             ) {
-      //      return control[key];
-    }
+    // std::string& operator [](std::string // key
+    //                          ) {
+    //   return std::string("");
+    //   //      return control[key];
+    // }
+    void operator [](const std::string&) { }
 
     void read() {
       char value[10];
