@@ -1,0 +1,9 @@
+[Unit]
+Description=neventGenerator controller
+After=rc-local.service
+
+[Service]
+ExecStart=/opt/amor/simfiles/el737controller.py
+
+[Install]
+WantedBy=multi-user.target

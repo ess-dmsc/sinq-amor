@@ -38,3 +38,8 @@
   become_method: sudo
   lineinfile: dest=/etc/environment line='export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib:/usr/local/lib64'
     
+- name: be sure generator service file is installed
+  become: yes
+  copy:
+    src: generator.service
+    dest: /usr/lib/systemd/system

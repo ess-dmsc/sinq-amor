@@ -8,6 +8,18 @@
     KAFKA_HOME: "{{ kafka_home }}"
   when: not kafka_dir.stat.exists
 
-- name: Run kafka
-  include: run-kafka.yml
+- name: be sure kafka service file is installed
+  become: yes
+  copy:
+    src: kafka.service
+    dest: /usr/lib/systemd/system
+
+- name: be sure zookeeper service file is installed
+  become: yes
+  copy:
+    src: zookeeper.service
+    dest: /usr/lib/systemd/system
+
+#- name: Run kafka
+#  include: run-kafka.yml
   
