@@ -69,8 +69,11 @@ class EL737Controller(LineReceiver):
             return
 
         if self.remotestate == 1:
+            l = data.split()[2:]
+            l[:0] = ['./AMORgenerator']
             if data.startswith('echo 2'):
-                reactor.spawnProcess(self.proc,"./AMORgenerator",['./AMORgenerator',l[1:]],env=os.environ)
+                print l
+                reactor.spawnProcess(self.proc,'./AMORgenerator',args=l,env=os.environ)
                 self.remotestate = 2
                 self.write("\r")
             else:

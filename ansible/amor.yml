@@ -9,7 +9,7 @@
   tags:
     - kafkaServer
   vars:
-    use_kafka: true
+    is_kafka_server: true
   roles:
     - { role: kafka, when: "{{ is_kafka_server }} == true" }
 

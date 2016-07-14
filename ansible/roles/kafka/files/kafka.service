@@ -1,9 +1,7 @@
 [Unit]
 Description=Run kafka server
+Requires=zookeeper
 After=rc-local.service
 
 [Service]
-ExecStart=/opt/kafka/bin/kafka-server-start.sh -daemon /opt/kafka/config/server.properties
-
-[Install]
-WantedBy=multi-user.target
+ExecStart=/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
