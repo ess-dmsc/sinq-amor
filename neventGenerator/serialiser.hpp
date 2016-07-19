@@ -26,6 +26,8 @@ namespace serialiser {
       builder.Finish(event);
       _size = builder.GetSize(); // GetSize() is in byte
       //       std::cout << "\t: " << reinterpret_cast<T*>(builder.GetBufferPointer()) << "\n";      
+
+      
       return reinterpret_cast<T*>(builder.GetBufferPointer());
     }
     
@@ -39,6 +41,7 @@ namespace serialiser {
     
     void extract(const char* msg, std::string& header, std::vector<T>& data) {
 
+      std::cout << msg << std::endl;
       auto event = GetEvent(reinterpret_cast<const void*>(msg));
 
       header=std::string(event->header()->c_str());

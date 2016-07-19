@@ -215,8 +215,8 @@ namespace generator {
   std::pair<int,int> msg_consume1(RdKafka::Message* message, void* opaque) {
     
     std::pair<int,int> result;
-    char *head;
-    uint64_t *stream;
+    std::string head;
+    std::vector<uint64_t> stream;
     serialiser::FlatBufSerialiser<uint64_t> s;
     
     switch (message->err()) {
@@ -231,33 +231,8 @@ namespace generator {
       }
       std::cout << "Len: " << message->len() << "\n";
 
-      head = new char[1000];
-      stream = new uint64_t[100000];
       s.extract(static_cast<char*>(message->payload()),head,stream);
       std::cout << head << std::endl;
-
-
-      // if( static_cast<char*>(message->payload())[0] == '{' ) {
-      //   std::cout << "Payload: " << static_cast<char*>(message->payload())[0] << "\n";
-
-      //   cJSON* root = NULL;
-      //   root = cJSON_Parse(static_cast<char*>(message->payload()));
-      //   if( root == 0 ) {
-      //     //      throw std::runtime_error("can't parse header");
-      //     std::cout << "Error: can't parse header" << std::endl;
-      //     exit(-1);
-      //   }
-      
-      //   cJSON* item = cJSON_GetObjectItem(root,"ds");
-      //   result.first = cJSON_GetObjectItem(root,"pid")->valuedouble;
-      //   result.second = cJSON_GetArrayItem(item,1) -> valuedouble;
-      // }
-      
-      // else
-      //   for(int i=0;i<10;++i)
-      //     std::cout << "Payload: " << static_cast<uint64_t*>(message->payload())[i] << "\n";
-    
-    
       break;
     
     case RdKafka::ERR__PARTITION_EOF:
@@ -375,15 +350,6 @@ namespace generator {
       }
       //  }
 
-      // RdKafka::Message *msg = consumer->consume(topic, partition, 1000);
-      // std::cout << "Read msg at offset " << msg->offset() << std::endl;
-      // if (msg->key()) {
-      //   std::cout << "Key: " << *msg->key() << "\t";
-      // }
-  
-      // std::cout << "Len: " << static_cast<int>(msg->len()) << std::endl;
-      // consumer->poll(0);
-  
       std::cout << "pid = " << ex_consume_cb.info.first << "\t" << "nev = " << ex_consume_cb.info.second << std::endl;
       return ex_consume_cb.info.first;
   
@@ -442,9 +408,6 @@ namespace generator {
 
 
 } // namespace generator
-
-
-
 
 
 

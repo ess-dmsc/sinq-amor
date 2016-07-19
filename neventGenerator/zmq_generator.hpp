@@ -25,7 +25,7 @@ namespace generator {
    *  \date Wed Jun 08 15:19:27 2016
    * @tparam mode_selector transmitter = 0, receiver = 1
    */
-  template<int mode_selector> // mode_selector = 0 -> transmitter, = 1 -> receiver 
+  template<int mode_selector>
   struct ZmqGen {
     static const int max_header_size=10000;
     static const int max_recv_size=100000000;
@@ -58,11 +58,11 @@ namespace generator {
        *  @param data data to be sent
        *  @param size number of elements
        *  @param flag optional flag (default = 0) */
-      std::cout << "->" << data
-                << "," << size
-                << std::endl;
+      // std::cout << "->" << data
+      //           << "," << size
+      //           << std::endl;
       zmq_send(socket,data,size,flag);
-      std::cout << std::endl;
+      // std::cout << std::endl;
     }
 
     template<typename T>
@@ -81,10 +81,10 @@ namespace generator {
       else {
         zmq_send(socket,&h[0],h.size(),0);
       }
-      std::cout << "->" << h
-                << "," << h.size()
-                << "," << nev
-                << std::endl;    
+      // std::cout << "->" << h
+      //           << "," << h.size()
+      //           << "," << nev
+      //           << std::endl;    
     }
   
     template<typename T>
@@ -95,15 +95,16 @@ namespace generator {
        *  @param nev number of elements in data array */
       /*! Serialises the message using FlatBuffers and sends it */
       serialiser::FlatBufSerialiser<T> s;
-      zmq_send(socket,(char*)s(h.c_str(),data,nev),s.size(),0);
-      std::cout << "->" << h
-                << "," << h.size()
-                << "," << nev
-                << std::endl;    
+      s(h.c_str(),data,nev);
+      zmq_send(socket,(char*)s(),s.size(),0);
+      // std::cout << "->" << h
+      //           << "," << h.size()
+      //           << "," << nev
+      //           << std::endl;    
     
-      std::ofstream of("first.out",std::ofstream::binary);
-      of.write((char*)s(h.c_str(),data,nev),s.size()); 
-      of.close();
+      // std::ofstream of("first.out",std::ofstream::binary);
+      // of.write((char*)s(h.c_str(),data,nev),s.size()); 
+      // of.close();
     }
   
 
@@ -124,13 +125,14 @@ namespace generator {
 
       auto info = parse_header(h);
       std::cout << " pid =  " << info.first << std::endl;
-
+      std::cout << " nev =  " << info.second << std::endl;
       
+      uint64_t* x;
       if(rcvmore && (info.second > 0) ) {
         if ( info.second > data.size() ) {
           data.resize(info.second);
         }
-        int s = zmq_recv (socket,&d[0],info.second*sizeof(T),0);
+        int s = zmq_recv (socket,&data[0],info.second,0);
       }
       else
         if( rcvmore != info.second )
@@ -150,14 +152,19 @@ namespace generator {
        *  @param data vector containing received event data
        *  @result pid packet ID */
       /*! Receives the serialised message and unserialise it. */
-      if (!raw) {
-        raw = new char [max_recv_size];
-      }
-      int n = zmq_recv (socket,raw,max_header_size,0);
-      
-      serialiser::FlatBufSerialiser<T> s;
-      s.extract(raw,h,data);
 
+      zmq_msg_t msg;
+      serialiser::FlatBufSerialiser<T> s;
+
+      int rc = zmq_msg_init (&msg);
+      assert (rc == 0);
+      zmq_msg_recv (&msg,socket,0);
+
+
+      std::cout << "\tzmq_recv size: " << zmq_msg_size(&msg) << std::endl;
+      
+      s.extract(reinterpret_cast<char*>(zmq_msg_data(&msg)),h,data);
+      zmq_msg_close (&msg);
       auto info = parse_header(h);
       std::cout << " pid =  " << info.first << std::endl;
       std::cout << "n events = " << info.second << std::endl; 
@@ -169,7 +176,6 @@ namespace generator {
     void* context; /// pointer to 0MQ context 
     void* socket;  /// pointer to 0MQ socket 
     char* d = NULL;
-    char* raw = NULL;
     int max_event_size = 0;
     size_t optlen=sizeof(int);
 
