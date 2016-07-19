@@ -11,13 +11,13 @@ typedef nexus::NeXusSource<Instrument> Source;
 typedef control::CommandlineControl Control;
 
 
-typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
-//typedef serialiser::NoSerialiser<uint64_t> Serialiser;
+//typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
+typedef serialiser::NoSerialiser<uint64_t> Serialiser;
 
 ///////////////////////
 // In the end we want to use kafka, I will use 0MQ for development purposes
-typedef ZmqGen<0> generator_t;
-//typedef KafkaGen generator_t;
+typedef generator::ZmqGen<generator::transmitter> generator_t;
+//typedef  generator::KafkaGen<generator::transmitter> generator_t;
 //typedef FileWriterGen generator_t;
 
 

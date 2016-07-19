@@ -37,17 +37,16 @@ namespace serialiser {
       return _size;
     }
     
-    void extract(const char* msg, char* header, T* data) {
+    void extract(const char* msg, std::string& header, std::vector<T>& data) {
 
       auto event = GetEvent(reinterpret_cast<const void*>(msg));
-      std::cout << "header: " << "\n\t" << event->header()->c_str() << std::endl;
 
-      // std::copy (event->data()->begin(), event->data()->end(), std::ostream_iterator<uint64_t>(std::cout, ", "));
+      header=std::string(event->header()->c_str());
+      data = std::vector<T>(event->data()->begin(),event->data()->end());
+
+      std::cout << "header (): " << "\n\t" <<  event->header()->c_str() << std::endl;
       std::cout << "n_header = " <<  std::distance(event->header()->begin(),event->header()->end())  << std::endl;
       std::cout << "n_data = " <<  std::distance(event->data()->begin(),event->data()->end())  << std::endl;
-
-
-
     }
 
 
