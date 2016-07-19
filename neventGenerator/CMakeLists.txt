@@ -21,6 +21,7 @@ add_custom_target(
 )
 
 # add the binary tree to the search path for include files
+include_directories("${PROJECT_SOURCE_DIR}/cJSON")
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${RDKAFKA_DIR}/include")
 include_directories("${NEXUS_DIR}/include")
@@ -28,6 +29,7 @@ include_directories("${FLATBUFFERS_DIR}/include")
 
 link_directories("/usr/lib")
 link_directories("/usr/lib64")
+link_directories("/opt/local/lib")
 link_directories("/usr/local/lib")
 link_directories("/usr/local/lib64")
 link_directories("${RDKAFKA_DIR}/lib")
@@ -36,8 +38,11 @@ link_directories("${FLATBUFFERS_DIR}/lib")
 link_directories("${PROJECT_SOURCE_DIR}/cJSON")
 
 add_executable(AMORgenerator AMORgenerator.cpp)
-target_link_libraries (AMORgenerator zmq rdkafka rdkafka++ NeXus NeXusCPP sodium cjson)
+add_executable(AMORreceiver AMORreceiver.cpp)
+target_link_libraries (AMORgenerator zmq rdkafka rdkafka++ NeXus sodium cjson hdf5)
+target_link_libraries (AMORreceiver zmq rdkafka rdkafka++ NeXus sodium cjson hdf5)
 
 add_dependencies(AMORgenerator extern_lib)
+add_dependencies(AMORreceiver extern_lib)
 
  

@@ -26,21 +26,6 @@ extern "C" {
 }
 
 
-  namespace detail {
-    
-    template<class T, typename Serialiser>
-    const int do_send(T* stream, int nev) {
-      std::cout << "Serialiser" << std::endl;
-      return 0;
-    }
-    
-    template<class T>
-    const int do_send(T* stream, int nev) {
-      std::cout << "ulong" << std::endl;
-      return 0;
-    }
-  }
-
 
 /*! \struct Generator 
  *
@@ -83,7 +68,7 @@ struct Generator {
 
   
   template<class T>
-  void listen(T* stream, int nev = 0) {
+  void listen(std::vector<T> stream, int nev = 0) {
 
     std::thread tr(&self_t::listen_impl<T>,this,stream);
     //    c.read();
@@ -145,7 +130,7 @@ private:
 
 
   template<class T>
-  void listen_impl(T* stream) {
+  void listen_impl(std::vector<T> stream) {
     
     int pulseID = -1, missed = -1, pid;
     int count = 0,nev, maxsize = 0,len;
@@ -154,23 +139,27 @@ private:
     using std::chrono::system_clock;
     auto start = system_clock::now();
 
-    char* h = new char[Streamer::max_header_size];
-
+    std::string h;
     while(1) {
         
-      pid = streamer.recv(h,stream,nev,Serialiser());
+      pid = streamer.recv(h,stream,Serialiser());
       std::cout << "pid = "      << pid 
                 <<"\tpulseID = " << pulseID
                 << std::endl;
       if(pid - pulseID != 1) {
         std::cout << "packet lost" << std::endl;
         pulseID = pid;
+        missed++;
+        std::cout << "\tpid = "      << pid 
+                  <<"\tpulseID = " << pulseID
+                  << std::endl;
       }
       else {
         if(nev > 0)
           ++count;
       }
-      pulseID++;
+      std::cout <<"\tpulseID = " << (++pulseID)
+                << std::endl;
 
       if(std::chrono::duration_cast<std::chrono::seconds>(system_clock::now() - 
                                                           start).count() > 10 ) {
