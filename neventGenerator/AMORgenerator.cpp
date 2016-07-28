@@ -11,13 +11,13 @@ typedef nexus::NeXusSource<Instrument> Source;
 typedef control::CommandlineControl Control;
 
 
-typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
-//typedef serialiser::NoSerialiser<uint64_t> Serialiser;
+//typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
+typedef serialiser::NoSerialiser<uint64_t> Serialiser;
 
 ///////////////////////
 // In the end we want to use kafka, I will use 0MQ for development purposes
-typedef generator::ZmqGen<generator::transmitter> generator_t;
-//typedef  generator::KafkaGen<generator::transmitter> generator_t;
+//typedef generator::ZmqGen<generator::transmitter> generator_t;
+typedef  generator::KafkaGen<generator::transmitter> generator_t;
 //typedef FileWriterGen generator_t;
 
 
@@ -44,6 +44,32 @@ int main(int argc, char **argv) {
 }
 
 
+void helper(uparam::Param input) {
+  std::cout << "AMORgenerator" << "\n is a neutron event generator based on a flexible library. It "
+            << "supports multiple transport (kafka, 0MQ, file I/O), sources (NeXus files,"
+            << "MCstas simulation output) and serialisation (no serialisation,"
+            << "FlatBuffers). When executed the generator sites on the status defined in the"
+            << "control file and can be driven from the command line (available commands are"
+            << "'run', 'pause', 'stop')\n"
+            << std::endl;
+
+  std::cout << "Usage example:\n"
+            << "[0MQ]\t./AMORgenerator -p 1234 -f sample/amor2015n001774.hdf\n"
+            << "[kafka]\t./AMORgenerator -b ess01 -t test_0\n"
+            << std::endl;
+  
+  std::cout << "-a" << "\t" << "area detector source file (mcstas)" << "\n"
+            << "-b" << "\t" << "broker address (when use kafka)" << "\n"
+            << "-c" << "\t" << "control file (when use file)" << "\n"
+            << "-f" << "\t" << "NeXus file source [default = " << input["filename"] << "\n"
+            << "-p" << "\t" << "port used for streaming (kafka,zmq) [default = " << input["port"] << "]\n"
+            << "-s" << "\t" << "1D detector source file (mcstas)" << "\n"
+            << "-t" << "\t" << "topic name (kafka) [default = " << input["topic"] << "\n"
+            << "-e" << "\t" << "header template [default = " << input["header"] << "\n"
+            << "-h" << "\t" << "this help" << "\n"
+            << std::endl;
+  exit(0);
+}
 
 
 /*!
@@ -89,8 +115,7 @@ uparam::Param parse(int argc, char **argv) {
       input["header"] = std::string(optarg);
       break;
     case '?':
-      // TODO help
-      exit(0);
+      helper(input);
     }
   }
 

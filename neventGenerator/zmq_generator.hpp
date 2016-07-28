@@ -1,20 +1,15 @@
-#ifndef _ZMQ_GENERATOR_H
-#define _ZMQ_GENERATOR_H
+#pragma once
 
 #include <string>
 #include <sstream>
 #include <exception>
-#include <utility>
 #include <assert.h>
 
 #include <zmq.h>
 
 #include "serialiser.hpp"
 #include "uparam.hpp"
-
-extern "C" {
-#include "cJSON/cJSON.h"
-}
+#include "header.hpp"
 
 namespace generator {
 
@@ -178,24 +173,6 @@ namespace generator {
     char* d = NULL;
     int max_event_size = 0;
     size_t optlen=sizeof(int);
-
-    std::pair<int,int> parse_header(std::string& s) {
-      std::pair<int,int> result;
-      cJSON* root = NULL;
-      root = cJSON_Parse(s.c_str());
-      if( root == 0 ) {
-        //      throw std::runtime_error("can't parse header");
-        std::cout << "Error: can't parse header" << std::endl;
-        exit(-1);
-      }
-      
-      result.first = cJSON_GetObjectItem(root,"pid")->valuedouble;
-      cJSON* item = cJSON_GetObjectItem(root,"ds");
-      result.second = cJSON_GetArrayItem(item,1) -> valuedouble;
-
-      std::cout << "parser: " << result.first << "\t" << result.second << std::endl;
-      return result;
-    }
     
   };
   
@@ -203,4 +180,3 @@ namespace generator {
   
 } // namespace generator
   
-#endif //ZMQ_GENERATOR_H

@@ -12,14 +12,14 @@ typedef nexus::NeXusSource<Instrument> Source;
 typedef control::NoControl Control;
 
 
-typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
-//typedef serialiser::NoSerialiser<uint64_t> Serialiser;
+//typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
+typedef serialiser::NoSerialiser<uint64_t> Serialiser;
 
 ///////////////////////
 // In the end we want to use kafka, I will use 0MQ for development purposes
 //typedef ZmqRecv Transport;
-typedef generator::ZmqGen<generator::receiver> Transport;
-//typedef generator::KafkaGen<generator::receiver> Transport;
+//typedef generator::ZmqGen<generator::receiver> Transport;
+typedef generator::KafkaListener<generator::receiver> Transport;
 
 //typedef FileWriterGen Transport
 

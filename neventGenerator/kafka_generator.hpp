@@ -1,16 +1,18 @@
-#ifndef _KAFKA_GENERATOR_H
-#define _KAFKA_GENERATOR_H
+#pragma once
 
 #include <string>
 #include <sstream>
 #include <utility>
 #include <cctype>
+#include <iterator>
 
 #include <assert.h>
 
 #include <librdkafka/rdkafkacpp.h>
 
+#include "serialiser.hpp"
 #include "uparam.hpp"
+#include "header.hpp"
 
 const int max_message_size = 100000000;
 
@@ -41,9 +43,8 @@ namespace generator {
         }
       }
 
-      std::string err_str;
-      conf->set("message.max.bytes", "100000000", err_str);
-      std::cerr << err_str << std::endl;
+      conf->set("message.max.bytes", "100000000", errstr);
+      std::cerr << errstr << std::endl;
 
       if(topic_str.empty()) {
         std::cerr << "Topic not set" << std::endl;
@@ -138,7 +139,7 @@ namespace generator {
     std::string errstr;
     std::string debug;
     
-    int32_t partition = RdKafka::Topic::PARTITION_UA;
+int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
     int64_t start_offset = RdKafka::Topic::OFFSET_BEGINNING;
     
     RdKafka::Conf *conf;
@@ -150,133 +151,29 @@ namespace generator {
 
 
   
-  std::pair<int,int> msg_consume(RdKafka::Message* message, void* opaque) {
-    
-    std::pair<int,int> result;
-    
-    switch (message->err()) {
-    case RdKafka::ERR__TIMED_OUT:
-      break;
-      
-    case RdKafka::ERR_NO_ERROR:
-      /* Real message */
-      std::cout << "Read msg at offset " << message->offset() << std::endl;
-      if (message->key()) {
-        std::cout << "Key: " << message->key() << "\t";
-      }
-      std::cout << "Len: " << message->len() << "\n";
-      if( static_cast<char*>(message->payload())[0] == '{' ) {
-        std::cout << "Payload: " << static_cast<char*>(message->payload())[0] << "\n";
-        
-        cJSON* root = NULL;
-        root = cJSON_Parse(static_cast<char*>(message->payload()));
-        if( root == 0 ) {
-          //      throw std::runtime_error("can't parse header");
-          std::cout << "Error: can't parse header" << std::endl;
-          exit(-1);
-        }
-        
-        cJSON* item = cJSON_GetObjectItem(root,"ds");
-        result.first = cJSON_GetObjectItem(root,"pid")->valuedouble;
-        result.second = cJSON_GetArrayItem(item,1) -> valuedouble;
-      }
-      
-      else
-        for(int i=0;i<10;++i)
-          std::cout << "Payload: " << static_cast<uint64_t*>(message->payload())[i] << "\n";
-      
-      
-      break;
-      
-    case RdKafka::ERR__PARTITION_EOF:
-      /* Last message */
-      //    if (exit_eof) {
-      std::cerr << "Consume failed: " << message->errstr() << std::endl;
-      //      run = false;
-      //    }
-      break;
-      
-    case RdKafka::ERR__UNKNOWN_TOPIC:
-    case RdKafka::ERR__UNKNOWN_PARTITION:
-      std::cerr << "Consume failed: " << message->errstr() << std::endl;
-      //    run = false;
-      break;
-      
-    default:
-      /* Errors */
-      std::cerr << "Consume failed: " << message->errstr() << std::endl;
-      //    run = false;
-    }
-    
-    return result;
+  std::pair<int,int> consume_header(RdKafka::Message* message, void* opaque) {
+    std::cout << "Read msg at offset " << message->offset() << std::endl;
+    opaque = message->payload();
+    std::copy(static_cast<char*>(message->payload()),
+              static_cast<char*>(message->payload())+message->len(),
+              static_cast<char*>(opaque));
+    return parse_header(std::string(static_cast<char*>(message->payload()) ));
   }
   
-  
-  std::pair<int,int> msg_consume1(RdKafka::Message* message, void* opaque) {
+  template<typename T>
+  void consume_data(RdKafka::Message* message, void* opaque) {
     
-    std::pair<int,int> result;
-    std::string head;
-    std::vector<uint64_t> stream;
-    serialiser::FlatBufSerialiser<uint64_t> s;
+    std::cout << "Len: " << message->len() << "\n";
+    std::cout << "Do something with data..." << std::endl;
     
-    switch (message->err()) {
-    case RdKafka::ERR__TIMED_OUT:
-      break;
-      
-    case RdKafka::ERR_NO_ERROR:
-      /* Real message */
-      std::cout << "Read msg at offset " << message->offset() << std::endl;
-      if (message->key()) {
-        std::cout << "Key: " << message->key() << "\t";
-      }
-      std::cout << "Len: " << message->len() << "\n";
-
-      s.extract(static_cast<char*>(message->payload()),head,stream);
-      std::cout << head << std::endl;
-      break;
-    
-    case RdKafka::ERR__PARTITION_EOF:
-      /* Last message */
-      //    if (exit_eof) {
-      std::cerr << "Consume failed: " << message->errstr() << std::endl;
-      //      run = false;
-      //    }
-      break;
-    
-    case RdKafka::ERR__UNKNOWN_TOPIC:
-    case RdKafka::ERR__UNKNOWN_PARTITION:
-      std::cerr << "Consume failed: " << message->errstr() << std::endl;
-      //    run = false;
-      break;
-    
-    default:
-      /* Errors */
-      std::cerr << "Consume failed: " << message->errstr() << std::endl;
-      //    run = false;
-    }
-
-    return result;
+    //    opaque = message->payload();    
+    return;
   }
 
 
-  class ExampleConsumeCb : public RdKafka::ConsumeCb {
-  public:
-    std::pair<int,int> info;
-    void consume_cb (RdKafka::Message &msg, void *opaque) {
-      info = msg_consume(&msg, opaque);
-    }
-  };
-
-  class SerialisedConsumeCb : public RdKafka::ConsumeCb {
-  public:
-    std::pair<int,int> info;
-    void consume_cb (RdKafka::Message &msg, void *opaque) {
-      info = msg_consume(&msg, opaque);
-    }
-  };
-  
 
 
+  template<int mode_selector>
   struct KafkaListener {
     static const int max_header_size=10000;
     
@@ -294,13 +191,12 @@ namespace generator {
           exit(1);
         }
       }
-      
-      std::string err_str;
-      conf->set("fetch.message.max.bytes", "100000000", err_str);
-      std::cerr << err_str << std::endl;
+      conf->set("fetch.message.max.bytes", "100000000", errstr);
+      std::cerr << errstr << std::endl;
       
       if(topic_str.empty()) {
-        //TODO
+        std::cerr << "Topic required." << std::endl;
+        exit(1);
       }
       
       consumer = RdKafka::Consumer::create(conf, errstr);
@@ -332,56 +228,72 @@ namespace generator {
 
     template<typename T>
     int recv(std::string& h, std::vector<T>& data, serialiser::NoSerialiser<T>) {
-      
-      ExampleConsumeCb ex_consume_cb;
+      void* value; 
       int use_ccb = 1;
+
       /*
        * Consume messages
        */
-      //  while (true) {
-      consumer->poll(0);
-      if (use_ccb) {
-        consumer->consume_callback(topic, partition, 1000,
-                                   &ex_consume_cb,&use_ccb);
-      } else {
-        RdKafka::Message *msg = consumer->consume(topic, partition, 1000);
-        msg_consume(msg, NULL);
-        delete msg;
+      std::pair<int,int> result;
+      RdKafka::Message *msg = nullptr;
+      do {
+        msg = consumer->consume(topic, partition, 1000);
+      } while (  msg->err() != RdKafka::ERR_NO_ERROR );
+      result = consume_header(msg, static_cast<void*>(&h[0]));
+      h = std::string(static_cast<char*>(msg->payload()));
+      std::cout << h << std::endl;
+      
+      if(result.second > 0) {
+        msg = consumer->consume(topic, partition, 1000);
+        if(msg->err() != RdKafka::ERR_NO_ERROR )
+          std::cerr << "expected event data" << std::endl;
+        consume_data<T>(msg,value);
+        // if(data.size() < result.second)
+        //   data.resize(result.second);
+        // std::cout << std::distance(static_cast<T*>(msg->payload()),
+        //                              static_cast<T*>(msg->payload())+result.second)
+        //           << std::endl;
+        // std::copy(static_cast<T*>(msg->payload()),
+        //           static_cast<T*>(msg->payload())+result.second,
+        //           data.begin());
       }
-      //  }
 
-      std::cout << "pid = " << ex_consume_cb.info.first << "\t" << "nev = " << ex_consume_cb.info.second << std::endl;
-      return ex_consume_cb.info.first;
-  
+      delete msg;
+
+
+      return result.first;
     }
-
+    
 
 
     template<typename T>
     int  recv(std::string& h, std::vector<T>& data, serialiser::FlatBufSerialiser<T>) {
 
-      SerialisedConsumeCb ex_consume_cb;
+      //SerialisedConsumeCb ex_consume_cb;
       int use_ccb = 1;
       /*
        * Consume messages
        */
-      //  while (true) {
-      consumer->poll(0);
-      if (use_ccb) {
-        consumer->consume_callback(topic, partition, 1000,
-                                   &ex_consume_cb,&use_ccb);
-      } else {
-        RdKafka::Message *msg = consumer->consume(topic, partition, 1000);
-        msg_consume(msg, NULL);
-        delete msg;
-      }
+std::cout << "Poll: "<<      consumer->poll(0) << std::endl;
+
+//while (true) {
+      //      consumer->poll(0);
+      // if (use_ccb) {
+      //   consumer->consume_callback(topic,
+      //                              partition,
+      //                              -1,
+      //                              &ex_consume_cb,
+      //                              &use_ccb);
+      // } else {
+      //   RdKafka::Message *msg = consumer->consume(topic, partition, 1000);
+      //   //msg_consume1(msg, NULL);
+      //   delete msg;
+      // }
       //  }
   
-      std::cout << "pid = " << ex_consume_cb.info.first << "\t" << "nev = " << ex_consume_cb.info.second << std::endl;
-      return ex_consume_cb.info.first;
+      // std::cout << "pid = " << ex_consume_cb.info.first << "\t" << "nev = " << ex_consume_cb.info.second << std::endl;
+      // return ex_consume_cb.info.first;
 
-
-      return ex_consume_cb.info.first;
     }
 
 
@@ -395,14 +307,12 @@ namespace generator {
   
     int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
     int64_t start_offset = RdKafka::Topic::OFFSET_BEGINNING;
-  
+    int pid_ = -1;
+    
     RdKafka::Conf *conf;
     RdKafka::Conf *tconf;
     RdKafka::Consumer *consumer;
     RdKafka::Topic *topic;
-  
-
-  
   
   };
 
@@ -411,4 +321,4 @@ namespace generator {
 
 
 
-#endif //KAFKA_GENERATOR_H
+
