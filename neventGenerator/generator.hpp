@@ -44,17 +44,13 @@ extern "C" {
  *
  *  \author Michele Brambilla <mib.mic@gmail.com>
  *  \date Wed Jun 08 15:19:52 2016 */
-template<typename Streamer, typename Header, typename Control, typename Serialiser>
+template<typename Streamer, typename Control, typename Serialiser>
 struct Generator {
-  typedef Generator<Streamer,Header,Control, Serialiser> self_t;
+  typedef Generator<Streamer,Control, Serialiser> self_t;
 
-  Generator(uparam::Param& p,
-            const int& m = 1) : streamer(p), 
-                                multiplier(m), 
-                                head(p["header"]),
+  Generator(uparam::Param& p) : streamer(p), 
                                 c(p["control"]) {
     /*! @param p see uparam::Param for description. Set of key-value used for initializations. */
-    /*! @param m optional multiplier for emulating larger data size */
     /*! Constructor: initialize the streamer, the header and the control. */
     //    get_control();
   }
@@ -71,7 +67,6 @@ struct Generator {
   void listen(std::vector<T> stream, int nev = 0) {
 
     std::thread tr(&self_t::listen_impl<T>,this,stream);
-    //    c.read();
     tr.join();
 
     listen_impl<T>(stream);
@@ -79,19 +74,18 @@ struct Generator {
 
 private:
   
-  int multiplier;
   Streamer streamer;
-  Header head;
   Control c;
-  Serialiser s;
-
+  
   template<class T>
   void run_impl(T* stream, int nev = 0) {
     
     int pulseID = 0;
     int count = 0;
-    double rate = c.rate();
-    
+    int rate = c.rate();
+
+    hws::HWstatus hws(pulseID,rate);
+
     using std::chrono::system_clock;
     auto start = system_clock::now();
     auto now = system_clock::now();
@@ -101,17 +95,15 @@ private:
       now += std::chrono::microseconds((uint64_t)(1e6/rate));
 
       if(c.run()) {
-        head.set(pulseID,time(0),1234567,nev,rate);
-        streamer.send(head.get(),stream,nev,Serialiser());
+        streamer.send(hws,stream,nev,Serialiser());
         ++count;
       }
       else {
-        head.set(pulseID,time(0),1234567,0  ,rate);
-        streamer.send(head.get(),stream,0,Serialiser());
+        streamer.send(hws,stream,0,Serialiser());
       }        
-   
+      
       ++pulseID;
-
+      
       std::this_thread::sleep_until (now);
       if(std::chrono::duration_cast<std::chrono::seconds>(now - start).count() > 10) {
         std::cout << "Sent "       << count 
@@ -134,15 +126,16 @@ private:
     
     int pulseID = -1, missed = -1, pid;
     int count = 0,nev, maxsize = 0,len;
-    int recvmore;
+    int recvmore,rate=0;
 
     using std::chrono::system_clock;
     auto start = system_clock::now();
 
-    std::string h;
+    hws::HWstatus hws(pid,rate);
+
     while(1) {
         
-      pid = streamer.recv(h,stream,Serialiser());
+      pid = streamer.recv(hws,stream,Serialiser());
       std::cout << "pid = "      << pid 
                 <<"\tpulseID = " << pulseID
                 << std::endl;

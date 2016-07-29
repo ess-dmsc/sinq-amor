@@ -1,5 +1,4 @@
-#ifndef UPARAM_H
-#define UPARAM_H
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -8,6 +7,7 @@
 #include <map>
 #include <fstream>
 #include <cmath>
+#include <sstream>
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
@@ -74,5 +74,14 @@ namespace uparam {
       return next;
     }
   };
+
+
+  template<typename T>
+  T to_num(const std::string& s) {
+    T result;
+    std::stringstream(s) >> result;
+    return result;
+  }
+
 }
-#endif
+

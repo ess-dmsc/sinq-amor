@@ -14,6 +14,9 @@
 #include "uparam.hpp"
 #include "header.hpp"
 
+#include "hardware.hpp"
+
+
 const int max_message_size = 100000000;
 
 namespace generator {
@@ -130,6 +133,50 @@ namespace generator {
                 << " bytes)" 
                 << std::endl;
     }
+
+
+    template<typename T>
+    void send(hws::HWstatus& hws, T* data, int nev, serialiser::FlatBufSerialiser<T>) {
+      
+      serialiser::FlatBufSerialiser<T> s;
+      s(hws,data,nev);
+      RdKafka::ErrorCode resp =
+        producer->produce(topic, partition,
+                          RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
+                          (void*)s(), s.size(),
+                          NULL, NULL);
+      if (resp != RdKafka::ERR_NO_ERROR)
+        throw std::runtime_error("% Produce failed: "+RdKafka::err2str(resp));
+      
+      std::cout << "% Produced message (" << s.size() << " bytes)" 
+                << std::endl;
+    }
+
+    template<typename T>
+    void send(hws::HWstatus& hws, T* data, int nev, serialiser::NoSerialiser<T>) {
+      
+      std::string header = hws.to_string(nev,1234);
+      RdKafka::ErrorCode resp =
+        producer->produce(topic, partition,
+                          RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
+                          (void*)&header[0], header.size(),
+                          NULL, NULL);
+      if (resp != RdKafka::ERR_NO_ERROR)
+        throw std::runtime_error("% Produce failed: "+RdKafka::err2str(resp));
+      if( nev > 0 ) {
+        RdKafka::ErrorCode resp =
+          producer->produce(topic, partition,
+                            RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
+                            (void*)data, nev*sizeof(T),
+                            NULL, NULL);
+        if (resp != RdKafka::ERR_NO_ERROR)
+          throw std::runtime_error("% Produce failed: "+RdKafka::err2str(resp));
+      }
+      
+      std::cerr << "% Produced message (" << header.size()+sizeof(T)*nev 
+                << " bytes)" 
+                << std::endl;
+    }
     
     
     
@@ -168,6 +215,23 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
     
     //    opaque = message->payload();    
     return;
+  }
+
+  template<typename T>
+  std::pair<int,int> consume_serialised(RdKafka::Message* message, 
+                                        void* opaque,
+                                        serialiser::FlatBufSerialiser<T>) {
+    std::pair<int,int> result;
+    serialiser::FlatBufSerialiser<T> s;
+    std::vector<T> data;
+    s.extract(reinterpret_cast<const char*>(message->payload()), result.first, data);
+    std::copy(data.begin(),data.end(),reinterpret_cast<T*>(opaque));
+
+    std::cout << "Len: " << message->len() << "\n";
+    std::cout << "Do something with data..." << std::endl;
+    
+    //    opaque = message->payload();    
+    return result;
   }
 
 
@@ -244,7 +308,7 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
       std::cout << h << std::endl;
       
       if(result.second > 0) {
-        msg = consumer->consume(topic, partition, 1000);
+        msg = consumer->consume(topic, partition, 10000);
         if(msg->err() != RdKafka::ERR_NO_ERROR )
           std::cerr << "expected event data" << std::endl;
         consume_data<T>(msg,value);
@@ -269,12 +333,26 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
     template<typename T>
     int  recv(std::string& h, std::vector<T>& data, serialiser::FlatBufSerialiser<T>) {
 
-      //SerialisedConsumeCb ex_consume_cb;
+      void* value; 
       int use_ccb = 1;
+
       /*
        * Consume messages
        */
-std::cout << "Poll: "<<      consumer->poll(0) << std::endl;
+      std::pair<int,int> result;
+      RdKafka::Message *msg = nullptr;
+      do {
+        msg = consumer->consume(topic, partition, 1000);
+      } while (  msg->err() != RdKafka::ERR_NO_ERROR );
+      result = consume_serialised(msg, value, serialiser::FlatBufSerialiser<T>());
+      h = std::string(static_cast<char*>(msg->payload()));
+
+
+      //SerialisedConsumeCb ex_consume_cb;
+      /*
+       * Consume messages
+       */
+// std::cout << "Poll: "<<      consumer->poll(0) << std::endl;
 
 //while (true) {
       //      consumer->poll(0);
@@ -293,6 +371,19 @@ std::cout << "Poll: "<<      consumer->poll(0) << std::endl;
   
       // std::cout << "pid = " << ex_consume_cb.info.first << "\t" << "nev = " << ex_consume_cb.info.second << std::endl;
       // return ex_consume_cb.info.first;
+
+    }
+
+
+    template<typename T>
+    int recv(hws::HWstatus& hws, std::vector<T>& data, serialiser::NoSerialiser<T>) {
+
+
+    }
+
+    template<typename T>
+    int recv(hws::HWstatus& hws, std::vector<T>& data, serialiser::FlatBufSerialiser<T>) {
+      
 
     }
 

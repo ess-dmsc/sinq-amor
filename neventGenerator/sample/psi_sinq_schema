@@ -1,0 +1,16 @@
+// Schema for neutron event data according the RITA2 instrument at PSI.
+// Information were originally encoded in a json string
+
+table EventData {
+      htype:string ;
+      pid:uint;
+      st:uint;
+      ts:uint;
+      nev:uint;
+      tr:double;
+      ds:[uint];
+      hws:[uint];
+      data:[ulong];
+}
+
+root_type EventData;

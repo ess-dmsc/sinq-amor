@@ -11,8 +11,8 @@ typedef nexus::NeXusSource<Instrument> Source;
 typedef control::CommandlineControl Control;
 
 
-//typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
-typedef serialiser::NoSerialiser<uint64_t> Serialiser;
+typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
+//typedef serialiser::NoSerialiser<uint64_t> Serialiser;
 
 ///////////////////////
 // In the end we want to use kafka, I will use 0MQ for development purposes
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
   // default values
   
   Source stream(input);  
-  Generator<generator_t,HeaderJson,Control,Serialiser> g(input);
+  Generator<generator_t,Control,Serialiser> g(input);
 
   g.run(&(stream.begin()[0]),stream.count());
 
