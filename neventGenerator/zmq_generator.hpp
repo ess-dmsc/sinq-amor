@@ -84,22 +84,22 @@ namespace generator {
   
     template<typename T>
     void send(std::string h, T* data, int nev, serialiser::FlatBufSerialiser<T>) {
-      /*! @tparam T data type
-       *  @param h data header
-       *  @param data pointer to data array to be sent
-       *  @param nev number of elements in data array */
-      /*! Serialises the message using FlatBuffers and sends it */
-      serialiser::FlatBufSerialiser<T> s;
-      s(h.c_str(),data,nev);
-      zmq_send(socket,(char*)s(),s.size(),0);
-      // std::cout << "->" << h
-      //           << "," << h.size()
-      //           << "," << nev
-      //           << std::endl;    
+      // /*! @tparam T data type
+      //  *  @param h data header
+      //  *  @param data pointer to data array to be sent
+      //  *  @param nev number of elements in data array */
+      // /*! Serialises the message using FlatBuffers and sends it */
+      // serialiser::FlatBufSerialiser<T> s;
+      // s(h.c_str(),data,nev);
+      // zmq_send(socket,(char*)s(),s.size(),0);
+      // // std::cout << "->" << h
+      // //           << "," << h.size()
+      // //           << "," << nev
+      // //           << std::endl;    
     
-      // std::ofstream of("first.out",std::ofstream::binary);
-      // of.write((char*)s(h.c_str(),data,nev),s.size()); 
-      // of.close();
+      // // std::ofstream of("first.out",std::ofstream::binary);
+      // // of.write((char*)s(h.c_str(),data,nev),s.size()); 
+      // // of.close();
     }
   
 
@@ -148,23 +148,23 @@ namespace generator {
        *  @result pid packet ID */
       /*! Receives the serialised message and unserialise it. */
 
-      zmq_msg_t msg;
-      serialiser::FlatBufSerialiser<T> s;
+      // zmq_msg_t msg;
+      // serialiser::FlatBufSerialiser<T> s;
 
-      int rc = zmq_msg_init (&msg);
-      assert (rc == 0);
-      zmq_msg_recv (&msg,socket,0);
+      // int rc = zmq_msg_init (&msg);
+      // assert (rc == 0);
+      // zmq_msg_recv (&msg,socket,0);
 
 
-      std::cout << "\tzmq_recv size: " << zmq_msg_size(&msg) << std::endl;
+      // std::cout << "\tzmq_recv size: " << zmq_msg_size(&msg) << std::endl;
       
-      s.extract(reinterpret_cast<char*>(zmq_msg_data(&msg)),h,data);
-      zmq_msg_close (&msg);
-      auto info = parse_header(h);
-      std::cout << " pid =  " << info.first << std::endl;
-      std::cout << "n events = " << info.second << std::endl; 
+      // s.extract(reinterpret_cast<char*>(zmq_msg_data(&msg)),h,data);
+      // zmq_msg_close (&msg);
+      // auto info = parse_header(h);
+      // std::cout << " pid =  " << info.first << std::endl;
+      // std::cout << "n events = " << info.second << std::endl; 
         
-      return info.first;
+      // return info.first;
     }
 
   private:

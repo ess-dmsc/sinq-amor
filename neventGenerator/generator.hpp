@@ -80,9 +80,9 @@ private:
   template<class T>
   void run_impl(T* stream, int nev = 0) {
     
-    int pulseID = 0;
+    uint32_t pulseID = 0;
     int count = 0;
-    int rate = c.rate();
+    uint32_t rate = c.rate();
 
     hws::HWstatus hws(pulseID,rate);
 
@@ -124,9 +124,11 @@ private:
   template<class T>
   void listen_impl(std::vector<T> stream) {
     
-    int pulseID = -1, missed = -1, pid;
+    int pulseID = -1, missed = -1;
+    uint32_t pid;
     int count = 0,nev, maxsize = 0,len;
-    int recvmore,rate=0;
+    int recvmore;
+    uint32_t rate=0;
 
     using std::chrono::system_clock;
     auto start = system_clock::now();
