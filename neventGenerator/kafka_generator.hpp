@@ -46,7 +46,7 @@ namespace generator {
         }
       }
 
-      conf->set("message.max.bytes", "100000000", errstr);
+      conf->set("message.max.bytes", "1000000000", errstr);
       std::cerr << errstr << std::endl;
 
       if(topic_str.empty()) {
@@ -117,13 +117,14 @@ namespace generator {
     template<typename T>
     void send(std::string h, T* data, int nev, serialiser::FlatBufSerialiser<T>) {
       
-      serialiser::FlatBufSerialiser<T> s;
-      s(h,data,nev);
+      // serialiser::FlatBufSerialiser<T> s;
+      // s(h,data,nev);
       
       RdKafka::ErrorCode resp =
         producer->produce(topic, partition,
                           RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
-                          (void*)s(), s.size(),
+                          //                          (void*)s(), s.size(),
+                          (void*)data, nev,
                           NULL, NULL);
       if (resp != RdKafka::ERR_NO_ERROR)
         std::cerr << "% Produce failed: " <<
@@ -137,13 +138,14 @@ namespace generator {
 
     template<typename T>
     void send(hws::HWstatus& hws, T* data, int nev, serialiser::FlatBufSerialiser<T>) {
-      
-      serialiser::FlatBufSerialiser<T> s;
-      s(hws,data,nev);
+
+      uint32_t timestamp= 123456;
+      serialiser::FlatBufSerialiser<T> s(hws,data,nev,timestamp);
+
       RdKafka::ErrorCode resp =
         producer->produce(topic, partition,
                           RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
-                          (void*)s(), s.size(),
+                          (void*)s.get(), s.size(),
                           NULL, NULL);
       if (resp != RdKafka::ERR_NO_ERROR)
         throw std::runtime_error("% Produce failed: "+RdKafka::err2str(resp));
@@ -255,7 +257,8 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
           exit(1);
         }
       }
-      conf->set("fetch.message.max.bytes", "100000000", errstr);
+      conf->set("fetch.message.max.bytes", "1000000000", errstr);
+      conf->set("receive.message.max.bytes", "1000000000", errstr);
       std::cerr << errstr << std::endl;
       
       if(topic_str.empty()) {
@@ -312,14 +315,6 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
         if(msg->err() != RdKafka::ERR_NO_ERROR )
           std::cerr << "expected event data" << std::endl;
         consume_data<T>(msg,value);
-        // if(data.size() < result.second)
-        //   data.resize(result.second);
-        // std::cout << std::distance(static_cast<T*>(msg->payload()),
-        //                              static_cast<T*>(msg->payload())+result.second)
-        //           << std::endl;
-        // std::copy(static_cast<T*>(msg->payload()),
-        //           static_cast<T*>(msg->payload())+result.second,
-        //           data.begin());
       }
 
       delete msg;
@@ -346,45 +341,31 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
       } while (  msg->err() != RdKafka::ERR_NO_ERROR );
       result = consume_serialised(msg, value, serialiser::FlatBufSerialiser<T>());
       h = std::string(static_cast<char*>(msg->payload()));
-
-
-      //SerialisedConsumeCb ex_consume_cb;
-      /*
-       * Consume messages
-       */
-// std::cout << "Poll: "<<      consumer->poll(0) << std::endl;
-
-//while (true) {
-      //      consumer->poll(0);
-      // if (use_ccb) {
-      //   consumer->consume_callback(topic,
-      //                              partition,
-      //                              -1,
-      //                              &ex_consume_cb,
-      //                              &use_ccb);
-      // } else {
-      //   RdKafka::Message *msg = consumer->consume(topic, partition, 1000);
-      //   //msg_consume1(msg, NULL);
-      //   delete msg;
-      // }
-      //  }
-  
-      // std::cout << "pid = " << ex_consume_cb.info.first << "\t" << "nev = " << ex_consume_cb.info.second << std::endl;
-      // return ex_consume_cb.info.first;
-
     }
 
 
     template<typename T>
     int recv(hws::HWstatus& hws, std::vector<T>& data, serialiser::NoSerialiser<T>) {
-
-
+      return 0;
     }
 
     template<typename T>
-    int recv(hws::HWstatus& hws, std::vector<T>& data, serialiser::FlatBufSerialiser<T>) {
-      
+    uint64_t recv(hws::HWstatus& hws, std::vector<T>& data, serialiser::FlatBufSerialiser<T>) {
 
+      std::pair<int,int> result;
+      RdKafka::Message *msg = nullptr;
+      do {
+        msg = consumer->consume(topic, partition, 1000);
+        if( (msg->err() != RdKafka::ERR_NO_ERROR) && (msg->err() != RdKafka::ERR__MSG_TIMED_OUT ) )
+          std::cerr << "message error: " << RdKafka::err2str(msg->err()) << std::endl;
+      } while (  msg->err() != RdKafka::ERR_NO_ERROR );
+
+      
+      // std::cout << "Len: " << msg->len() << "\n";
+      serialiser::FlatBufSerialiser<T> s;
+      s.extract(reinterpret_cast<const char*>(msg->payload()),data,hws);
+
+      return hws.pid;
     }
 
 
