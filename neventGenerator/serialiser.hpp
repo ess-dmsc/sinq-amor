@@ -26,10 +26,12 @@ namespace serialiser {
       auto htype = builder.CreateString("questo dovrebbe essere l'header");
       auto data = builder.CreateVector(val,nev);
       auto hws = builder.CreateVector(&hwstat.hws[0],0);
+      auto ds = builder.CreateVector(&hwstat.ds[0],0);
       auto event = CreateEvent(builder,
                                htype,
                                timestamp,
                                hws,
+                               ds,
                                hwstat.system_time,
                                hwstat.pid,
                                data);  

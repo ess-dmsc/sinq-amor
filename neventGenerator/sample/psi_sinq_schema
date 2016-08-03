@@ -2,9 +2,10 @@
 // Information were originally encoded in a json string
 
 table Event {
-       htype:string;
+      htype:string;
       ts:ulong;
       hws:[ushort];
+      ds:[ushort];
       st:ulong;
       pid:ulong;
       data:[ulong];

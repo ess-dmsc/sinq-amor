@@ -126,6 +126,7 @@ private:
     
     int pulseID = -1, missed = -1;
     uint32_t pid;
+    uint64_t size=0;
     int count = 0,nev, maxsize = 0,len;
     int recvmore;
     uint32_t rate=0;
@@ -134,38 +135,41 @@ private:
     auto start = system_clock::now();
 
     hws::HWstatus hws(pid,rate);
-
+    std::pair<uint64_t,uint64_t> msg;
+    
     while(1) {
         
-      pid = streamer.recv(hws,stream,Serialiser());
-      std::cout << "pid = "      << pid 
-                <<"\tpulseID = " << pulseID
-                << std::endl;
-      if(pid - pulseID != 1) {
-        std::cout << "packet lost" << std::endl;
+      msg = streamer.recv(hws,stream,Serialiser());
+      pid = msg.first;
+      // std::cout << "pid = "      << pid
+      //           << "len = "      << msg.second
+      //           <<"\tpulseID = " << pulseID
+                // << std::endl;
+      if(pid - pulseID != 0) {
+        // std::cout << "packet lost" << std::endl;
         pulseID = pid;
         missed++;
-        std::cout << "\tpid = "      << pid 
-                  <<"\tpulseID = " << pulseID
-                  << std::endl;
+        // std::cout << "\tpid = "      << pid 
+        //           <<"\tpulseID = " << pulseID
+        //           << std::endl;
       }
       else {
-        if(nev > 0)
+        //        if(nev > 0) {
           ++count;
+          size+=msg.second;
+          //        }
       }
-      std::cout <<"\tpulseID = " << (++pulseID)
-                << std::endl;
-
       if(std::chrono::duration_cast<std::chrono::seconds>(system_clock::now() - 
                                                           start).count() > 10 ) {
-        std::cout << "Missed " << missed << " packets"
-                  << " @ " << count/10 << "packets/s"
+        std::cout << "Missed " << missed << " packets" << std::endl;
+        std::cout << "Received " << count << "packets" << " @ " << size*1e-1*1e-6 << "MB/s"
                   << std::endl;
         count = 0;
         missed = 0;
+        size = 0;
         start = system_clock::now();
       }
-
+      pulseID++;
     }
   }
 
