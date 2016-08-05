@@ -1,0 +1,25 @@
+# Streamdevice protocol file for the Siemens SPS-S5 with the custom RS232 interface as used at 
+# AMOR
+
+InTerminator = "\n";
+OutTerminator = "\r\n";
+ExtraInput = Ignore;
+
+
+readDigital {
+	    out "R";
+	    separator="";
+	    in "\?%d";	    
+}
+
+readAnalog {
+	    out "A";
+	    separator="";
+	    in "\?%d";	    
+}
+
+
+push {
+     out "%s";
+}
+

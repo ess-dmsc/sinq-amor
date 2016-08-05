@@ -1,0 +1,31 @@
+- name: Make sure that /opt/amor/simfiles exists
+  file: path=/opt/amor/simfiles state=directory recurse=yes
+
+- name: be sure spss5.py is installed
+  become: yes
+  copy:
+    src: spss5.py
+    dest: /opt/amor/simfiles
+    mode: 0755
+
+
+- name: be sure simulation service file for spss5 is installed
+  become: yes
+  copy:
+    src: spss5.service
+    dest: /usr/lib/systemd/system
+
+
+- name: be sure magnet simulation service spss5 is enabled
+  become: yes
+  service:
+    name:  spss5
+    enabled: yes
+    state: stopped
+
+
+#- name: be amormagnet DB file is installed
+#  become: yes
+#  copy:
+#    src: motc.substitutions
+#    dest: /opt/amor/epics

@@ -1,0 +1,9 @@
+[Unit]
+Description=SPS simulation AMOR
+After=rc-local.service
+
+[Service]
+ExecStart=/opt/amor/simfiles/spss5.py 60077 > /tmp/amorsps.log
+
+[Install]
+WantedBy=multi-user.target

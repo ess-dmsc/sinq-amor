@@ -26,7 +26,7 @@ In the `ansible` directory, edit the `staging` file, changing `support` to the
 name of the target machine where the simulation is to be installed, if
 necessary (you may also use the IP address of the target machine). Then run
 
-    $ ansible-playbook -i staging site.yml
+    $ ansible-playbook -i staging amor.yml
 
 ## Running the simulation
 To change the state of the simulation, run one of the following:
@@ -106,3 +106,23 @@ via a streamdevice driver living in slsvme.proto and an EPICS database
 slsvme.db.
 
 
+AMOR also has a Siemens programmable logic unit for controlling the shutter and a switch for 
+the alignment laser and the spin flipper RF. This is SPS-S5 which is connected to the world as 
+such via a custom RS232 interface and a terminal server. In EPICS the following PV's are provided:
+
+* *SQ:AMOR:SPS1:DigitalInput* a waveform record with 16 bytes giving the state of the SPS digital inputs
+* *SQ:AMOR:SPS1:AnalogInput* a waveform record holding 8 analog input values. This is not used at AMOR. Anyway, 
+  how a physical value is calculated from any of these values depends on the connected sensor and the 
+  application. 
+* *SQ:AMOR:SPS1:Push* This is a string output for sending the commands to toggle SPS buttons to have something happen 
+  in the SPS. For AMOR, the following commands are valid:
+   + S0000, toggles the shutter, state is in byte 5  of the DigitalInput
+   + S0001, toggles the laser light, state is in  byte 16, bit 7 of DigitalInput
+   + S0007, toggles the spin flipper RF, state is in byte 13, bit 7 of DigitalInput
+
+The AMOR SPS is simulated via a twisted server implement in spss5.py. EPICS support is realised as streamdevice 
+driver implemented in spss5.proto and spsamor.db. 
+
+ 
+ 
+     

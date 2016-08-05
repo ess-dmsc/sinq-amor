@@ -16,7 +16,7 @@ include "synAppsStd.dbd"
 device(scaler,INST_IO,devScalerEL737,"asynScalerEL737")
 
 #--------- For lakeshore
-#addpath "/opt/epics/modules/streamdevice/2.6.0/3.14.12.5/dbd"
-#include "streamdevice.dbd"
+addpath "/opt/epics/modules/streamdevice/2.6.0/3.14.12.5/dbd"
+include "streamdevice.dbd"
 addpath "/opt/epics/modules/busy/1.6.0/3.14.12.5/dbd"
 include "busy.dbd"

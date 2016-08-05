@@ -46,11 +46,14 @@ dbLoadRecords("$(ASYN)/db/asynRecord.db","P=SQ:AMOR:,R=slsvme,PORT=slsvme,ADDR=0
 
 epicsEnvSet ("STREAM_PROTOCOL_PATH", "$(TOP)/db:.")
 
-cd ${TOP}/iocBoot/iocsinqEPICS
 dbLoadRecords("$(TOP)/db/slsvme.db","PREFIX=SQ:AMOR:PBY:,NO=1")
 dbLoadRecords("$(TOP)/db/slsvme.db","PREFIX=SQ:AMOR:FMA:,NO=2")
 dbLoadRecords("$(TOP)/db/slsvme.db","PREFIX=SQ:AMOR:ABY:,NO=3")
 
+#-------------- load SPS
+drvAsynIPPortConfigure("sps1", "localhost:60077",0,0,0)
+dbLoadRecords("$(ASYN)/db/asynRecord.db","P=SQ:AMOR:,R=spsdirect,PORT=sps1,ADDR=0,OMAX=80,IMAX=80")
+dbLoadRecords("$(TOP)/db/spsamor.db","PREFIX=SQ:AMOR:SPS1:")
 
 
 

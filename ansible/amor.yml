@@ -3,6 +3,7 @@
     - common
     - motors
     - magnet 
+    - sps
     - epics
 
 - hosts: kafka_server

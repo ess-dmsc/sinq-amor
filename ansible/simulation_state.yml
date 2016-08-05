@@ -22,6 +22,12 @@
     name: amormagnet
     state: "{{ new_state }}"
 
+- name: change AMOR SPS simulation state
+  become: yes
+  service:
+    name: spss5
+    state: "{{ new_state }}"
+
 - name: change AMOR IOC state
   become: yes
   service:

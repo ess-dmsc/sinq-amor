@@ -1,0 +1,9 @@
+[Unit]
+Description=Magnet simulation AMOR
+After=rc-local.service
+
+[Service]
+ExecStart=/opt/amor/simfiles/SLSVME.py 60066 > /tmp/amormagnet.log
+
+[Install]
+WantedBy=multi-user.target

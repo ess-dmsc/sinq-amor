@@ -1,0 +1,32 @@
+# DB definition for a SPS-S5 with the custom RS232 interface as used at SINQ. 
+
+#The digital inputs. Ignore the first one, which is the response character R
+
+record(waveform, "$(PREFIX)DigitalInput") {
+  field(DTYP, "stream")
+  field(INP, "@spss5.proto readDigital() sps1 0")
+  field(SCAN, "5 second")
+  field(NELM, "16")
+  field(FTVL, "LONG")
+  field(PREC, "1")
+}
+
+# The analog inputs, again ignore the first one as it is the response character A 
+record(waveform, "$(PREFIX)AnalogInput") {
+  field(DTYP, "stream")
+  field(INP, "@spss5.proto readAnalog() sps1 0")
+  field(SCAN, "5 second")
+  field(NELM, "8")
+  field(FTVL, "LONG")
+  field(PREC, "1")
+}
+
+# This is forwarding the S0001 style strings to the hardware. This is the easiest solution but requires 
+# Hardware knowledge upstream. Which is required anyway. The syntax is: SBBBI with 3 characters for the byte 
+# to set and one character for the bit in the byte. The Byte must always be filled with 0 to the left.  
+record(stringout, "$(PREFIX)Push") {
+  field(DESC, "String for pushing buttons")
+  field(DTYP, "stream")
+  field(OUT, "@spss5.proto push() sps1 0")
+}
+
