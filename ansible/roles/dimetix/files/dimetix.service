@@ -1,0 +1,10 @@
+
+[Unit]
+Description=Dimetix simulation AMOR
+After=rc-local.service
+
+[Service]
+ExecStart=/opt/amor/simfiles/dimetix.py 60088 > /tmp/amordimetix.log
+
+[Install]
+WantedBy=multi-user.target

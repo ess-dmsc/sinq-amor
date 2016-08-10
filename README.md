@@ -123,6 +123,31 @@ such via a custom RS232 interface and a terminal server. In EPICS the following 
 The AMOR SPS is simulated via a twisted server implement in spss5.py. EPICS support is realised as streamdevice 
 driver implemented in spss5.proto and spsamor.db. 
 
- 
+
+AMOR also has a laser distance measurement device called dimetix. In
+order to set the various beamline components properly when changing
+omega or two theta or else, the position of these beamline components
+on the optical bench needs to be known very precisely. In order to
+find the positions automatically, each component is equipped with a
+little mirror. The height at which this mirror is attached is unique
+to the component. Then there is the dimetix laser distance measurement
+device which can be moved up and down with the XLZ motor. With this
+setup, the position of all the beamline components can be determined
+by driving XLZ to predefined positions and taking distance
+measurements with the dimetix.  The dimetix device is simulated with
+dimetix.py. There is a streamdevice driver for the dimetix for EPICS,
+expressed in dimetix.proto and dimetix.db.
+In EPICS, the following PV are available for the dimetix:
+
+* *SQ:AMOR:DIMETIX:DIST*  The distance readback. Please note that this
+ is 0, and the value in an alarm state when the laser is off.
+* *SQ:AMOR:DIMETIX:LASER* is a binary output which switches the laser
+  on and off. The device does not support reading back of the laser
+  state.
+* *SQ:AMOR:DIMETIX:SimVal*  is a output value which allows to set the
+  readback value for the simulation. This is only useful in the
+  simulation, the real device will not honour this value.
+
+
  
      

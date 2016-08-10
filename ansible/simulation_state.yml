@@ -27,6 +27,12 @@
   service:
     name: spss5
     state: "{{ new_state }}"
+    
+- name: change AMOR dimetix simulation state
+  become: yes
+  service:
+    name: dimetix
+    state: "{{ new_state }}"
 
 - name: change AMOR IOC state
   become: yes

@@ -55,6 +55,11 @@ drvAsynIPPortConfigure("sps1", "localhost:60077",0,0,0)
 dbLoadRecords("$(ASYN)/db/asynRecord.db","P=SQ:AMOR:,R=spsdirect,PORT=sps1,ADDR=0,OMAX=80,IMAX=80")
 dbLoadRecords("$(TOP)/db/spsamor.db","PREFIX=SQ:AMOR:SPS1:")
 
+#------------- Load dimetix distance measurement device
+drvAsynIPPortConfigure("dimetix", "localhost:60088",0,0,0)
+dbLoadRecords("$(ASYN)/db/asynRecord.db","P=SQ:AMOR:,R=dimetixdirect,PORT=dimetix,ADDR=0,OMAX=80,IMAX=80")
+dbLoadRecords("$(TOP)/db/dimetix.db","PREFIX=SQ:AMOR:DIMETIX:")
+
 
 
 iocInit

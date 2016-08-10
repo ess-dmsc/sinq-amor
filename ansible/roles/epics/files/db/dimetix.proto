@@ -1,0 +1,23 @@
+# Streamdevice protocol file for a Dimetix distance measuring device as used at
+# AMOR
+
+InTerminator = "\n";
+OutTerminator = "\r\n";
+ExtraInput = Ignore;
+
+setlaser {
+	 out "%{s0p|s0o}";
+	 in "g0?";
+}
+
+setreadback {
+	    out  "setval %d";
+	    in  "g0?";
+}
+
+read {
+     out "s0g";
+     in "g0g+%d";
+     @mismatch {in "@E213"}
+}
+

@@ -1,0 +1,40 @@
+
+# DB file for dimetix laser distance measurement device
+
+##
+## Switch the laser
+##
+record(bo, "$(PREFIX)LASER") {
+  field(DESC, "Switch laser on and off")
+  field(DTYP,"stream")
+  field(OUT,"@dimetix.proto setlaser() dimetix 0")
+  field(PINI, "YES")
+  field(VAL, "0")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+}
+
+## 
+## Read the distance
+##  
+record(ai, "$(PREFIX)DIST") {
+  field(DTYP, "stream")
+  field(DESC, "Distance")
+  field(INP, "@dimetix.proto read() dimetix 0")
+  field(SCAN, "1 second")
+  field(PREC, "1")
+  field(EGU, "mm")
+}
+
+
+##
+## Set the readback (for simulation purposes only)
+## 
+record(ao, "$(PREFIX)SimVal") {
+  field(DTYP, "stream")
+  field(DESC, "Set readback for simulation")
+  field(OUT, "@dimetix.proto setreadback() dimetix 0")
+  field(PREC, "1")
+  field(EGU, "mm")
+}
+

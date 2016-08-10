@@ -1,0 +1,25 @@
+- name: Make sure that /opt/amor/simfiles exists
+  file: path=/opt/amor/simfiles state=directory recurse=yes
+
+- name: be sure dimetix.py is installed
+  become: yes
+  copy:
+    src: dimetix.py
+    dest: /opt/amor/simfiles
+    mode: 0755
+
+
+- name: be sure simulation service file for dimetix is installed
+  become: yes
+  copy:
+    src: dimetix.service
+    dest: /usr/lib/systemd/system
+
+
+- name: be sure simulation service dimetix is enabled
+  become: yes
+  service:
+    name:  dimetix
+    enabled: yes
+    state: stopped
+

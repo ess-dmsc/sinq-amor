@@ -4,6 +4,7 @@
     - motors
     - magnet 
     - sps
+    - dimetix
     - epics
 
 - hosts: kafka_server
