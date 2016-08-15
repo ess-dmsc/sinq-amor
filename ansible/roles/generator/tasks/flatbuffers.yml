@@ -1,17 +1,21 @@
 ---
-- name: Clone flatbuffers
-  git: repo=https://github.com/google/flatbuffers.git dest=/tmp/flatbuffers
+- name: Download flatbuffers
+  git:
+    repo: "{{ flatbuffers_src }}"
+    dest: "{{ flatbuffers_src_dir }}"
 
 - name: Create build folder
-  file: path=/tmp/flatbuffers/build state=directory
+  file:
+    path: "{{ flatbuffers_src_dir }}/build"
+    state: directory
 
 - name: Compile flatbuffers
-  shell: cmake ../ && make chdir=/tmp/flatbuffers/build
+  shell: "cmake -DCMAKE_INSTALL_PREFIX={{ flatbuffers_install_dir }} ../ && make chdir={{ flatbuffers_src_dir }}/build"
 
 - name: Install flatbuffers
   become: yes
-  become_method: sudo
-  shell: make install chdir=/tmp/flatbuffers/build
+  shell: "make install chdir={{ flatbuffers_src_dir }}/build"
 
-- name: Export environment
-  shell: export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+- name: Create link in {{ install_dir }}
+  become: yes
+  shell: "stow -t {{ install_dir }} flatbuffers chdir={{ stow_dir }}"

@@ -5,31 +5,25 @@
   yum: name=hdf5-devel.x86_64 state=present
     
 - name: Download NeXus library
-  git: repo=https://github.com/nexusformat/code.git dest=/tmp/nexusformat
+  git:
+    repo: "{{ nexus_src }}"
+    dest: "{{ nexus_src_dir }}"
   
 - name: Create build folder
-  file: path=/tmp/nexusformat/build state=directory
+  file:
+    path: "{{ nexus_src_dir }}/build"
+    state: directory
   
 - name: Compile NeXus library
   environment:
     HDF5_INCLUDE_DIRS: /usr/include
     HDF5_LIBRARIES: /usr/lib64
-  shell: cmake -DENABLE_HDF5=1 -DENABLE_CXX=1 -DENABLE_APPS=ON ../ && make chdir=/tmp/nexusformat/build
+  shell: "cmake -DENABLE_HDF5=1 -DENABLE_CXX=1 -DENABLE_APPS=ON -DCMAKE_INSTALL_PREFIX={{ nexus_install_dir }} ../ && make chdir={{ nexus_src_dir }}/build"
 
 - name: Install NeXus
   become: yes
-  become_method: sudo
-  shell: make install chdir=/tmp/nexusformat/build
+  shell: make install chdir="{{ nexus_src_dir }}/build"
 
-- name: Create link1
+- name: Create link in {{ install_dir }}
   become: yes
-  become_method: sudo
-  file: src=/usr/local/lib64/libNeXus.so dest=/usr/local/lib64/libNeXus.so.0 state=link
-  
-- name: Create link2
-  become: yes
-  become_method: sudo
-  file: src=/usr/local/lib64/libNeXusCPP.so dest=/usr/local/lib64/libNeXusCPP.so.0 state=link
-  
-- name: Export environment
-  shell: export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64
+  shell: "stow -t {{ install_dir }} nexusformat chdir={{ nexus_install_dir }}"

@@ -1,0 +1,3 @@
+local_download_dir: "/tmp"
+stow_dir: "/opt/stow"
+install_dir: "/usr/local"

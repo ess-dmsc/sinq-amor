@@ -50,7 +50,7 @@
   become_method: sudo
   copy: src="/tmp/neventGenerator/neventGenerator/{{ item }}" dest="{{ generator_home }}/{{ item }}" remote_src=yes
   with_items:
-    - AMORgenerator
+    - build/AMORgenerator
     - control.in
     - el737counter.py
     - header.amor

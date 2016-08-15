@@ -2,33 +2,26 @@
 - name: Cmake
   include: cmake.yml 
 
-- stat: path=/usr/local/lib64/libNeXus.so
-  register: st
-
-- name: NeXus library
-  include: nexus.yml 
-  when: not st.stat.exists
-
-- stat: path=/usr/lib64/libzmq.so
-  register: st
-  
 - name: 0MQ library
   include: zmq.yml
-  when: not st.stat.exists
-  
-- stat: path="{{ rdkafka_home }}/lib/librdkafka.so"
-  register: st
 
-- name: Install rdkafka
+- name: checks for files
+  include: check.yml
+
+- name: NeXus library
+  include: nexus.yml
+  when:
+    not lib_nexus.stat.exists
+    
+- name: rdkafka library
   include: rdkafka.yml
-  when: not st.stat.exists
-
-- stat: path="/usr/local/lib/libflatbuffers.a"
-  register: st
+  when:
+    not lib_rdkafka.stat.exists
 
 - name: flatbuffers library
   include: flatbuffers.yml 
-  when: not st.stat.exists
+  when:
+    not lib_flatbuffers.stat.exists
   
 - name: neventGenerator
   include: nevent_generator.yml 
@@ -38,8 +31,8 @@
   become_method: sudo
   lineinfile: dest=/etc/environment line='export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib:/usr/local/lib64'
     
-- name: be sure generator service file is installed
-  become: yes
-  copy:
-    src: generator.service
-    dest: /usr/lib/systemd/system
+#- name: be sure generator service file is installed
+#  become: yes
+#  copy:
+#    src: generator.service
+#    dest: /usr/lib/systemd/system

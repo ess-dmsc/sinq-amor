@@ -10,11 +10,9 @@
 - hosts: kafka_server
   tags:
     - kafkaServer
-  vars:
-    is_kafka_server: true
   roles:
-    - { role: kafka, when: "{{ is_kafka_server }} == true" }
-
+#    - role: kafka
+    - role: generator
 
 - hosts: generator_host
   tags:

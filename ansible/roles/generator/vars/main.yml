@@ -1,6 +1,15 @@
+
 generator_src: https://mib_mic@bitbucket.org/europeanspallationsource/sinq-amorsim.git
 generator_home: /opt/amor/simfiles
 
 rdkafka_src: https://github.com/edenhill/librdkafka.git
-rdkafka_home: /usr/local
+rdkafka_src_dir: "{{ local_download_dir }}/librdkafka"
+rdkafka_install_dir: "{{ stow_dir }}/librdkafka"
 
+nexus_src: https://github.com/nexusformat/code.git
+nexus_src_dir: "{{ local_download_dir }}/nexusformat"
+nexus_install_dir: "{{ stow_dir }}/nexusformat"
+
+flatbuffers_src: https://github.com/google/flatbuffers.git
+flatbuffers_src_dir: "{{ local_download_dir }}/flatbuffers"
+flatbuffers_install_dir: "{{ stow_dir }}/flatbuffers"
