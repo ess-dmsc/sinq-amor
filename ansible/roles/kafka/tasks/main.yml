@@ -1,25 +1,27 @@
 ---
-- stat: path="{{ kafka_home }}"
-  register: kafka_dir
+- name: install the latest version of stow
+  become: yes
+  package: name=stow state=latest
 
+- name: check for kafka installation
+  include: check-kafka.yml
+  
 - name: Install kafka
   include: install-kafka.yml
-  environment:
-    KAFKA_HOME: "{{ kafka_home }}"
-  when: not kafka_dir.stat.exists
+  when: not kafka_installed.stat.exists
 
-- name: be sure kafka service file is installed
-  become: yes
-  copy:
-    src: kafka.service
-    dest: /usr/lib/systemd/system
+- name: Run kafka service
+  include: run-kafka.yml
 
-- name: be sure zookeeper service file is installed
-  become: yes
-  copy:
-    src: zookeeper.service
-    dest: /usr/lib/systemd/system
-
-#- name: Run kafka
-#  include: run-kafka.yml
+#- name: be sure kafka service file is installed
+#  become: yes
+#  copy:
+#    src: kafka.service
+#    dest: /usr/lib/systemd/system
+#
+#- name: be sure zookeeper service file is installed
+#  become: yes
+#  copy:
+#    src: zookeeper.service
+#    dest: /usr/lib/systemd/system
   

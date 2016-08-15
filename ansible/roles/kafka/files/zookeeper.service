@@ -3,4 +3,6 @@ Description=Run zookeeper server
 After=rc-local.service
 
 [Service]
-ExecStart=/opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties
+ExecStart=/usr/local/bin/zookeeper-server-start.sh /usr/local/config/zookeeper.properties
+ExecStop=/usr/local/bin/zookeeper-server-stop.sh 
+SuccessExitStatus=143

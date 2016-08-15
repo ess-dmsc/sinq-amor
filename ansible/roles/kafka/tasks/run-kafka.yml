@@ -1,12 +1,19 @@
 ---
-
-- name: Run the Zookeeper service
+- name: copy service files
   become: yes
-  become_method: sudo
-  shell: "{{ kafka_home }}/bin/zookeeper-server-start.sh -daemon {{ kafka_home }}/config/zookeeper.properties"
+  copy:
+    src: "{{ item }}"
+    dest: /usr/lib/systemd/system
+    force: yes
+  with_items:
+    - kafka.service
+    - zookeeper.service
 
-- name: Run the Kafka service
+- name: start kafka
   become: yes
-  become_method: sudo
-  shell: "{{ kafka_home }}/bin/kafka-server-start.sh -daemon {{ kafka_home }}/config/kafka.properties"
-
+  service:
+    name: "{{ item }}"
+    state: started
+  with_items:
+    - zookeeper
+    - kafka

@@ -2,46 +2,14 @@
 - name: Install OpenJDK
   become: yes
   become_method: sudo
-  yum: name=java-1.8.0-openjdk-headless.x86_64 state=present
-  when:  "'$ansible_pkg_mgr' == 'yum'"
-
-- name: Install OpenJDK
-  become: yes
-  become_method: sudo
-  apt: name=java-1.8.0-openjdk-headless.x86_64 state=present
-  when: "'$ansible_pkg_mgr' == 'apt'"
-  
-#- stat: path="/tmp/gradle-{{ gradle_version }}"
-#  register: gradle_folder
-
-#- file: state=directory path="/tmp/gradle-{{ gradle_version }}"
-#  when: not gradle_folder.stat.exists
-  
-#- name: Download and unpack Gradle
-#  unarchive: src="{{ gradle_url }}/gradle-{{ gradle_version }}-bin.zip" dest="/tmp/gradle-{{ gradle_version }}" copy=no
-#  when: not gradle_folder.stat.exists
-  
-#- file: state=directory path="/tmp/kafka/kafka-{{ kafka_version }}-src"
-
-- file: state=directory path="{{ kafka_home }}-{{ kafka_version }}"
-  become: yes
-  become_method: sudo
-
-#- name: Download Kafka 
-#  get_url: url="{{ kafka_src }}" dest=/tmp/
+  package: name=java-1.8.0-openjdk-headless.x86_64 state=present
 
 - name : Unpack Kafka
   become: yes
   become_method: sudo
-  unarchive: src="{{ kafka_src }}" dest=/usr/local copy=no
+  unarchive: src="{{ kafka_src }}" dest="{{ kafka_install_dir }}" copy=no
 
-- name: Symlink /usr/local/kafka to this version
+- name: Install kafka executables and libs using stow
   become: yes
   become_method: sudo
-  file: src="/usr/local/kafka_2.11-{{ kafka_version }}" dest="{{ kafka_home }}" state=link
-
-#- name: Run Gradle to build Kafka
-#  become: yes
-#  become_method: sudo
-#  shell: "./gradlew jar chdir={{ kafka_home }} creates={{ kafka_home }}/core/build/"
-
+  command: "stow -t {{ install_dir }} {{ kafka_pkg }} chdir={{ stow_dir }}"
