@@ -44,14 +44,14 @@ namespace control {
     { }
 
     FileControl(uparam::Param in) : s(in["control"]) {
-      control.read(s);
+      control.read(s,uparam::PlainText());
     }
 
     FileControl(const std::string in) : s(in) {
-      control.read(s);
+      control.read(s,uparam::PlainText());
     }
 
-    void update() { control.read(s); }
+    void update() { control.read(s,uparam::PlainText()); }
     void finalize() { };
 
     bool run()    { return control["run"] == "run"; }

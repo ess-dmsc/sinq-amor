@@ -10,7 +10,6 @@ typedef nexus::Amor Instrument;
 typedef nexus::NeXusSource<Instrument> Source;
 typedef control::CommandlineControl Control;
 
-
 typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
 //typedef serialiser::NoSerialiser<uint64_t> Serialiser;
 
@@ -20,8 +19,9 @@ typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
 typedef  generator::KafkaGen<generator::transmitter> generator_t;
 //typedef FileWriterGen generator_t;
 
+typedef uparam::Param Param;
 
-uparam::Param parse(int, char **);
+Param parse(int, char **);
 
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
@@ -32,9 +32,12 @@ uparam::Param parse(int, char **);
 ///  \date Wed Jun 08 15:14:10 2016
 int main(int argc, char **argv) {
 
-  uparam::Param input = parse(argc,argv);
+  Param input;// = parse(argc,argv);
+  input.read("config.in",uparam::RapidJSON());
+
   // default values
-  
+  input.print();
+
   Source stream(input);  
   Generator<generator_t,Control,Serialiser> g(input);
 
@@ -45,7 +48,7 @@ int main(int argc, char **argv) {
 }
 
 
-void helper(uparam::Param input) {
+void helper(Param input) {
   std::cout << "AMORgenerator" << "\n is a neutron event generator based on a flexible library. It "
             << "supports multiple transport (kafka, 0MQ, file I/O), sources (NeXus files,"
             << "MCstas simulation output) and serialisation (no serialisation,"
@@ -78,14 +81,14 @@ void helper(uparam::Param input) {
  *  \author Michele Brambilla <mib.mic@gmail.com>
  *  \date Fri Jun 17 12:20:25 2016
  */
-uparam::Param parse(int argc, char **argv) {
-  uparam::Param input;
-  input["port"] = "1235";
-  input["control"] = "control.in";
-  input["topic"] = "test_0";
-  input["brokers"] = "localhost";
-  input["filename"] = "sample/amor2015n001774.hdf";
-  input["header"] = "header.amor";
+Param parse(int argc, char **argv) {
+  Param input;
+  // input["port"] = "1235";
+  // input["control"] = "control.in";
+  // input["topic"] = "test_0";
+  // input["brokers"] = "localhost";
+  // input["filename"] = "sample/amor2015n001774.hdf";
+  // input["header"] = "header.amor";
 
   opterr = 0;
   int opt;

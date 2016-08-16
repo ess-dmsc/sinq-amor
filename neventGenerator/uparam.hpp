@@ -9,6 +9,12 @@
 #include <cmath>
 #include <sstream>
 
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/filereadstream.h>
+#include <rapidjson/ostreamwrapper.h>
+#include <rapidjson/writer.h>
+
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 ///
@@ -18,6 +24,10 @@
 ///  \date Wed May 30 16:39:24 2012
 
 namespace uparam {
+  struct PlainText { };
+  struct RapidJSON { };
+
+  //  template <typename Source>
   class Param {
   public:
     typedef std::map<std::string, std::string> map_t;
@@ -28,19 +38,15 @@ namespace uparam {
     const_iterator begin() const { return params.begin(); }
     const_iterator end() const { return params.end(); }
 
-    void read(const std::string& s){
-      std::ifstream inf(s.c_str());
-      if (!inf.is_open()) {
-        std::cerr << "PARAMETER FILE " << s  << " NOT FOUND!\n";
-        throw std::exception();
-      }
-      while (inf.good()) {
-        std::string name = get_str(inf);
-        if (name != "")
-          params[name] = get_str(inf);
-      }
-      inf.close();
+    
+    void read(const std::string& s, const PlainText&){
+      read_impl(s,PlainText());
     }
+
+    void read(const std::string& s, const RapidJSON&) {
+      read_impl(s,RapidJSON());
+    }
+
     void write(const std::string& s) const {
       std::ofstream of(s.c_str(), std::ios::trunc);
       for (const_iterator i = begin(); i != end(); ++i)
@@ -61,6 +67,30 @@ namespace uparam {
                      (int(*)(int))std::toupper);
       return in;
     }
+    void read_impl(const std::string& s, const PlainText&){
+      std::ifstream inf(s.c_str());
+      if (!inf.is_open()) {
+        std::cerr << "PARAMETER FILE " << s  << " NOT FOUND!\n";
+        throw std::exception();
+      }
+      while (inf.good()) {
+        std::string name = get_str(inf);
+        if (name != "")
+          params[name] = get_str(inf);
+      }
+      inf.close();
+    }
+    void read_impl(const std::string& s, const RapidJSON&){
+      FILE* fp = fopen(s.c_str(), "rb");
+      char buffer[65536];
+      rapidjson::FileReadStream is(fp, buffer, sizeof(buffer));
+      rapidjson::Document d;
+      d.ParseStream(is);
+      for( auto i=d.MemberBegin();i!=d.MemberEnd();++i) 
+        params[i->name.GetString()] = i->value.GetString();
+      fclose(fp);
+    }
+
     std::string get_str(std::ifstream& in) {
       std::string next;
       in >> next;
@@ -73,6 +103,7 @@ namespace uparam {
         next = "";
       return next;
     }
+
   };
 
 

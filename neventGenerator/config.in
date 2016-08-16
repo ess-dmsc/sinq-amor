@@ -1,0 +1,8 @@
+{
+    "port" : "1235",
+    "control" : "control.in",
+    "topic" : "test_0",
+    "brokers" : "localhost",
+    "filename" : "sample/amor2015n001774.hdf",
+    "header" : "header.amor"
+}

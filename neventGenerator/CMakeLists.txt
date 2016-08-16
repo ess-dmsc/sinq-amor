@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
-project (neventGenerator)
+set(PROJECT_NAME_STR neventGenerator)
+project(${PROJECT_NAME_STR} CXX)
 
 # The version number.
 set (neventGenerator_VERSION_MAJOR 1)
@@ -21,11 +22,13 @@ add_custom_target(
 )
 
 # add the binary tree to the search path for include files
-include_directories("${PROJECT_SOURCE_DIR}/cJSON")
-include_directories("${PROJECT_BINARY_DIR}")
-include_directories("${RDKAFKA_DIR}/include")
-include_directories("${NEXUS_DIR}/include")
-include_directories("${FLATBUFFERS_DIR}/include")
+include_directories("${PROJECT_SOURCE_DIR}/cJSON"
+  "${PROJECT_SOURCE_DIR}/rapidjson/include"
+  "${PROJECT_SOURCE_DIR}"
+  "${RDKAFKA_DIR}/include"
+  "${NEXUS_DIR}/include"
+  "${FLATBUFFERS_DIR}/include")
+
 
 link_directories("/usr/lib")
 link_directories("/usr/lib64")
@@ -45,4 +48,18 @@ target_link_libraries (AMORreceiver zmq rdkafka rdkafka++ NeXus sodium cjson hdf
 add_dependencies(AMORgenerator extern_lib)
 add_dependencies(AMORreceiver extern_lib)
 
- 
+
+enable_testing()
+set(PROJECT_TEST_NAME ${PROJECT_NAME_STR}_test)
+
+include_directories(${GTEST_INCLUDE})
+file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/tests/*.cpp)
+add_executable(${PROJECT_TEST_NAME} ${TEST_SRC_FILES})
+add_dependencies(${PROJECT_TEST_NAME} googletest)
+
+target_link_libraries(${PROJECT_TEST_NAME}
+  ${GTEST_LIB}/libgtest.a
+  ${GTEST_LIB}/libgtest_main.a)
+
+add_test(test1 ${PROJECT_TEST_NAME})
+
