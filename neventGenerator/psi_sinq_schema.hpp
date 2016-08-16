@@ -91,7 +91,7 @@ inline flatbuffers::Offset<Event> CreateEvent(flatbuffers::FlatBufferBuilder &_f
 
 inline const Event *GetEvent(const void *buf) { return flatbuffers::GetRoot<Event>(buf); }
 
-inline bool VerifyEventBuffer(flatbuffers::Verifier &verifier) { return verifier.VerifyBuffer<Event>(nullptr); }
+inline bool VerifyEventBuffer(flatbuffers::Verifier &verifier) { return verifier.VerifyBuffer<Event>(); }
 
 inline void FinishEventBuffer(flatbuffers::FlatBufferBuilder &fbb, flatbuffers::Offset<Event> root) { fbb.Finish(root); }
 

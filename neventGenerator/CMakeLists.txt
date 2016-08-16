@@ -49,17 +49,15 @@ add_dependencies(AMORgenerator extern_lib)
 add_dependencies(AMORreceiver extern_lib)
 
 
-enable_testing()
-set(PROJECT_TEST_NAME ${PROJECT_NAME_STR}_test)
+#enable_testing()
+#set(PROJECT_TEST_NAME ${PROJECT_NAME_STR}_test)
+#include_directories(${GTEST_INCLUDE})
+#file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/tests/*.cpp)
+#add_executable(${PROJECT_TEST_NAME} ${TEST_SRC_FILES})
+#add_dependencies(${PROJECT_TEST_NAME} googletest)
 
-include_directories(${GTEST_INCLUDE})
-file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/tests/*.cpp)
-add_executable(${PROJECT_TEST_NAME} ${TEST_SRC_FILES})
-add_dependencies(${PROJECT_TEST_NAME} googletest)
-
-target_link_libraries(${PROJECT_TEST_NAME}
-  ${GTEST_LIB}/libgtest.a
-  ${GTEST_LIB}/libgtest_main.a)
-
-add_test(test1 ${PROJECT_TEST_NAME})
+#target_link_libraries(${PROJECT_TEST_NAME}
+#  ${GTEST_LIB}/libgtest.a
+#  ${GTEST_LIB}/libgtest_main.a)
+#add_test(test1 ${PROJECT_TEST_NAME})
 

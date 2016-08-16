@@ -32,17 +32,15 @@ Param parse(int, char **);
 ///  \date Wed Jun 08 15:14:10 2016
 int main(int argc, char **argv) {
 
-  Param input;// = parse(argc,argv);
-  input.read("config.in",uparam::RapidJSON());
-
-  // default values
+  Param input = parse(argc,argv);
   input.print();
 
   Source stream(input);  
   Generator<generator_t,Control,Serialiser> g(input);
 
-  g.run(&(stream.begin()[0]),// stream.count()
-        100);
+  g.run(&(stream.begin()[0]), stream.count());
+  // g.run(&(stream.begin()[0]),// stream.count()
+  //       100);
 
   return 0;
 }
@@ -83,12 +81,8 @@ void helper(Param input) {
  */
 Param parse(int argc, char **argv) {
   Param input;
-  // input["port"] = "1235";
-  // input["control"] = "control.in";
-  // input["topic"] = "test_0";
-  // input["brokers"] = "localhost";
-  // input["filename"] = "sample/amor2015n001774.hdf";
-  // input["header"] = "header.amor";
+  // default values
+  input.read("config.in",uparam::RapidJSON());
 
   opterr = 0;
   int opt;

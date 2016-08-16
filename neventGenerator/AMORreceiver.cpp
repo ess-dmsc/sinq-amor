@@ -20,15 +20,15 @@ typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
 //typedef ZmqRecv Transport;
 //typedef generator::ZmqGen<generator::receiver> Transport;
 typedef generator::KafkaListener<generator::receiver> Transport;
-
 //typedef FileWriterGen Transport
 
+typedef uparam::Param Param;
 
-uparam::Param parse(int, char **);
+
+Param parse(int, char **);
 int main(int argc, char **argv) {
 
-  uparam::Param input = parse(argc,argv);
-  // default values
+  Param input = parse(argc,argv);
   
   Generator<Transport,Control,Serialiser> g(input);
 
@@ -46,15 +46,10 @@ int main(int argc, char **argv) {
  *  \author Michele Brambilla <mib.mic@gmail.com>
  *  \date Fri Jun 17 12:20:25 2016
  */
-uparam::Param parse(int argc, char **argv) {
-  uparam::Param input;
-  input["port"] = "1235";
-  input["control"] = "control.in";
-  input["topic"] = "test_0";
-  input["brokers"] = "localhost";
-  input["filename"] = "sample/amor2015n001774.hdf";
-  input["header"] = "header.amor";
-  input["host"] = "localhost";
+Param parse(int argc, char **argv) {
+  Param input;
+  // default values
+  input.read("config.in",uparam::RapidJSON());
 
   opterr = 0;
   int opt;
