@@ -1,0 +1,3 @@
+[submodule "neventGenerator/rapidjson"]
+	path = neventGenerator/rapidjson
+	url = https://github.com/miloyip/rapidjson.git

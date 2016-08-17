@@ -26,4 +26,4 @@
 
 - name: Create link in {{ install_dir }}
   become: yes
-  shell: "stow -t {{ install_dir }} nexusformat chdir={{ nexus_install_dir }}"
+  shell: "stow -t {{ install_dir }} nexusformat chdir={{ stow_dir }}"

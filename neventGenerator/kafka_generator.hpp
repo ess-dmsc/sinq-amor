@@ -338,6 +338,7 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
       RdKafka::Message *msg = nullptr;
       do {
         msg = consumer->consume(topic, partition, 1000);
+        std::cout << RdKafka::err2str(msg->err()) << std::endl;
       } while (  msg->err() != RdKafka::ERR_NO_ERROR );
       result = consume_serialised(msg, value, serialiser::FlatBufSerialiser<T>());
       h = std::string(static_cast<char*>(msg->payload()));
@@ -362,12 +363,13 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
       
       do {
         msg = consumer->consume(topic, partition, 1000);
-        if( (msg->err() != RdKafka::ERR_NO_ERROR) &&
-            (msg->err() != RdKafka::ERR__MSG_TIMED_OUT ) &&
-            rcv_stat == RdKafka::ERR_NO_ERROR ) {
-          rcv_stat = msg->err();
+        rcv_stat = msg->err();
+        // if( rcv_stat != RdKafka::ERR_NO_ERROR) {
+          // if( (rcv_stat != RdKafka::ERR_NO_ERROR) &&
+          //     (rcv_stat != RdKafka::ERR__MSG_TIMED_OUT ) &&
+          //     rcv_stat == RdKafka::ERR_NO_ERROR ) {
           std::cerr << "message error: " << RdKafka::err2str(msg->err()) << std::endl;
-        }
+        // }
       } while (  msg->err() != RdKafka::ERR_NO_ERROR );
 
       // std::cout << "Len: " << msg->len() << "\n";
@@ -378,7 +380,7 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
     }
 
 
-
+    //    int& pid;
   private:
 
     std::string brokers;
@@ -388,7 +390,6 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
   
     int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
     int64_t start_offset = RdKafka::Topic::OFFSET_BEGINNING;
-    int pid_ = -1;
     
     RdKafka::Conf *conf;
     RdKafka::Conf *tconf;

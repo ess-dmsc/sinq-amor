@@ -38,9 +38,8 @@ int main(int argc, char **argv) {
   Source stream(input);  
   Generator<generator_t,Control,Serialiser> g(input);
 
-  g.run(&(stream.begin()[0]), stream.count());
-  // g.run(&(stream.begin()[0]),// stream.count()
-  //       100);
+  g.run(&(stream.begin()[0]),// stream.count()
+        100);
 
   return 0;
 }

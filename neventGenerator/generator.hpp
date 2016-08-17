@@ -26,7 +26,6 @@ extern "C" {
 }
 
 
-
 /*! \struct Generator 
  *
  * The ``Generator`` send an event stream via the network using a templated
@@ -141,10 +140,10 @@ private:
         
       msg = streamer.recv(hws,stream,Serialiser());
       pid = msg.first;
-      // std::cout << "pid = "      << pid
-      //           << "len = "      << msg.second
-      //           <<"\tpulseID = " << pulseID
-                // << std::endl;
+      std::cout << "pid = "      << pid
+                << "len = "      << msg.second
+                <<"\tpulseID = " << pulseID
+                << std::endl;
       if(pid - pulseID != 0) {
         // std::cout << "packet lost" << std::endl;
         pulseID = pid;

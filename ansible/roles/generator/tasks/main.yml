@@ -1,7 +1,10 @@
 ---
-- name: Cmake
+- name: Make sure cmake is installed
   include: cmake.yml 
 
+- name: Make sure stow is installed
+  include: stow.yml
+  
 - name: 0MQ library
   include: zmq.yml
 
