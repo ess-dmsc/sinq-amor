@@ -14,6 +14,7 @@ without access to the real thing.
   1990-ies and is still the main stay motor controller in SINQ and at
   AMOR
   * An EPICS-IOC to talk to all these motors
+  * A twisted based neutron event simulation. It implements the EL737 counterbox protocol.
 
 ## Prerequisites
 
@@ -50,7 +51,7 @@ default values are
 The ansible playbook installs all files into /opt/amor. Thus getting
 rid of it means removing that directory. Then you have to disable and
 remove the installed services in  /usr/lib/systemd/system. As of now:
-mota, motb, motc and amor_ioc.
+mota, motb, motc and amor_ioc, generator.
 
 
 ## Documentation
@@ -147,7 +148,3 @@ In EPICS, the following PV are available for the dimetix:
 * *SQ:AMOR:DIMETIX:SimVal*  is a output value which allows to set the
   readback value for the simulation. This is only useful in the
   simulation, the real device will not honour this value.
-
-
- 
-     
