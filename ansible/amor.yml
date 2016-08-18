@@ -6,16 +6,16 @@
     - sps
     - dimetix
     - epics
-
+    - generator
+    
 - hosts: kafka_server
   tags:
     - kafkaServer
   roles:
-#    - role: kafka
-    - role: generator
+    - role: kafka
 
 - hosts: generator_host
   tags:
-    - neventGenerator
+    - generator
   roles:
     - generator

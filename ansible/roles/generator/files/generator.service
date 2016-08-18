@@ -3,7 +3,7 @@ Description=neventGenerator controller
 After=rc-local.service
 
 [Service]
-ExecStart=/opt/amor/simfiles/el737controller.py
+ExecStart=/opt/amor/simfiles/el737counter.py /tmp/AMORgenerator.log
 
 [Install]
 WantedBy=multi-user.target

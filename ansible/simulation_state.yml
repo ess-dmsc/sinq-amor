@@ -40,3 +40,14 @@
     name: amor_ioc
     state: "{{ new_state }}"
 
+- name: change kafka server state
+  become: yes
+  service:
+    name: kafka
+    state: "{{ new_state }}"
+
+- name: change generator simulation state
+  become: yes
+  service:
+    name: generator
+    state: "{{ new_state }}"

@@ -37,8 +37,8 @@
 - name: Create build folder
   file: path=/tmp/neventGenerator/neventGenerator/build state=directory
   
-- name: Compile generator
-  shell: cmake -DRDKAFKA_DIR=/usr/local -DNEXUS_DIR=/usr -DFLATBUFFERS_DIR=/usr/local/lib64 ../ && make chdir=/tmp/neventGenerator/neventGenerator/build
+#- name: Compile generator
+#  shell: cmake -DRDKAFKA_DIR=/usr/local -DNEXUS_DIR=/usr -DFLATBUFFERS_DIR=/usr/local/lib64 ../ && make chdir=/tmp/neventGenerator/neventGenerator/build
   
 - name: Copy cJSON library to /usr/local/lib
   become: yes
@@ -48,16 +48,34 @@
 - name: Copy files to execution folder
   become: yes
   become_method: sudo
-  copy: src="/tmp/neventGenerator/neventGenerator/{{ item }}" dest="{{ generator_home }}/{{ item }}" remote_src=yes
+  copy: src="/tmp/neventGenerator/neventGenerator/{{ item }}" dest="{{ generator_home }}" remote_src=yes
   with_items:
     - build/AMORgenerator
-    - control.in
+    - header.in
     - el737counter.py
     - header.amor
+    
+- name: Copy files to sample subfolder
+  become: yes
+  become_method: sudo
+  copy: src="/tmp/neventGenerator/neventGenerator/{{ item }}" dest="{{ generator_home }}/{{ item }}" remote_src=yes
+  with_items:
     - sample/amor2015n001774.hdf
 
+- name: Copy config files
+  become: yes
+  copy: src="{{ item }}" dest="{{ generator_home }}"
+  with_items:
+    - config.in
+    - control.in
+    
 - name: Make generator executable
   become: yes
   become_method: sudo
   file: path="{{ generator_home }}/AMORgenerator" mode="a+x"
   
+- name: be sure detector simulation service file installed
+  become: yes
+  copy:
+    src: generator.service
+    dest: /usr/lib/systemd/system
