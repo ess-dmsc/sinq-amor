@@ -34,15 +34,19 @@ int main(int argc, char **argv) {
 
   Param input = parse(argc,argv);
   input.print();
+  
+  Source stream(input,uparam::to_num<int>(input["multiplier"]));
 
-  Source stream(input);  
   Generator<generator_t,Control,Serialiser> g(input);
 
-  g.run(&(stream.begin()[0]),// stream.count()
-        100);
+  g.run(&(stream.begin()[0]),100);//stream.count());
 
   return 0;
 }
+
+
+
+
 
 
 void helper(Param input) {
@@ -67,6 +71,7 @@ void helper(Param input) {
             << "-s" << "\t" << "1D detector source file (mcstas)" << "\n"
             << "-t" << "\t" << "topic name (kafka) [default = " << input["topic"] << "\n"
             << "-e" << "\t" << "header template [default = " << input["header"] << "\n"
+            << "-m" << "\t" << "data multiplier [default = " << input["multiplier"] << "\n"
             << "-h" << "\t" << "this help" << "\n"
             << std::endl;
   exit(0);
@@ -85,7 +90,7 @@ Param parse(int argc, char **argv) {
 
   opterr = 0;
   int opt;
-  while ((opt = getopt (argc, argv, "a:b:c:f:p:s:t:e:")) != -1) {
+  while ((opt = getopt (argc, argv, "a:b:c:f:p:s:t:e:m:")) != -1) {
     switch (opt) {
     case 'a': //area
       input["2D"] = std::string(optarg);
@@ -110,6 +115,9 @@ Param parse(int argc, char **argv) {
       break;
     case 'e':
       input["header"] = std::string(optarg);
+      break;
+    case 'm':
+      input["multiplier"] = std::string(optarg);
       break;
     case '?':
       helper(input);

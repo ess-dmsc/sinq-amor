@@ -37,8 +37,8 @@
 - name: Create build folder
   file: path=/tmp/neventGenerator/neventGenerator/build state=directory
   
-#- name: Compile generator
-#  shell: cmake -DRDKAFKA_DIR=/usr/local -DNEXUS_DIR=/usr -DFLATBUFFERS_DIR=/usr/local/lib64 ../ && make chdir=/tmp/neventGenerator/neventGenerator/build
+- name: Compile generator
+  shell: cmake -DRDKAFKA_DIR=/usr/local -DNEXUS_DIR=/usr -DFLATBUFFERS_DIR=/usr/local/lib64 ../ && make chdir=/tmp/neventGenerator/neventGenerator/build
   
 - name: Copy cJSON library to /usr/local/lib
   become: yes

@@ -360,6 +360,7 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
       std::pair<int,int> result;
       RdKafka::Message *msg = nullptr;
       uint8_t rcv_stat = RdKafka::ERR_NO_ERROR;
+      serialiser::FlatBufSerialiser<T> s;
       
       do {
         msg = consumer->consume(topic, partition, 1000);
@@ -369,11 +370,11 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
           //     (rcv_stat != RdKafka::ERR__MSG_TIMED_OUT ) &&
           //     rcv_stat == RdKafka::ERR_NO_ERROR ) {
           std::cerr << "message error: " << RdKafka::err2str(msg->err()) << std::endl;
+          std::cout << "Len: " << msg->len() << "\n";
         // }
       } while (  msg->err() != RdKafka::ERR_NO_ERROR );
 
-      // std::cout << "Len: " << msg->len() << "\n";
-      serialiser::FlatBufSerialiser<T> s;
+
       s.extract(reinterpret_cast<const char*>(msg->payload()),data,hws);
       
       return std::pair<uint64_t,uint64_t>(hws.pid, msg->len());

@@ -30,11 +30,16 @@ namespace nexus {
     std::vector<value_type>::const_iterator begin() const { return data.begin(); }
     std::vector<value_type>::const_iterator end() const { return data.end(); }
   
-    NeXusSource(uparam::Param p) {
+    NeXusSource(uparam::Param p, const int multiplier=1) {
       if(NXopen(p["filename"].c_str(),NXACC_READ,&handle) != NX_OK){
         throw std::runtime_error("Failed to open NeXus file "+p["filename"]);
       }
       read();
+      if( multiplier > 1) {
+        int nelem=data.size();
+        for(int m=1;m<multiplier;++m)
+          data.insert(data.end(),data.begin(),data.begin()+nelem);
+      }
     }
 
     int count() const { return data.size(); }
