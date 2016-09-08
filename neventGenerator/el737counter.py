@@ -87,7 +87,8 @@ class EL737Controller(LineReceiver):
                return
 
            if data.startswith('mp'):
-               l = data.split()
+               l = 
+data.split()
                self.mode = 'monitor'
                self.preset = float(l[1])
                self.starttime = time.time()
