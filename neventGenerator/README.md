@@ -64,3 +64,17 @@ int main() {
   return 0;
 }
 ```
+
+Execution
+======
+
+The generator can be executed manually from the command line e.g. :
+
+```
+./AMORgenerator -t <topic> -b <kafka_broker> -f <NeXus source> -m <multiplier>
+```
+
+(for more option ```-h```) or via the el737 counter box. As a default it is executed in the couterbox as a service called "generator", see:
+```
+service generator status
+```
