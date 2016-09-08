@@ -3,5 +3,6 @@
     "topic" : "detector_data",
     "brokers" : "ess01",
     "filename" : "sample/amor2015n001774.hdf",
-    "header" : "header.amor"
+    "header" : "header.amor",
+    "multiplier" : "1"
 }
