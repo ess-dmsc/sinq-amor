@@ -1,5 +1,6 @@
 - name: Make sure that /opt/amor/simfiles exists
   file: path=/opt/amor/simfiles state=directory recurse=yes
+  become: yes
 
 - name: be sure EL734 controller is installed
   become: yes
@@ -74,6 +75,7 @@
     
 - name: Make sure that /opt/amor/epics exists
   file: path=/opt/amor/epics state=directory recurse=yes
+  become: yes
 
 - name: be sure mota substitutions file is installed
   become: yes
