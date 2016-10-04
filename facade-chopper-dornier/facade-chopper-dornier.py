@@ -14,6 +14,14 @@ import pcaspy
 import pcaspy.tools
 
 
+def log(s):
+    print(s)
+
+def log_file(s):
+    with open('/var/log/ch', 'a') as f1:
+        f1.write(s + "\n")
+        f1.flush()
+
 """
 Generates the chopper pickup signal based on the current chopper frequency.
 Runs in its own thread.
@@ -28,6 +36,7 @@ class PickupSignalGenerator(object):
         self.thr_run = True
         self.thr = threading.Thread(target=self._run)
         self.thr.start()
+        log('pickup started')
 
     def _run(self):
         ts_now = time.time()
@@ -55,7 +64,7 @@ class PickupSignalGenerator(object):
                     t1 += step
                     i_gen += 1
                     if len(dat) == self.chopper.tdce_array_size:
-                        print('ERROR not enough space for the pickup sinals')
+                        log('ERROR not enough space for the pickup sinals')
                         break
 
                 if i_gen > 0:
@@ -76,7 +85,7 @@ class PickupSignalGenerator(object):
                 ts_p_last = ts_now
             ts_last = ts_now
             time.sleep(self.period)
-        print('pickup generator done.')
+        log('pickup generator done.')
 
             
 
@@ -114,7 +123,7 @@ class FacadeEpicsDriver(pcaspy.Driver):
         self.pvdb = pvdb
 
     def write(self, pv, value):
-        print('Write: {} = {}'.format(pv, value))
+        log('Write: {} = {}'.format(pv, value))
         #super(FacadeEpicsDriver, self).write(pv, value)
         if pv == 'CmdS':
             self.update_from_epics_CmdS(value)
@@ -126,7 +135,7 @@ class FacadeEpicsDriver(pcaspy.Driver):
     def update_from_epics_CmdS(self, data):
         cmds = data.split('\n')
         for cmd in cmds:
-            print('cmd: {}'.format(cmd))
+            log('cmd: {}'.format(cmd))
             if cmd == 'start':
                 self.chopper.command_start()
 
@@ -248,6 +257,7 @@ class Chopper(object):
             i1 += 1
 
     def stop(self):
+        log('Chopper::stop')
         self.pickup_gen.thr_run = False
         self.server_thread.stop()
 
@@ -264,7 +274,7 @@ class Chopper(object):
     @property
     def Spd(self):
         x = self.driver.read('Spd')
-        print('read from DB: {}'.format(x))
+        log('read from DB: {}'.format(x))
         return x
 
     # Called from the Epics driver write()
@@ -277,7 +287,7 @@ class Chopper(object):
     @property
     def Phs(self):
         x = self.driver.read('Phs')
-        print('read from DB: {}'.format(x))
+        log('read from DB: {}'.format(x))
         return x
 
     @Phs.setter
@@ -321,22 +331,22 @@ class DornierProtocol(twisted.internet.protocol.Protocol):
         self.report_status_parse_success = True
 
     def connectionMade(self):
-        print('GOOD Connection to chopper TCP device established.')
+        log('GOOD Connection to chopper TCP device established.')
         reactor.callLater(5, self.chopper.ask_device_status)
 
     def connectionLost(self, x):
         return
-        print('WARNING connectionLost: {}'.format(x))
+        log('WARNING connectionLost: {}'.format(x))
         #reactor.stop()
 
     """
     Called for every line in the status answer of the chopper.
     """
     def parse_status_line(self, line):
-        rx = '(.+?);state (async|synch);amode([ a-zA-Z0-9]+?);nspee([ 0-9]+?);aspee([ 0-9]+?);'
-        'nphas([ 0-9.]+?);dphas([ 0-9.]+?);averl([ 0-9.]+?);spver([ 0-9]+?);ratio([ 0-9]+?);'
-        'no_action(.*?);monit_(\\d+?);vibra([ \\d.]+?);t_cho([ \\d.]+?);durch([ \\d.]+?);'
-        'vakum([ \\d.]+?);valve([ \\d]+?);sumsi([ \\d]+?);'
+        rx = ('(.+?);state (async|synch);amode([ a-zA-Z0-9]+?);nspee([ 0-9]+?);aspee([ 0-9]+?);'
+              'nphas([ 0-9.]+?);dphas([ 0-9.]+?);averl([ 0-9.]+?);spver([ 0-9]+?);ratio([ 0-9]+?);'
+              'no_action(.*?);monit_(\\d+?);vibra([ \\d.]+?);t_cho([ \\d.]+?);durch([ \\d.]+?);'
+              'vakum([ \\d.]+?);valve([ \\d]+?);sumsi([ \\d]+?);')
         m = re.search(rx, line)
         if not m:
             return None
@@ -351,7 +361,7 @@ class DornierProtocol(twisted.internet.protocol.Protocol):
                 matched.append(m)
         if len(matched) == 2:
             if self.report_status_parse_success:
-                print('GOOD parsed chopper status the first time')
+                log('GOOD parsed chopper status the first time')
                 self.report_status_parse_success = False
             self.chopper.ActSpd = float(matched[0].group(5))
             self.chopper.ActPhs = float(matched[1].group(7))
@@ -378,7 +388,7 @@ class DornierProtocol(twisted.internet.protocol.Protocol):
     """
     def command_set_Phs(self, val):
         x = 'nphas 2 {:.3f}\r\n'.format(val)
-        print(x)
+        log(x)
         self.transport.write(x)
         # Only for chopper 2 in slave mode
         # TODO  check if it is in slave mode
@@ -412,29 +422,56 @@ class Facade(object):
         self.run()
 
     def protocol_up(p):
-        print('protocol_up')
+        log('protocol_up')
 
     def run(self):
         d = connectProtocol(self.endpoint, self.protocol)
         d.addCallback(self.protocol_up)
         reactor.run()
-        print('reactor done.')
+        log('reactor done.')
 
     def stop(self):
-        reactor.stop()
-        self.chopper.stop()
+        try:
+            log('stopping reactor')
+            reactor.stop()
+        except:
+            log('Reactor did not shut down cleanly, but we do not care.')
+        try:
+            log('stopping chopper')
+            self.chopper.stop()
+        except:
+            log('Chopper did not shut down cleanly, but we do not care.')
 
 
 
 """
 Signal handler to allow to stop the program with SIGINT or SIGTERM (systemd).
 """
+handled_shutdown = False
+def handle_shutdown():
+    global handled_shutdown
+    if handled_shutdown:
+        log('already handled_shutdown')
+        return
+    facade.stop()
+    handled_shutdown = True
+
 def handle_SIGINT(signum, frame):
-    facade.stop()
+    log('handle_SIGINT')
+    handle_shutdown()
+
 def handle_SIGTERM(signum, frame):
-    facade.stop()
+    log('handle_SIGTERM')
+    handle_shutdown()
+
+def handle_SIGHUP(signum, frame):
+    log('handle_SIGHUP')
+    handle_shutdown()
+
 import signal
+signal.signal(signal.SIGINT, handle_SIGINT)
 signal.signal(signal.SIGTERM, handle_SIGTERM)
+signal.signal(signal.SIGHUP, handle_SIGHUP)
 
 
 
@@ -461,4 +498,4 @@ if __name__ == '__main__':
 
     facade = Facade(args.chopper_name, device_host, device_port, args.freq_max, args.pickup_update_interval)
     facade.start()
-    print('main done.')
+    log('main done.')

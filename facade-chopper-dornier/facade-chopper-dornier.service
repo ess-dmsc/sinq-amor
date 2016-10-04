@@ -4,6 +4,9 @@ After=rc-local.service
 
 [Service]
 ExecStart=/usr/bin/python /opt/amor/facade-chopper-dornier/facade-chopper-dornier.py -n cp1
+KillMode=control-group
+KillSignal=SIGINT
+TimeoutStopSec=5
 
 [Install]
 WantedBy=multi-user.target
