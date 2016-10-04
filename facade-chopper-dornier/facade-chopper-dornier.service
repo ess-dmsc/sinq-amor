@@ -1,0 +1,9 @@
+[Unit]
+Description=Dornier Chopper ESS Facade
+After=rc-local.service
+
+[Service]
+ExecStart=/usr/bin/python /opt/amor/facade-chopper-dornier/facade-chopper-dornier.py -n cp1
+
+[Install]
+WantedBy=multi-user.target
