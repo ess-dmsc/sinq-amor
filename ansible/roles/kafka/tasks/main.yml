@@ -1,7 +1,7 @@
 ---
 - name: install the latest version of stow
   become: yes
-  package: name=stow state=latest
+  yum: name=stow state=latest
 
 - name: check for kafka installation
   include: check-kafka.yml

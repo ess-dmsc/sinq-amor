@@ -2,7 +2,7 @@
 - name: Install OpenJDK
   become: yes
   become_method: sudo
-  package: name=java-1.8.0-openjdk-headless.x86_64 state=present
+  yum: name=java-1.8.0-openjdk-headless.x86_64 state=present
 
 - name : Unpack Kafka
   become: yes
