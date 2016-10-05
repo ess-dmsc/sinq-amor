@@ -1,0 +1,27 @@
+---
+
+- name: ESS facade for Dornier chopper
+  copy:
+    src: ../../../../facade-chopper-dornier/facade-chopper-dornier.py
+    dest: /opt/amor/facade-chopper-dornier/
+  tags:
+    - dornier
+  become: yes
+
+
+- name: Copy service for ESS facade for Dornier chopper (facade-chopper-dornier)
+  copy:
+    src: ../../../../facade-chopper-dornier/facade-chopper-dornier.service
+    dest: /usr/lib/systemd/system/
+  tags:
+    - dornier
+  become: yes
+
+- name: Start service for ESS facade for Dornier chopper (facade-chopper-dornier)
+  service:
+    name: facade-chopper-dornier
+    enabled: yes
+    state: restarted
+  tags:
+    - dornier
+  become: yes
