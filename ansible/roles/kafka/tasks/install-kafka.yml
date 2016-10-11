@@ -4,10 +4,14 @@
   become_method: sudo
   yum: name=java-1.8.0-openjdk-headless.x86_64 state=present
 
+# On Ansible < 2.0, unarchive can not download, so do it here:
+- name: Download Kafka
+  get_url: url={{kafka_src}} dest=/tmp/{{kafka_pkg}}
+
 - name : Unpack Kafka
   become: yes
   become_method: sudo
-  unarchive: src="{{ kafka_src }}" dest="{{ kafka_install_dir }}" copy=no
+  unarchive: src=/tmp/{{kafka_pkg}} dest={{kafka_install_dir}} copy=no
 
 - name: Install kafka executables and libs using stow
   become: yes
