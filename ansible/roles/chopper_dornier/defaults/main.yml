@@ -3,3 +3,8 @@
 ---
 install_path: /opt/amor/
 src_repo_essiip_fakesinqhw: "https://bitbucket.org/europeanspallationsource/essiip-fakesinqhw.git"
+
+chopper_ess_facade_for_sinq_conf_path: /opt/amor/etc
+broker_configuration_address: localhost
+broker_configuration_topic:   configuration
+broker_data_address:          localhost

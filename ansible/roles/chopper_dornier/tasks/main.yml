@@ -1,3 +1,10 @@
 ---
 - include: chopper_dornier_deps.yml
+  tags:
+    - dornier
+  become: yes
+
 - include: chopper_dornier_host.yml
+  tags:
+    - dornier
+  become: yes
