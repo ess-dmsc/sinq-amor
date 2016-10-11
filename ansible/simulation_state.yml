@@ -51,3 +51,21 @@
   service:
     name: generator
     state: "{{ new_state }}"
+
+- name: change dornier chopper simulation state
+  service:
+    name: chopper_SIM_SINQ
+    enabled: yes
+    state: "{{ new_state }}"
+  tags:
+    - dornier
+  become: yes
+
+- name: change dornier chopper facade simulation state
+  service:
+    name: facade-chopper-dornier
+    enabled: yes
+    state: "{{ new_state }}"
+  tags:
+    - dornier
+  become: yes

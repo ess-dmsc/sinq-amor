@@ -21,12 +21,3 @@
   copy:
     src: ../../../../facade-chopper-dornier/facade-chopper-dornier.service
     dest: /usr/lib/systemd/system/
-
-- name: Start service for ESS facade for Dornier chopper (facade-chopper-dornier)
-  service:
-    name: facade-chopper-dornier
-    enabled: yes
-    state: restarted
-  tags:
-    - dornier
-  become: yes

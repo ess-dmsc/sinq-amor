@@ -33,12 +33,3 @@
   tags:
     - dornier
   become: yes
-
-- name: Start service for Dornier chopper
-  service:
-    name: chopper_SIM_SINQ
-    enabled: yes
-    state: restarted
-  tags:
-    - dornier
-  become: yes
