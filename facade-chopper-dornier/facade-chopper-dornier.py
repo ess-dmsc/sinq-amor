@@ -308,11 +308,11 @@ class Chopper(object):
         self.driver.updatePVs()
 
     @property
-    def ActSpd(self):
+    def ActPhs(self):
         self.driver.getParam('ActPhs')
 
-    @ActSpd.setter
-    def ActSpd(self, val):
+    @ActPhs.setter
+    def ActPhs(self, val):
         self.driver.setParam('ActPhs', val)
         self.driver.updatePVs()
 
@@ -343,10 +343,24 @@ class DornierProtocol(twisted.internet.protocol.Protocol):
     Called for every line in the status answer of the chopper.
     """
     def parse_status_line(self, line):
-        rx = ('(.+?);state (async|synch);amode([ a-zA-Z0-9]+?);nspee([ 0-9]+?);aspee([ 0-9]+?);'
-              'nphas([ 0-9.]+?);dphas([ 0-9.]+?);averl([ 0-9.]+?);spver([ 0-9]+?);ratio([ 0-9]+?);'
-              'no_action(.*?);monit_(\\d+?);vibra([ \\d.]+?);t_cho([ \\d.]+?);durch([ \\d.]+?);'
-              'vakum([ \\d.]+?);valve([ \\d]+?);sumsi([ \\d]+?);')
+        rx = ('(.+?);'
+              'state (async|synch);'
+              'amode([ a-zA-Z0-9]+?);'
+              'nspee([ 0-9]+?);'
+              'aspee([ 0-9]+?);'
+              'nphas([ 0-9.]+?);'
+              'dphas([ 0-9.]+?);'
+              'averl([ 0-9.]+?);'
+              'spver([ 0-9]+?);'
+              'ratio([ 0-9]+?);'
+              'no_action(.*?);'
+              'monit_(\\d+?);'
+              'vibra([ \\d.]+?);'
+              't_cho([ \\d.]+?);'
+              'durch([ \\d.]+?);'
+              'vakum([ \\d.]+?);'
+              'valve([ \\d]+?);'
+              'sumsi([ \\d]+?);')
         m = re.search(rx, line)
         if not m:
             return None
