@@ -1,3 +1,7 @@
+- name: Refresh systemd
+  shell: systemctl daemon-reload
+  become: yes
+
 - name: change motor mota simulation state
   become: yes
   service:

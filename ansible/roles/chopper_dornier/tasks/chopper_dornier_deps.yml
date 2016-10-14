@@ -26,10 +26,9 @@
     - dornier
   become: true
 
+# copy and synchronize modules work only from local to remote, therefore use command:
 - name: Copy service for Dornier chopper
-  copy:
-    src: "{{install_path}}/essiip-fakesinqhw/fakeDChopper/chopper_SIM_SINQ.service"
-    dest: /usr/lib/systemd/system/
+  command: cp /opt/amor/essiip-fakesinqhw/fakeDChopper/chopper_SIM_SINQ.service  /usr/lib/systemd/system/
   tags:
     - dornier
   become: yes
