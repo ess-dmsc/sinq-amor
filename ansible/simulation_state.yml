@@ -73,3 +73,12 @@
   tags:
     - dornier
   become: yes
+
+- name: Check if we have forwarder
+  stat: path=/usr/lib/systemd/system/forward-epics-to-kafka.service
+  register: fwd
+
+- name: Service {{new_state}} forward-epics-to-kafka
+  service: name=forward-epics-to-kafka  state={{new_state}}  enabled=true
+  when: fwd.stat.exists
+  become: true
