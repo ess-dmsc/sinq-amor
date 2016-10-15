@@ -1,27 +1,18 @@
 ---
+#- include_vars: chopper_dornier_host.yml
 
-- name: ESS facade for Dornier chopper
-  copy:
-    src: ../../../../facade-chopper-dornier/facade-chopper-dornier.py
-    dest: /opt/amor/facade-chopper-dornier/
-  tags:
-    - dornier
-  become: yes
+# The chopper facade is already in the sinq repository
 
+- file:
+    path: "{{chopper_ess_facade_for_sinq_conf_path}}"
+    state: directory
+
+- name: ESS facade for Dornier chopper (configuration file)
+  template:
+    src: chopper-ess-facade-for-sinq.conf.j2
+    dest: "{{chopper_ess_facade_for_sinq_conf_path}}/chopper-ess-facade-for-sinq.conf"
+    mode: u=rw,g=rw,o=r
+  #notify: restart redis
 
 - name: Copy service for ESS facade for Dornier chopper (facade-chopper-dornier)
-  copy:
-    src: ../../../../facade-chopper-dornier/facade-chopper-dornier.service
-    dest: /usr/lib/systemd/system/
-  tags:
-    - dornier
-  become: yes
-
-- name: Start service for ESS facade for Dornier chopper (facade-chopper-dornier)
-  service:
-    name: facade-chopper-dornier
-    enabled: yes
-    state: restarted
-  tags:
-    - dornier
-  become: yes
+  command: cp /opt/sinq-amorsim/facade-chopper-dornier/facade-chopper-dornier.service  /usr/lib/systemd/system/

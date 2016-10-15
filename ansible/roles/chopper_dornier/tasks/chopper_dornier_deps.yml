@@ -13,6 +13,9 @@
 
 - name: Install deps via pip
   pip: name={{ item }}
+  environment:
+    EPICS_BASE: "{{ env_EPICS_BASE }}"
+    EPICS_HOST_ARCH: "{{ env_EPICS_HOST_ARCH }}"
   with_items:
     - pyepics
     - pcaspy
@@ -26,19 +29,9 @@
     - dornier
   become: true
 
+# copy and synchronize modules work only from local to remote, therefore use command:
 - name: Copy service for Dornier chopper
-  copy:
-    src: "{{install_path}}/essiip-fakesinqhw/fakeDChopper/chopper_SIM_SINQ.service"
-    dest: /usr/lib/systemd/system/
-  tags:
-    - dornier
-  become: yes
-
-- name: Start service for Dornier chopper
-  service:
-    name: chopper_SIM_SINQ
-    enabled: yes
-    state: restarted
+  command: cp /opt/amor/essiip-fakesinqhw/fakeDChopper/chopper_SIM_SINQ.service  /usr/lib/systemd/system/
   tags:
     - dornier
   become: yes

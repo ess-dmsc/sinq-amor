@@ -1,3 +1,7 @@
+- name: Refresh systemd
+  shell: systemctl daemon-reload
+  become: yes
+
 - name: change motor mota simulation state
   become: yes
   service:
@@ -51,3 +55,30 @@
   service:
     name: generator
     state: "{{ new_state }}"
+
+- name: change dornier chopper simulation state
+  service:
+    name: chopper_SIM_SINQ
+    enabled: yes
+    state: "{{ new_state }}"
+  tags:
+    - dornier
+  become: yes
+
+- name: change dornier chopper facade simulation state
+  service:
+    name: facade-chopper-dornier
+    enabled: yes
+    state: "{{ new_state }}"
+  tags:
+    - dornier
+  become: yes
+
+- name: Check if we have forwarder
+  stat: path=/usr/lib/systemd/system/forward-epics-to-kafka.service
+  register: fwd
+
+- name: Service {{new_state}} forward-epics-to-kafka
+  service: name=forward-epics-to-kafka  state={{new_state}}  enabled=true
+  when: fwd.stat.exists
+  become: true

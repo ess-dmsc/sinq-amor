@@ -4,11 +4,27 @@
     name: telnet
     state: latest
 
+- name: python
+  yum: name=python  state=latest
+  become: yes
+
+- name: python-devel  (at least for twisted)
+  yum: name=python-devel  state=latest
+  become: yes
+
+- name: Enable EPEL so we can actually find python-pip
+  become: yes
+  yum: name=epel-release  state=latest
+
 - name: be sure pip is installed
   become: yes
   yum:
     name: python-pip
     state: latest
+
+- name: pip update
+  pip: name=pip  state=latest
+  become: true
 
 - name: be sure python2-crypto is installed
   become: yes
