@@ -3,6 +3,7 @@
   git:
     repo: "{{ flatbuffers_src }}"
     dest: "{{ flatbuffers_src_dir }}"
+    version: "v1.4.0"
 
 - name: Create build folder
   file:
