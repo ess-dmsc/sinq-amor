@@ -8,15 +8,27 @@
     - epics
     - generator
     - chopper_dornier
-    
+  vars:
+    local_download_dir: "/tmp"
+    stow_dir: "/opt/stow"
+    install_dir: "/usr/local"
+
 - hosts: kafka_server
   tags:
     - kafkaServer
   roles:
     - role: kafka
+  vars:
+    local_download_dir: "/tmp"
+    stow_dir: "/opt/stow"
+    install_dir: "/usr/local"
 
 - hosts: generator_host
   tags:
     - generator
   roles:
     - generator
+  vars:
+    local_download_dir: "/tmp"
+    stow_dir: "/opt/stow"
+    install_dir: "/usr/local"
