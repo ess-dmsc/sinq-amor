@@ -8,3 +8,7 @@ chopper_ess_facade_for_sinq_conf_path: /opt/amor/etc
 broker_configuration_address: localhost
 broker_configuration_topic:   configuration
 broker_data_address:          localhost
+
+
+env_EPICS_BASE: "{{ ansible_env.EPICS_BASE }}"
+env_EPICS_HOST_ARCH: "{{ ansible_env.EPICS_HOST_ARCH }}"
