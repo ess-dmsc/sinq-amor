@@ -17,3 +17,10 @@
   become: yes
   become_method: sudo
   command: "stow -t {{ install_dir }} {{ kafka_pkg }} chdir={{ stow_dir }}"
+
+- name: Kafka Configuration file
+  template:
+    src: server.properties.j2
+    dest: /usr/local/config/server.properties
+    mode: a=r,u=rw
+  become: true
