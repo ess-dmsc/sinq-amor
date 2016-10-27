@@ -21,11 +21,6 @@
 #include "control.hpp"
 
 
-extern "C" {
-#include "cJSON/cJSON.h"
-}
-
-
 /*! \struct Generator 
  *
  * The ``Generator`` send an event stream via the network using a templated
@@ -48,7 +43,10 @@ struct Generator {
   typedef Generator<Streamer,Control, Serialiser> self_t;
 
   Generator(uparam::Param& p) : streamer(p), 
-                                c(p["control"]) {
+                                control(p["control"]),
+                                initial_status(false) {
+    if(p["status"] == "run")
+      initial_status = true;
     /*! @param p see uparam::Param for description. Set of key-value used for initializations. */
     /*! Constructor: initialize the streamer, the header and the control. */
     //    get_control();
@@ -57,7 +55,11 @@ struct Generator {
   template<class T>
   void run(T* stream, int nev = 0) {
     std::thread ts(&self_t::run_impl<T>,this,stream,nev);
-    c.read();
+    control.read();
+    if( initial_status) {
+      control.run(true);
+    }
+
     ts.join();
   }
 
@@ -74,14 +76,16 @@ struct Generator {
 private:
   
   Streamer streamer;
-  Control c;
+  Control control;
+  bool initial_status;
   
   template<class T>
   void run_impl(T* stream, int nev = 0) {
     
     uint32_t pulseID = 0;
     int count = 0;
-    uint32_t rate = c.rate();
+    uint32_t rate = control.rate();
+    bool initial_status;
 
     hws::HWstatus hws(pulseID,rate);
 
@@ -89,11 +93,11 @@ private:
     auto start = system_clock::now();
     auto now = system_clock::now();
 
-    while(!c.stop()) {
+    while(!control.stop()) {
 
       now += std::chrono::microseconds((uint64_t)(1e6/rate));
 
-      if(c.run()) {
+      if(control.run()) {
         streamer.send(hws,stream,nev,Serialiser());
         ++count;
       }
@@ -109,8 +113,8 @@ private:
                   << " packets @ " << count*nev*sizeof(T)/(10*1e6)
                   << "MB/s" 
                   << std::endl;
-        c.update();
-        rate = c.rate();
+        control.update();
+        rate = control.rate();
         count = 0;
         now = start = system_clock::now();
       }
@@ -174,54 +178,6 @@ private:
 
 
  
-};
-
-
-
-struct HeaderJson {
-
-  HeaderJson(std::string s) {
-    std::ifstream in(s);
-    std::string dummy;
-    while(in.good()) {
-      in >> dummy;
-      content += dummy;
-    }
-    in.close();
-    len = content.size();
-    std::cout << (content+="\n");
-    
-  } 
-
-  const std::string& set(const int pid, 
-                         const int st,
-                         const int ts,
-                         const int nev,
-                         const int tr) {
-    
-    
-    cJSON* root = cJSON_Parse(content.c_str());
-
-    //////////////////////
-    // !!! cJSON does not modify valueint vars: use valuedouble
-    cJSON_GetObjectItem(root,"pid")->valuedouble = pid;
-    cJSON_GetObjectItem(root,"st")->valuedouble = st;
-    cJSON_GetObjectItem(root,"ts")->valuedouble = ts;
-    cJSON_GetObjectItem(root,"tr")->valuedouble = tr;
-
-    cJSON* item = cJSON_GetObjectItem(root,"ds");
-    cJSON_GetArrayItem(item,1) -> valuedouble = nev;
-
-    return content = std::string(cJSON_Print(root));;
-  }
-
-  //  const std::string get() { return content; }
-  std::string get() { return content; }
-
-  const int size() { return content.size(); }
-
-  std::string content;
-  int len;
 };
 
 

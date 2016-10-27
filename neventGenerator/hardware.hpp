@@ -5,7 +5,11 @@
 #include <chrono>
 #include <vector>
 
+
 namespace hws {
+
+  // std::string to_string(HWstatus::short_type val) { return std::to_string(static_cast<unsigned long long>(val)) };
+  // std::string to_string(HWstatus::value_type val) { return std::to_string(static_cast<unsigned long long>(val)) };
 
   using namespace std::chrono;
 
@@ -30,35 +34,35 @@ namespace hws {
     std::string to_string(const value_type& nev, const value_type& timestamp) {
 
       std::string ds_string;
-      ds_string = std::string("[{") 
-        + "\"ts\":"  + std::to_string(ds[0]) + ','
-        + "\"bsy\":" + std::to_string(ds[1]) + ','
-        + "\"cnt\":" + std::to_string(ds[2]) + ','
-        + "\"rok\":" + std::to_string(ds[3]) + ','
-        + "\"gat\":" + std::to_string(ds[4]) + ','
-        + "\"evt\":" + std::to_string(ds[5]) + ','
-        + "\"id1\":" + std::to_string(ds[6]) + ','
-        + "\"id2\":" + std::to_string(ds[7]) + ','
-        + '}'                + ','
-        + std::to_string(nev)
-        + "]";
+      // ds_string = std::string("[{") 
+      //   + "\"ts\":"  + std::to_string(ds[0]) + ','
+      //   + "\"bsy\":" + std::to_string(ds[1]) + ','
+      //   + "\"cnt\":" + std::to_string(ds[2]) + ','
+      //   + "\"rok\":" + std::to_string(ds[3]) + ','
+      //   + "\"gat\":" + std::to_string(ds[4]) + ','
+      //   + "\"evt\":" + std::to_string(ds[5]) + ','
+      //   + "\"id1\":" + std::to_string(ds[6]) + ','
+      //   + "\"id2\":" + std::to_string(ds[7]) + ','
+      //   + '}'                + ','
+      //   + std::to_string(nev)
+      //   + "]";
 
       std::string s;
-      s =  std::string("{") 
-        + "\"htype\":\"" + htype                       + "\","
-        + "\"pid\":\""   + std::to_string(pid)         + "\","
-        + "\"st\":\""    + std::to_string(system_time) + "\","
-        + "\"ts\":\""    + std::to_string(timestamp)   + "\","
-        + "\"tr\":\""    + std::to_string(rate)        + "\","
-        + "\"ds\":\""    + ds_string                   + "\","
-        + "\"hws\":\":"                                
-        + "{"                                          
-        + "\"error\":"   + std::to_string(hws[0])      + "\","
-        + "\"full\":"    + std::to_string(hws[1])      + "\","
-        + "\"zmqerr\":"  + std::to_string(hws[2])      + "\""
-        + "\"lost\":"    + "[0,0,0,0,0,0,0,0,0,0]"
-        + "}"                                          + "\""
-        + "}";
+      s =  std::string("{") ;
+      //   + "\"htype\":\"" + htype                       + "\","
+      //   + "\"pid\":\""   + std::to_string(pid)         + "\","
+      //   + "\"st\":\""    + std::to_string(system_time) + "\","
+      //   + "\"ts\":\""    + std::to_string(timestamp)   + "\","
+      //   + "\"tr\":\""    + std::to_string(rate)        + "\","
+      //   + "\"ds\":\""    + ds_string                   + "\","
+      //   + "\"hws\":\":"                                
+      //   + "{"                                          
+      //   + "\"error\":"   + std::to_string(hws[0])      + "\","
+      //   + "\"full\":"    + std::to_string(hws[1])      + "\","
+      //   + "\"zmqerr\":"  + std::to_string(hws[2])      + "\""
+      //   + "\"lost\":"    + "[0,0,0,0,0,0,0,0,0,0]"
+      //   + "}"                                          + "\""
+      //   + "}";
       return s;
     }
     

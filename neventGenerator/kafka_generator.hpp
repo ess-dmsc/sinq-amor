@@ -16,9 +16,6 @@
 
 #include "hardware.hpp"
 
-
-const int max_message_size = 100000000;
-
 namespace generator {
 
   enum {transmitter,receiver};
@@ -46,7 +43,7 @@ namespace generator {
         }
       }
 
-      conf->set("message.max.bytes", "1000000000", errstr);
+      conf->set("message.max.bytes", "100000000", errstr);
       std::cerr << errstr << std::endl;
 
       if(topic_str.empty()) {

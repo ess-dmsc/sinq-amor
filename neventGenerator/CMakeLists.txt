@@ -18,15 +18,14 @@ configure_file (
 add_custom_target(
   extern_lib
   COMMAND make
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/cJSON
 )
 
 # add the binary tree to the search path for include files
-include_directories("${PROJECT_SOURCE_DIR}/cJSON"
-  "${PROJECT_SOURCE_DIR}/rapidjson/include"
+include_directories("${PROJECT_SOURCE_DIR}/rapidjson/include"
   "${PROJECT_SOURCE_DIR}"
   "${RDKAFKA_DIR}/include"
   "${NEXUS_DIR}/include"
+  "${ZMQ_DIR}/include"
   "${FLATBUFFERS_DIR}/include")
 
 
@@ -38,16 +37,12 @@ link_directories("/usr/local/lib64")
 link_directories("${RDKAFKA_DIR}/lib")
 link_directories("${NEXUS_DIR}/lib")
 link_directories("${FLATBUFFERS_DIR}/lib")
-link_directories("${PROJECT_SOURCE_DIR}/cJSON")
+link_directories("${ZMQ_DIR}/lib")
 
 add_executable(AMORgenerator AMORgenerator.cpp)
 add_executable(AMORreceiver AMORreceiver.cpp)
-target_link_libraries (AMORgenerator zmq rdkafka rdkafka++ NeXus sodium cjson hdf5)
-target_link_libraries (AMORreceiver zmq rdkafka rdkafka++ NeXus sodium cjson hdf5)
-
-add_dependencies(AMORgenerator extern_lib)
-add_dependencies(AMORreceiver extern_lib)
-
+target_link_libraries (AMORgenerator zmq rdkafka rdkafka++ NeXus sodium hdf5)
+target_link_libraries (AMORreceiver zmq rdkafka rdkafka++ NeXus sodium hdf5)
 
 #enable_testing()
 #set(PROJECT_TEST_NAME ${PROJECT_NAME_STR}_test)

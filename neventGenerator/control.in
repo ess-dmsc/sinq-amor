@@ -1,5 +1,5 @@
 # generator status
-run pause
+run run
 mutation none
 
 # hws flags
@@ -10,4 +10,4 @@ gat      1
 evt      2
 
 #stream frequency
-rate     140
+rate     10

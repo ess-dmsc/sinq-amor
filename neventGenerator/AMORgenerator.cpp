@@ -16,7 +16,7 @@ typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
 ///////////////////////
 // In the end we want to use kafka, I will use 0MQ for development purposes
 //typedef generator::ZmqGen<generator::transmitter> generator_t;
-typedef  generator::KafkaGen<generator::transmitter> generator_t;
+typedef  generator::KafkaGen<generator::transmitter> Communication;
 //typedef FileWriterGen generator_t;
 
 typedef uparam::Param Param;
@@ -35,17 +35,14 @@ int main(int argc, char **argv) {
   Param input = parse(argc,argv);
   input.print();
   
-  Source stream(input,uparam::to_num<int>(input["multiplier"]));
+   Source stream(input,uparam::to_num<int>(input["multiplier"]));
 
-  Generator<generator_t,Control,Serialiser> g(input);
+   Generator<Communication,Control,Serialiser> g(input);
 
-  g.run(&(stream.begin()[0]),stream.count());
+   g.run(&(stream.begin()[0]),stream.count());
 
   return 0;
 }
-
-
-
 
 
 
@@ -67,11 +64,13 @@ void helper(Param input) {
             << "-b" << "\t" << "broker address (when use kafka)" << "\n"
             << "-c" << "\t" << "control file (when use file)" << "\n"
             << "-f" << "\t" << "NeXus file source [default = " << input["filename"] << "\n"
+            << "-e" << "\t" << "header template [default = " << input["header"] << "\n"
+            << "-i" << "\t" << "configuration file" << "\n"
+            << "-m" << "\t" << "data multiplier [default = " << input["multiplier"] << "\n"
             << "-p" << "\t" << "port used for streaming (kafka,zmq) [default = " << input["port"] << "]\n"
+            << "-r" << "\t" << "set generator status to 'run'" << "\n"
             << "-s" << "\t" << "1D detector source file (mcstas)" << "\n"
             << "-t" << "\t" << "topic name (kafka) [default = " << input["topic"] << "\n"
-            << "-e" << "\t" << "header template [default = " << input["header"] << "\n"
-            << "-m" << "\t" << "data multiplier [default = " << input["multiplier"] << "\n"
             << "-h" << "\t" << "this help" << "\n"
             << std::endl;
   exit(0);
@@ -85,12 +84,27 @@ void helper(Param input) {
  */
 Param parse(int argc, char **argv) {
   Param input;
-  // default values
-  input.read("config.in",uparam::RapidJSON());
+  std::string configuration_file("config.in");
+
+  for(int i=0;i<argc;++i) {
+    if(std::string(*(argv+i)) == "-i" ) {
+      if( (*(argv+i+1))[0] == '-' ) {
+        throw std::runtime_error("Bad parameter for configuration file.");
+      }
+      else {
+        configuration_file=std::string( *(argv+i+1) );
+        std::cout << configuration_file << std::endl;
+      }
+      break;
+    }
+  }
+
+  input.read(configuration_file,uparam::RapidJSON());
+  input["status"] = "pause";
 
   opterr = 0;
   int opt;
-  while ((opt = getopt (argc, argv, "a:b:c:f:p:s:t:e:m:")) != -1) {
+  while ((opt = getopt (argc, argv, "a:b:c:f:p:s:t:e:m:rh")) != -1) {
     switch (opt) {
     case 'a': //area
       input["2D"] = std::string(optarg);
@@ -119,7 +133,10 @@ Param parse(int argc, char **argv) {
     case 'm':
       input["multiplier"] = std::string(optarg);
       break;
-    case '?':
+    case 'r':
+      input["status"] = "run";
+      break;
+    case 'h':
       helper(input);
     }
   }

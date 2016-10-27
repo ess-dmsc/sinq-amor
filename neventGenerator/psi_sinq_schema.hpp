@@ -3,7 +3,7 @@
 #ifndef FLATBUFFERS_GENERATED_PSISINQSCHEMA_H_
 #define FLATBUFFERS_GENERATED_PSISINQSCHEMA_H_
 
-#include "flatbuffers/flatbuffers.h"
+#include <flatbuffers/flatbuffers.h>
 
 struct Event;
 
