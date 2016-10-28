@@ -45,8 +45,9 @@ struct Generator {
   Generator(uparam::Param& p) : streamer(p), 
                                 control(p["control"]),
                                 initial_status(false) {
-    if(p["status"] == "run")
+    if(p["status"] == "run") {
       initial_status = true;
+    }
     /*! @param p see uparam::Param for description. Set of key-value used for initializations. */
     /*! Constructor: initialize the streamer, the header and the control. */
     //    get_control();
@@ -56,9 +57,6 @@ struct Generator {
   void run(T* stream, int nev = 0) {
     std::thread ts(&self_t::run_impl<T>,this,stream,nev);
     control.read();
-    if( initial_status) {
-      control.run(true);
-    }
 
     ts.join();
   }
@@ -85,13 +83,15 @@ private:
     uint32_t pulseID = 0;
     int count = 0;
     uint32_t rate = control.rate();
-    bool initial_status;
 
     hws::HWstatus hws(pulseID,rate);
 
     using std::chrono::system_clock;
     auto start = system_clock::now();
     auto now = system_clock::now();
+
+
+    control.run(initial_status);
 
     while(!control.stop()) {
 

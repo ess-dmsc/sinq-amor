@@ -70,6 +70,11 @@ namespace control {
     }
 
     void update() { }
+    void read() { 
+      read_impl();
+      //      std::thread t(&CommandlineControl::read_impl,this);
+      //      t.join();
+    }
 
     bool run(const bool do_run) {
       status = _run;
@@ -82,7 +87,14 @@ namespace control {
     int& rate()    { return _rate; }
     void operator [](const std::string&) { }
 
-    void read() {
+
+  private:
+    int status;
+    int _rate;
+    std::string s;
+    enum  { _run, _pau, _sto };
+    
+    void read_impl() {
       char value[10];
 
       while(status != _sto) {
@@ -102,13 +114,6 @@ namespace control {
         std::cout << "\t" << status << std::endl;
       }
     }
-
-  private:
-    int status;
-    int _rate;
-    std::string s;
-    enum  { _run, _pau, _sto };
-    
 
   };
 
