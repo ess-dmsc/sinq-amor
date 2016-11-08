@@ -40,11 +40,6 @@
 - name: Compile generator
   shell: cmake -DRDKAFKA_DIR=/usr/local -DNEXUS_DIR=/usr -DFLATBUFFERS_DIR=/usr/local/lib64 ../ && make chdir=/tmp/neventGenerator/neventGenerator/build
   
-- name: Copy cJSON library to /usr/local/lib
-  become: yes
-  become_method: sudo
-  copy: src=/tmp/neventGenerator/neventGenerator/cJSON/libcjson.so dest=/usr/local/lib remote_src=true
-
 - name: Copy files to execution folder
   become: yes
   become_method: sudo
