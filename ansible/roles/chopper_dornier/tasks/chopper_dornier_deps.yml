@@ -23,8 +23,14 @@
     - dornier
   become: true
 
+- name: Include vars for location
+  include_vars: roles/playbook_local_deps/defaults/main.yml
+
 - name: pull europeanspallationsource/essiip-fakesinqhw
-  git: repo={{src_repo_essiip_fakesinqhw}}  version=release-latest  dest={{install_path}}/essiip-fakesinqhw
+  synchronize:
+    src: "{{repo_loc_essiip_fakesinqhw}}"
+    dest: "{{install_path}}/essiip-fakesinqhw"
+  #git: repo={{src_repo_essiip_fakesinqhw}}  version=release-latest  dest={{install_path}}/essiip-fakesinqhw
   tags:
     - dornier
   become: true

@@ -1,0 +1,28 @@
+- name: Check existence of essiip-fakesinqhw in {{repo_loc_essiip_fakesinqhw}}
+  connection: local
+  stat: path={{repo_loc_essiip_fakesinqhw}}
+  register: st
+
+# If it does not yet exist, and user want auto_fetch_deps, we try to clone it
+- name: "[auto-fetch-deps] Fetch essiip-fakesinqhw into {{repo_loc_essiip_fakesinqhw}}"
+  connection: local
+  git:
+    repo: https://bitbucket.org/europeanspallationsource/essiip-fakesinqhw.git
+    dest: "{{repo_loc_essiip_fakesinqhw}}"
+  when: (st.stat.exists!=true or st.stat.isdir==false) and (auto_fetch_deps is defined and {{auto_fetch_deps|bool}} == true)
+  register: task_auto_fetch_deps
+
+# Check again
+- name: Check existence of essiip-fakesinqhw in {{repo_loc_essiip_fakesinqhw}}
+  connection: local
+  #when: task_auto_fetch_deps.skipped is not defined or task_auto_fetch_deps.skipped == false
+  stat: path={{repo_loc_essiip_fakesinqhw}}
+  register: st
+  #failed_when: "st.stat.isdir is not defined or st.stat.isdir != true"
+
+- name: Check existence of essiip-fakesinqhw in {{repo_loc_essiip_fakesinqhw}}
+  connection: local
+  fail:
+    msg: >
+      essiip-fakesinqhw does not exist.  Solution:  Please make sure that the repository `essiip-fakesinqhw` is cloned in the same directory as this `sinq-amorsim` repository.  Or pass --extra-vars "auto_fetch_deps=true"
+  when: st.stat.exists!=true or st.stat.isdir != true

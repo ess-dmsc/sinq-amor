@@ -1,5 +1,6 @@
 - hosts: simulation
   roles:
+    - playbook_local_deps
     - common
     - motors
     - magnet 
