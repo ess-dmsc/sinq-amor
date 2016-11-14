@@ -29,15 +29,14 @@
 - name: pull europeanspallationsource/essiip-fakesinqhw
   synchronize:
     src: "{{repo_loc_essiip_fakesinqhw}}"
-    dest: "{{install_path}}/essiip-fakesinqhw"
-  #git: repo={{src_repo_essiip_fakesinqhw}}  version=release-latest  dest={{install_path}}/essiip-fakesinqhw
+    dest: "{{install_path}}/"
   tags:
     - dornier
   become: true
 
 # copy and synchronize modules work only from local to remote, therefore use command:
 - name: Copy service for Dornier chopper
-  command: cp /opt/amor/essiip-fakesinqhw/fakeDChopper/chopper_SIM_SINQ.service  /usr/lib/systemd/system/
+  command: cp {{install_path}}/essiip-fakesinqhw/fakeDChopper/chopper_SIM_SINQ.service  /usr/lib/systemd/system/
   tags:
     - dornier
   become: yes
