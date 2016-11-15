@@ -1,3 +1,9 @@
+- hosts: 127.0.0.1
+  connection: local
+  tasks:
+  - assert:
+      that: ansible_version.major >= 2 and ansible_version.minor >= 2
+
 - hosts: simulation
   roles:
     - playbook_local_deps
@@ -15,8 +21,8 @@
     stow_dir: "/opt/stow"
     install_dir: "/usr/local"
     # Used in roles: playbook_local_deps, forward-epics-to-kafka:
-    repo_loc_essiip_fakesinqhw: ../../essiip-fakesinqhw
-    repo_loc_forward_epics_to_kafka: ../../forward-epics-to-kafka
+    repo_loc_essiip_fakesinqhw: "{{playbook_dir}}/../../essiip-fakesinqhw"
+    repo_loc_forward_epics_to_kafka: "{{playbook_dir}}/../../forward-epics-to-kafka"
 
 - hosts: kafka_server
   tags:
