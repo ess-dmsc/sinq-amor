@@ -24,5 +24,36 @@
   connection: local
   fail:
     msg: >
-      essiip-fakesinqhw does not exist.  Solution:  Please make sure that the repository `essiip-fakesinqhw` is cloned in the same directory as this `sinq-amorsim` repository.  Or pass --extra-vars "auto_fetch_deps=true"
+      essiip-fakesinqhw does not exist.  Solution:  Please make sure that the repository `essiip-fakesinqhw` is cloned in the same directory as this `sinq-amorsim` repository.  Or pass --extra-vars "auto_fetch_deps=true.    Or pass --extra-vars "repo_loc_essiip_fakesinqhw=<directory>"
+  when: st.stat.exists!=true or st.stat.isdir != true
+
+
+
+- name: Check existence of forward-epics-to-kafka in {{repo_loc_forward_epics_to_kafka}}
+  connection: local
+  stat: path={{repo_loc_forward_epics_to_kafka}}
+  register: st
+
+# If it does not yet exist, and user want auto_fetch_deps, we try to clone it
+- name: "[auto-fetch-deps] Fetch forward-epics-to-kafka into {{repo_loc_essiip_fakesinqhw}}"
+  connection: local
+  git:
+    repo: https://bitbucket.org/europeanspallationsource/forward-epics-to-kafka.git
+    dest: "{{repo_loc_essiip_fakesinqhw}}"
+  when: (st.stat.exists!=true or st.stat.isdir==false) and (auto_fetch_deps is defined and {{auto_fetch_deps|bool}} == true)
+  register: task_auto_fetch_deps
+
+# Check again
+- name: Check existence of forward-epics-to-kafka in {{repo_loc_forward_epics_to_kafka}}
+  connection: local
+  #when: task_auto_fetch_deps.skipped is not defined or task_auto_fetch_deps.skipped == false
+  stat: path={{repo_loc_forward_epics_to_kafka}}
+  register: st
+  #failed_when: "st.stat.isdir is not defined or st.stat.isdir != true"
+
+- name: Check existence of forward-epics-to-kafka in {{repo_loc_forward_epics_to_kafka}}
+  connection: local
+  fail:
+    msg: >
+      forward-epics-to-kafka does not exist.  Solution:  Please make sure that the repository `forward-epics-to-kafka` is cloned in the same directory as this `sinq-amorsim` repository.  Or pass --extra-vars "auto_fetch_deps=true.  Or pass --extra-vars "repo_loc_forward_epics_to_kafka=<directory>"
   when: st.stat.exists!=true or st.stat.isdir != true

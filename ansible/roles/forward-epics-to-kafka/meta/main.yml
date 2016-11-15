@@ -1,0 +1,2 @@
+dependencies:
+  - role: "{{repo_loc_forward_epics_to_kafka}}/ansible/roles/forward_epics_to_kafka"

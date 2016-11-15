@@ -23,10 +23,9 @@
     - dornier
   become: true
 
-- name: Include vars for location
-  include_vars: roles/playbook_local_deps/defaults/main.yml
+# Variables for install location are currently defined on top level
 
-- name: pull europeanspallationsource/essiip-fakesinqhw
+- name: Push europeanspallationsource/essiip-fakesinqhw
   synchronize:
     src: "{{repo_loc_essiip_fakesinqhw}}"
     dest: "{{install_path}}/"

@@ -76,3 +76,13 @@
   file:
     path: /tmp/procServ-2.6.0
     state: absent
+
+
+- name: Amorsim source dir
+  file: path=/opt/amor/sinq-amorsim  state=directory  owner={{ansible_user_uid}}  group={{ansible_user_gid}}
+  become: true
+
+- name: Amorsim source
+  synchronize:
+    src:  "{{role_path}}/../../../."
+    dest: /opt/amor/sinq-amorsim
