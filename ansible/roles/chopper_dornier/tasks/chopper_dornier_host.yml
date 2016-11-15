@@ -15,4 +15,7 @@
   #notify: restart redis
 
 - name: Copy service for ESS facade for Dornier chopper (facade-chopper-dornier)
-  command: cp /opt/sinq-amorsim/facade-chopper-dornier/facade-chopper-dornier.service  /usr/lib/systemd/system/
+  template:
+    src: facade-chopper-dornier.service.j2
+    dest: /usr/lib/systemd/system/facade-chopper-dornier.service
+    mode: u=rw,g=rw,o=r
