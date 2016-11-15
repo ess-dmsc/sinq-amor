@@ -1,0 +1,8 @@
+[kafka_server]
+dm
+
+[simulation]
+dm
+
+[generator_host]
+dm
