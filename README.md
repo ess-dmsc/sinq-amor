@@ -21,6 +21,9 @@ without access to the real thing.
 * A machine or VM with the ESS ICS software installed
 * Python
 * Ansible
+* Extra repositories, cloned in the same directory as this one
+  * forward-epics-to-kafka
+  * essiip-fakesinqhw
 
 ## Setting up the simulation
 In the `ansible` directory, edit the `staging` file, changing `support` to the
@@ -35,6 +38,18 @@ To change the state of the simulation, run one of the following:
     $ ansible-playbook -i staging start_simulation.yml
     $ ansible-playbook -i staging restart_simulation.yml
     $ ansible-playbook -i staging stop_simulation.yml
+
+## Self-contained simulation on dev-env
+Similarily, we can set up a self-contained simulation including Kafka broker on the
+development environment.  An example inventory is provided:
+```
+cd sinq-amorsim/ansible/
+ansible-playbook -i inv-selfcontained.txt amor.yml
+ansible-playbook -i inv-selfcontained.txt restart_simulation.yml
+```
+After starting this single-machine setup, one should see for example chopper TDCE
+signals on the Kafka topic `chopper1.TDCE` from the example `chopper1` which
+is enabled by default.
 
 ## Accessing the IOCs
 The IOCs can be accessed using `telnet`. For this, run
