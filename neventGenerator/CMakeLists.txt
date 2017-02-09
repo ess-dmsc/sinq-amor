@@ -1,58 +1,132 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 set(PROJECT_NAME_STR neventGenerator)
 project(${PROJECT_NAME_STR} CXX)
 
-# The version number.
-set (neventGenerator_VERSION_MAJOR 1)
-set (neventGenerator_VERSION_MINOR 0)
-
 set (CMAKE_CXX_FLAGS "-std=c++11 -pthread  -D_GLIBCXX_USE_NANOSLEEP ${CMAKE_CXX_FLAGS}")
-
-# configure a header file to pass some of the CMake settings
-# to the source code
-configure_file (
-  "${PROJECT_SOURCE_DIR}/neventGeneratorConfig.h.in"
-  "${PROJECT_BINARY_DIR}/neventGeneratorConfig.h"
-  )
 
 add_custom_target(
   extern_lib
   COMMAND make
 )
 
-# add the binary tree to the search path for include files
-include_directories("${PROJECT_SOURCE_DIR}/rapidjson/include"
-  "${PROJECT_SOURCE_DIR}"
-  "${RDKAFKA_DIR}/include"
-  "${NEXUS_DIR}/include"
-  "${ZMQ_DIR}/include"
-  "${FLATBUFFERS_DIR}/include")
+# flatbuffers
+find_path(path_include_flatbuffers NAMES flatbuffers/flatbuffers.h PATHS
+ "$ENV{flatbuffers_dir}/include"
+ /opt/local/flatbuffers.git/include
+)
+find_path(path_flatc NAMES flatc PATHS
+  $ENV{flatc_dir}
+)
+message(STATUS flatbuffers_inc: ${path_include_flatbuffers})
+message(STATUS flatc: ${path_flatc})
+
+#rapidjson
+find_path(path_include_rapidjson NAMES rapidjson/document.h PATHS
+ "$ENV{rapidjson_dir}/include"
+ /opt/local/rapidjson.git/include
+)
+#find_library(path_lib_rapidjson NAMES librapidjson PATHS
+#"$ENV{rapidjson_dir}/lib"
+# /opt/local/rapidjson.git/lib
+#)
+message(STATUS rapidjson_inc: ${path_include_rapidjson})
+#message(STATUS ${path_lib_rapidjson})
+#add_library(librapidjson SHARED IMPORTED)
+#set_property(TARGET librapidjson PROPERTY IMPORTED_LOCATION ${path_lib_rapidjson})
+
+#0mq
+find_path(path_include_zmq NAMES zmq.h PATHS
+ "$ENV{zmq_dir}/include"
+)
+find_library(path_lib_zmq NAMES zmq PATHS
+"$ENV{zmq_dir}/lib"
+)
+message(STATUS zmq_inc: ${path_include_zmq})
+message(STATUS zmq_lib: ${path_lib_zmq} )
+
+add_library(libzmq SHARED IMPORTED)
+set_property(TARGET libzmq PROPERTY IMPORTED_LOCATION ${path_lib_zmq})
+
+#rdkafka
+find_path(path_include_rdkafka NAMES librdkafka/rdkafka.h PATHS
+ "$ENV{librdkafka_dir}/include"
+ /opt/local/rdkafka/install/include
+ /usr/local/include
+)
+find_library(path_lib_rdkafka NAMES rdkafka PATHS
+"$ENV{librdkafka_dir}/lib"
+/opt/local/rdkafka/install/lib
+/usr/local/lib
+)
+add_library(librdkafka SHARED IMPORTED)
+set_property(TARGET librdkafka PROPERTY IMPORTED_LOCATION ${path_lib_rdkafka})
+
+find_library(path_lib_rdkafka++ NAMES rdkafka++ PATHS
+ "$ENV{librdkafka_dir}/lib"
+ /opt/local/rdkafka/install/lib
+ /usr/local/lib
+)
+add_library(librdkafka++ SHARED IMPORTED)
+set_property(TARGET librdkafka++ PROPERTY IMPORTED_LOCATION ${path_lib_rdkafka++})
+
+#nexus
+find_path(path_include_nexus NAMES napi.h PATHS
+  "$ENV{nexus_dir}/include/nexus"
+  "$ENV{nexus_dir}/include"
+)
+find_library(path_lib_nexus NAMES NeXus PATHS
+  "$ENV{nexus_dir}/lib"
+  "$ENV{nexus_dir}/lib/nexus"
+  )
+message(STATUS NeXus_inc: ${path_include_nexus})
+message(STATUS NeXus_lib: ${path_lib_nexus})
+add_library(libNeXus SHARED IMPORTED)
+set_property(TARGET libNeXus PROPERTY IMPORTED_LOCATION ${path_lib_nexus})
 
 
-link_directories("/usr/lib")
-link_directories("/usr/lib64")
-link_directories("/opt/local/lib")
-link_directories("/usr/local/lib")
-link_directories("/usr/local/lib64")
-link_directories("${RDKAFKA_DIR}/lib")
-link_directories("${NEXUS_DIR}/lib")
-link_directories("${FLATBUFFERS_DIR}/lib")
-link_directories("${ZMQ_DIR}/lib")
+#hdf5
+find_path(path_include_hdf5 NAMES hdf5.h PATHS
+  "$ENV{hdf5_dir}/include"
+)
+find_library(path_lib_hdf5 NAMES hdf5-shared PATHS
+  "$ENV{hdf5_dir}/lib"
+  )
+find_library(path_lib_hdf5cpp NAMES hdf5_cpp-shared PATHS
+  "$ENV{hdf5_dir}/lib"
+  )
+if( NOT path_lib_hdf5 )
+  find_library(path_lib_hdf5 NAMES hdf5 PATHS
+  "$ENV{hdf5_dir}/lib"
+  )
+  find_library(path_lib_hdf5cpp NAMES hdf5_cpp PATHS
+    "$ENV{hdf5_dir}/lib"
+    )
+endif()
+
+add_library(libhdf5 SHARED IMPORTED)
+set_property(TARGET libhdf5 PROPERTY IMPORTED_LOCATION ${path_lib_hdf5})
+
+add_library(libhdf5cpp SHARED IMPORTED)
+set_property(TARGET libhdf5cpp PROPERTY IMPORTED_LOCATION ${path_lib_hdf5cpp})
+
+
+include_directories(
+  ${path_include_rdkafka}
+  ${path_include_flatbuffers}
+  ${path_include_rapidjson}
+  ${path_include_zmq}
+  ${path_include_hdf5}
+  ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+link_libraries(librdkafka
+  librdkafka++
+  libzmq
+  sodium
+)
 
 add_executable(AMORgenerator AMORgenerator.cpp)
 add_executable(AMORreceiver AMORreceiver.cpp)
-target_link_libraries (AMORgenerator zmq rdkafka rdkafka++ NeXus sodium hdf5)
-target_link_libraries (AMORreceiver zmq rdkafka rdkafka++ NeXus sodium hdf5)
-
-#enable_testing()
-#set(PROJECT_TEST_NAME ${PROJECT_NAME_STR}_test)
-#include_directories(${GTEST_INCLUDE})
-#file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/tests/*.cpp)
-#add_executable(${PROJECT_TEST_NAME} ${TEST_SRC_FILES})
-#add_dependencies(${PROJECT_TEST_NAME} googletest)
-
-#target_link_libraries(${PROJECT_TEST_NAME}
-#  ${GTEST_LIB}/libgtest.a
-#  ${GTEST_LIB}/libgtest_main.a)
-#add_test(test1 ${PROJECT_TEST_NAME})
+target_link_libraries (AMORgenerator libNeXus libhdf5)
+#target_link_libraries (AMORreceiver)
 

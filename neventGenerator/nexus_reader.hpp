@@ -18,17 +18,28 @@
 
 namespace nexus {
 
+  template<typename T>
+  struct StreamFormat {
+    typedef T value_type;
+  };
+  
+  using PSIformat = StreamFormat<uint64_t>;
+  using ESSformat = StreamFormat<uint32_t>;
+  
+  
   ///  \author Michele Brambilla <mib.mic@gmail.com>
   ///  \date Wed Jun 08 16:49:17 2016
-  template<typename Instrument>
+  template<typename Instrument, typename Format>
   struct NeXusSource {
     typedef NeXusSource self_t;
-    typedef uint64_t value_type;
-
-    std::vector<value_type>::iterator begin() { return data.begin(); }
-    std::vector<value_type>::iterator end() { return data.end(); }
-    std::vector<value_type>::const_iterator begin() const { return data.begin(); }
-    std::vector<value_type>::const_iterator end() const { return data.end(); }
+    typedef typename Format::value_type value_type;
+    typedef typename std::vector<value_type>::iterator iterator;
+    typedef typename std::vector<value_type>::const_iterator const_iterator;
+    
+    iterator begin() { return data.begin(); }
+    iterator end() { return data.end(); }
+    const_iterator begin() const { return data.begin(); }
+    const_iterator end() const { return data.end(); }
   
     NeXusSource(uparam::Param p, const int multiplier=1) {
       if(NXopen(p["filename"].c_str(),NXACC_READ,&handle) != NX_OK){
@@ -80,19 +91,13 @@ namespace nexus {
       }
       NXgetinfo(handle,&rank,dim,&type);
 
-      // std::cout << "rank: " << rank << "\n"
-      //           << "type: " << type << "\n"
-      //           << "dim: " << dim[0] << "\t" << dim[1] << "\t" << dim[2] << "\n";
       size = dim[0];
       for(int i = 1; i < rank; i++) size *= dim[i];
       dim[rank] = dim[rank-1];
     
-      // std::cout << "size: " << size << "\n"    ;
-
       data = new int32_t [size];
     
       NXgetdata(handle,data);
-
       toEventFmt<T>(stream);
     }
   
@@ -160,24 +165,18 @@ namespace nexus {
         throw std::runtime_error("Error reading NeXus data");
       }
       NXgetinfo(handle,&rank,dim,&type);
-      // std::cout << "rank: " << rank << "\n"
-      //           << "type: " << type << "\n"
-      //           << "dim: " << dim[0] << "\t" << dim[1] << "\t" << dim[2] << "\n";
+
       size = dim[0];
       for(int i = 1; i < rank; i++) size *= dim[i];
       dim[rank] = dim[rank-1];
       data = new int32_t [size];
       NXgetdata(handle,data);
-      // std::cout << "size: " << size << "\n"    ;
 
       tof = new float [dim[2]];
       if(NXopenpath(handle,path[1].c_str()) != NX_OK){
         throw std::runtime_error("Error reading NeXus data");
       }
       NXgetdata(handle,tof);
-
-      // std::cout << "size: " << size << "\n"    ;
-
       NXclose((void**)&handle);
 
       toEventFmt<T>(stream);
@@ -194,6 +193,13 @@ namespace nexus {
     
     template<typename T>
     void toEventFmt(std::vector<T>& signal) {
+      throw std::runtime_error("Error, stream format unknown");
+    }
+    
+  };
+
+  template<>
+  void Amor::toEventFmt<PSIformat::value_type>(std::vector<PSIformat::value_type>& signal) {
       unsigned long nEvents = std::accumulate(data,data+size,0);
       int offset, nCount;
       int detID = 0;
@@ -205,7 +211,6 @@ namespace nexus {
           uint32_t high;
         };
       } x;
-
 
       for(int i = 0; i < dim[0]; ++i){
         for(int j = 0; j < dim[1]; ++j) {
@@ -222,11 +227,29 @@ namespace nexus {
         }
       }
     }
-    
-  };
 
+  template<>
+  void Amor::toEventFmt<ESSformat::value_type>(std::vector<ESSformat::value_type>& signal) {
+      unsigned long nEvents = std::accumulate(data,data+size,0);
+      uint32_t detID = 0;
+      int offset, nCount;
+      int counter = 0;
 
-
+      signal.resize(2*nEvents);
+      for(int i = 0; i < dim[0]; ++i){
+        for(int j = 0; j < dim[1]; ++j) {
+          offset = dim[2]*(j+dim[1]*i);
+          for(int k = 0; k < dim[2]; ++k) {
+            nCount = data[offset+k];
+            for(int l = 0;l< nCount; ++l) {
+              signal[counter] = std::round(tof[k]/10.);
+              signal[counter+nEvents] = detID;
+            }
+          }
+        }
+        detID++;
+      }
+    }
 
 
 } // namespace

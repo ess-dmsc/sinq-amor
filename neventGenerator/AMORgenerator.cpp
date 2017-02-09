@@ -6,11 +6,14 @@
 #include "mcstas_reader.hpp"
 #include "generator.hpp"
 
+using StreamFormat = nexus::ESSformat;
+
 typedef nexus::Amor Instrument;
-typedef nexus::NeXusSource<Instrument> Source;
+
+typedef nexus::NeXusSource<Instrument,StreamFormat> Source;
 typedef control::CommandlineControl Control;
 
-typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
+typedef serialiser::FlatBufSerialiser<StreamFormat::value_type> Serialiser;
 //typedef serialiser::NoSerialiser<uint64_t> Serialiser;
 
 ///////////////////////
@@ -36,7 +39,7 @@ int main(int argc, char **argv) {
   input.print();
   
    Source stream(input,uparam::to_num<int>(input["multiplier"]));
-
+   
    Generator<Communication,Control,Serialiser> g(input);
 
    g.run(&(stream.begin()[0]),stream.count());

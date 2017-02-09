@@ -7,7 +7,7 @@
 #include "generator.hpp"
 
 typedef nexus::Amor Instrument;
-typedef nexus::NeXusSource<Instrument> Source;
+typedef nexus::NeXusSource<Instrument,nexus::PSIformat> Source;
 
 typedef control::NoControl Control;
 
@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
   
   Generator<Transport,Control,Serialiser> g(input);
 
-  std::vector<uint64_t> stream;
+  std::vector<Source::value_type> stream;
   g.listen(stream);
 
   return 0;
