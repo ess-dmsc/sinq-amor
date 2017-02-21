@@ -42,8 +42,8 @@ namespace generator {
           exit(1);
         }
       }
-
-      conf->set("message.max.bytes", "100000000", errstr);
+                                       
+      conf->set("message.max.bytes", "23100100", errstr);
       std::cerr << errstr << std::endl;
 
       if(topic_str.empty()) {
@@ -144,11 +144,18 @@ namespace generator {
                           RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
                           (void*)s.get(), s.size(),
                           NULL, NULL);
+
+      
+      std::copy(s.get()+0,
+		s.get()+s.size(), 
+		std::ostream_iterator<char>(std::cout, ""));
+      std::cout << "\n";
+
       if (resp != RdKafka::ERR_NO_ERROR)
         throw std::runtime_error("% Produce failed: "+RdKafka::err2str(resp));
       
-      // std::cout << "% Produced message (" << s.size() << " bytes)" 
-      //           << std::endl;
+      std::cout << "% Produced message (" << s.size() << " bytes)" 
+                << std::endl;
     }
 
     template<typename T>

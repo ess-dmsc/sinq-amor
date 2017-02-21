@@ -37,12 +37,11 @@ int main(int argc, char **argv) {
 
   Param input = parse(argc,argv);
   input.print();
-  
-   Source stream(input,uparam::to_num<int>(input["multiplier"]));
+  Source stream(input,uparam::to_num<int>(input["multiplier"]));
    
-   Generator<Communication,Control,Serialiser> g(input);
-
-   g.run(&(stream.begin()[0]),stream.count());
+  Generator<Communication,Control,Serialiser> g(input);
+  
+  g.run(&(stream.begin()[0]),stream.count());
 
   return 0;
 }

@@ -57,10 +57,10 @@ namespace control {
 
   struct CommandlineControl {
 
-    CommandlineControl() : status(_pau) { } 
+    CommandlineControl() : status(_pau), _rate(default_rate) { } 
     CommandlineControl(const CommandlineControl& other) : status(other.status), _rate(other._rate), s(other.s) { }
-    CommandlineControl(uparam::Param&) : status(_pau) { }
-    CommandlineControl(std::string) : status(_pau) { }
+    CommandlineControl(uparam::Param& p) : status(_pau) { _rate = std::stoi(p["rate"]);  }
+    CommandlineControl(std::string) : status(_pau) {}
 
     CommandlineControl& operator=(CommandlineControl& other) {
       status=other.status;

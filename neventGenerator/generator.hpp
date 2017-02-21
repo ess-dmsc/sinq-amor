@@ -20,6 +20,11 @@
 
 #include "control.hpp"
 
+using milliseconds = std::chrono::milliseconds;
+constexpr milliseconds operator "" _ms(const unsigned long long int value) {
+  return milliseconds(value);
+}
+
 
 /*! \struct Generator 
  *
@@ -43,11 +48,13 @@ struct Generator {
   typedef Generator<Streamer,Control, Serialiser> self_t;
 
   Generator(uparam::Param& p) : streamer(p), 
-                                control(p["control"]),
+                                control(p),
                                 initial_status(false) {
+
     if(p["status"] == "run") {
       initial_status = true;
     }
+
     /*! @param p see uparam::Param for description. Set of key-value used for initializations. */
     /*! Constructor: initialize the streamer, the header and the control. */
     //    get_control();
@@ -87,36 +94,38 @@ private:
     hws::HWstatus hws(pulseID,rate);
 
     using std::chrono::system_clock;
-    auto start = system_clock::now();
-    auto now = system_clock::now();
-
-
+    
     control.run(initial_status);
+
+    auto start = system_clock::now();
+    std::time_t to_time = system_clock::to_time_t(start);
+    auto timeout = std::localtime(&to_time);
 
     while(!control.stop()) {
 
-      now += std::chrono::microseconds((uint64_t)(1e6/rate));
-
       if(control.run()) {
-        streamer.send(hws,stream,nev,Serialiser());
-        ++count;
+	streamer.send(hws,stream,nev,Serialiser());
+      	++count;
       }
       else {
-        streamer.send(hws,stream,0,Serialiser());
+	streamer.send(hws,stream,0,Serialiser());
       }        
-      
       ++pulseID;
-      
-      std::this_thread::sleep_until (now);
-      if(std::chrono::duration_cast<std::chrono::seconds>(now - start).count() > 10) {
+
+      if( pulseID%rate == 0) {
+	++timeout->tm_sec;
+	std::this_thread::sleep_until(  system_clock::from_time_t(mktime(timeout))  );
+        control.update();
+        rate = control.rate();
+      }
+
+      if(std::chrono::duration_cast<std::chrono::seconds>(system_clock::now() - start).count() > 10) {
         std::cout << "Sent "       << count 
                   << " packets @ " << count*nev*sizeof(T)/(10*1e6)
                   << "MB/s" 
                   << std::endl;
-        control.update();
-        rate = control.rate();
         count = 0;
-        now = start = system_clock::now();
+        start = system_clock::now();
       }
     }
     
@@ -149,18 +158,12 @@ private:
                 <<"\tpulseID = " << pulseID
                 << std::endl;
       if(pid - pulseID != 0) {
-        // std::cout << "packet lost" << std::endl;
         pulseID = pid;
         missed++;
-        // std::cout << "\tpid = "      << pid 
-        //           <<"\tpulseID = " << pulseID
-        //           << std::endl;
       }
       else {
-        //        if(nev > 0) {
-          ++count;
-          size+=msg.second;
-          //        }
+	++count;
+	size+=msg.second;
       }
       if(std::chrono::duration_cast<std::chrono::seconds>(system_clock::now() - 
                                                           start).count() > 10 ) {

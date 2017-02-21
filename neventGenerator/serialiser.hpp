@@ -6,8 +6,8 @@
 #include <inttypes.h>
 #include <type_traits>
 
-#include <hardware.hpp>
-#include <psi_sinq_schema.hpp>
+#include "hardware.hpp"
+#include "amo0_psi_sinq_schema_generated.h"
 
 namespace serialiser {
 
@@ -21,18 +21,14 @@ namespace serialiser {
 
     FlatBufSerialiser(hws::HWstatus& hwstat, T* val = NULL, int nev = 0, const T timestamp=0) {
       int16_t* stat = new int16_t[10];
-      auto htype = builder.CreateString("questo dovrebbe essere l'header");
+      auto htype = builder.CreateString("AMOR.event.stream");
       auto data = builder.CreateVector(val,nev);
-      auto hws = builder.CreateVector(&hwstat.hws[0],0);
-      auto ds = builder.CreateVector(&hwstat.ds[0],0);
-      auto event = CreateEvent(builder,
-                               htype,
-                               timestamp,
-                               hws,
-                               ds,
-                               hwstat.system_time,
-                               hwstat.pid,
-                               data);  
+      auto event = BrightnESS::EventGenerator::FlatBufs::AMOR::CreateEvent(builder,
+									   htype,
+									   timestamp,
+									   hwstat.system_time,
+									   hwstat.pid,
+									   data);  
       builder.Finish(event);
       _size = builder.GetSize();
     }
@@ -43,11 +39,11 @@ namespace serialiser {
     void extract(const char* msg,
                  std::vector<T>& data,
                  hws::HWstatus& hwstat) {
-      auto evt = GetEvent(reinterpret_cast<const void*>(msg));
+      auto event = BrightnESS::EventGenerator::FlatBufs::AMOR::GetEvent(reinterpret_cast<const void*>(msg));
 
-      data.resize(evt->data()->size());
-      std::copy(evt->data()->begin(),evt->data()->end(),data.begin());
-      hwstat.pid = evt->pid();
+      data.resize(event->data()->size());
+      std::copy(event->data()->begin(),event->data()->end(),data.begin());
+      hwstat.pid = event->pid();
       return;
     }
 
