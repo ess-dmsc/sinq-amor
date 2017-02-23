@@ -40,7 +40,8 @@ int main(int argc, char **argv) {
   Source stream(input,uparam::to_num<int>(input["multiplier"]));
    
   Generator<Communication,Control,Serialiser> g(input);
-  
+
+  std::cout << stream.count() << std::endl;
   g.run(&(stream.begin()[0]),stream.count());
 
   return 0;

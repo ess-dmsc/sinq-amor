@@ -235,7 +235,7 @@ namespace nexus {
       int offset, nCount;
       int counter = 0;
 
-      std::cout << "ESSformat" << std::endl;
+      std::cout << "ESSformat : " << nEvents << std::endl;
 
       signal.resize(2*nEvents);
       for(int i = 0; i < dim[0]; ++i){

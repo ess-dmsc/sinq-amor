@@ -359,13 +359,12 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
       do {
         msg = consumer->consume(topic, partition, 1000);
         rcv_stat = msg->err();
-        // if( rcv_stat != RdKafka::ERR_NO_ERROR) {
+        if( rcv_stat != RdKafka::ERR_NO_ERROR) {
           // if( (rcv_stat != RdKafka::ERR_NO_ERROR) &&
           //     (rcv_stat != RdKafka::ERR__MSG_TIMED_OUT ) &&
           //     rcv_stat == RdKafka::ERR_NO_ERROR ) {
           std::cerr << "message error: " << RdKafka::err2str(msg->err()) << std::endl;
-          std::cout << "Len: " << msg->len() << "\n";
-        // }
+	}
       } while (  msg->err() != RdKafka::ERR_NO_ERROR );
 
 

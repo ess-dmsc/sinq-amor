@@ -150,13 +150,10 @@ private:
         
       msg = streamer.recv(hws,stream,Serialiser());
       pid = msg.first;
-      std::cout << "pid = "      << pid
-                << "len = "      << msg.second
-                <<"\tpulseID = " << pulseID
-                << std::endl;
-
-      for(int i=0;i<10;++i)
-	std::cout << stream[i] << "\t" << stream[i+msg.second/2] << std::endl;
+      // std::cout << "\tpid = "      << pid
+      //           << "\tlen = "      << msg.second
+      //           << "\tnev = "      << stream.size()
+      //           << std::endl;
 
       if(pid - pulseID != 0) {
         pulseID = pid;
