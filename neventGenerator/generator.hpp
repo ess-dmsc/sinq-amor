@@ -82,6 +82,7 @@ private:
   
   Streamer streamer;
   Control control;
+  Serialiser serialiser;
   bool initial_status;
   
   template<class T>
@@ -89,14 +90,10 @@ private:
     
     uint32_t pulseID = 0;
     int count = 0;
-    uint32_t rate = control.rate();
-
-    hws::HWstatus hws(pulseID,rate);
-
-    using std::chrono::system_clock;
-    
+    hws::HWstatus hws(pulseID,control.rate());    
     control.run(initial_status);
 
+    using std::chrono::system_clock;
     auto start = system_clock::now();
     std::time_t to_time = system_clock::to_time_t(start);
     auto timeout = std::localtime(&to_time);
@@ -104,19 +101,19 @@ private:
     while(!control.stop()) {
 
       if(control.run()) {
-	streamer.send(hws,stream,nev,Serialiser());
+	streamer.send(hws,stream,nev,serialiser);
       	++count;
       }
       else {
-	streamer.send(hws,stream,0,Serialiser());
+	streamer.send(hws,stream,0,serialiser);
       }        
       ++pulseID;
 
-      if( pulseID%rate == 0) {
+      if( pulseID%control.rate() == 0) {
 	++timeout->tm_sec;
 	std::this_thread::sleep_until(  system_clock::from_time_t(mktime(timeout))  );
         control.update();
-        rate = control.rate();
+	hws.rate = control.rate();
       }
 
       if(std::chrono::duration_cast<std::chrono::seconds>(system_clock::now() - start).count() > 10) {
@@ -157,6 +154,10 @@ private:
                 << "len = "      << msg.second
                 <<"\tpulseID = " << pulseID
                 << std::endl;
+
+      for(int i=0;i<10;++i)
+	std::cout << stream[i] << "\t" << stream[i+msg.second/2] << std::endl;
+
       if(pid - pulseID != 0) {
         pulseID = pid;
         missed++;

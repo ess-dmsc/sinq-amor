@@ -5,6 +5,7 @@
 #include <string>
 #include <inttypes.h>
 #include <type_traits>
+#include <iterator>
 
 #include "hardware.hpp"
 #include "amo0_psi_sinq_schema_generated.h"
@@ -17,24 +18,25 @@ namespace serialiser {
   struct FlatBufSerialiser {
     typedef std::true_type is_serialised;
     FlatBufSerialiser() { }
-    FlatBufSerialiser(const FlatBufSerialiser& other) { }
 
-    FlatBufSerialiser(hws::HWstatus& hwstat, T* val = NULL, int nev = 0, const T timestamp=0) {
-      int16_t* stat = new int16_t[10];
+    std::vector<char>& serialise(hws::HWstatus& hwstat, T* value = NULL, int nev = 0, const T timestamp=0) {
+      flatbuffers::FlatBufferBuilder builder;
       auto htype = builder.CreateString("AMOR.event.stream");
-      auto data = builder.CreateVector(val,nev);
+      auto data = builder.CreateVector(value,nev);
       auto event = BrightnESS::EventGenerator::FlatBufs::AMOR::CreateEvent(builder,
-									   htype,
-									   timestamp,
-									   hwstat.system_time,
-									   hwstat.pid,
-									   data);  
-      builder.Finish(event);
-      _size = builder.GetSize();
+    									   htype,
+    									   timestamp,
+    									   hwstat.system_time,
+    									   hwstat.pid,
+    									   data);  
+      FinishEventBuffer(builder,event);
+      buffer.assign(builder.GetBufferPointer(),
+		    builder.GetBufferPointer()+builder.GetSize());
+      return buffer;
     }
 
-    char* get() { return reinterpret_cast<char*>(builder.GetBufferPointer()); }
-    const int size() { return _size; }
+    char* get() { return &buffer[0]; }
+    const int size() { return buffer.size(); }
 
     void extract(const char* msg,
                  std::vector<T>& data,
@@ -48,29 +50,29 @@ namespace serialiser {
     }
 
   private:
-    flatbuffers::FlatBufferBuilder builder;
     int _size = 0;
-    uint8_t *buf;
+    std::vector<char> buffer;
 
   };
 
 
-///  \author Michele Brambilla <mib.mic@gmail.com>
-///  \date Thu Aug 04 09:34:56 2016
-  template<typename T>
-  struct jSONSerialiser {
-    typedef std::true_type is_serialised;
+// ///  \author Michele Brambilla <mib.mic@gmail.com>
+// ///  \date Thu Aug 04 09:34:56 2016
+//   template<typename T>
+//   struct jSONSerialiser {
+//     typedef std::true_type is_serialised;
     
-    jSONSerialiser(hws::HWstatus&, T* = NULL, int =0, const T =0) { }
-    char* get() { return reinterpret_cast<char*>(NULL); }
+//     jSONSerialiser() : buf(nulptr) { };
+//     jSONSerialiser(hws::HWstatus&, T* = NULL, int =0, const T =0) { }
+//     char* get() { return reinterpret_cast<char*>(NULL); }
     
-    const int size() { return _size; }
+//     const int size() { return _size; }
 
-  private:
-    const int _size = 0;
-    const uint8_t *buf;
+//   private:
+//     const int _size = 0;
+//     const uint8_t *buf;
 
-  };
+//   };
 
 
 
@@ -80,8 +82,9 @@ namespace serialiser {
   struct NoSerialiser {
     typedef std::false_type is_serialised;
     
-    NoSerialiser(hws::HWstatus&, T* = NULL, int =0, const T =0) { }
-    char* get() { return reinterpret_cast<char*>(NULL); }
+    NoSerialiser() : buf(nullptr) { };
+    NoSerialiser(hws::HWstatus&, T* = nullptr, int =0, const T =0) { }
+    char* get() { return reinterpret_cast<char*>(nullptr); }
     
     const int size() { return _size; }
 

@@ -4,7 +4,6 @@
 #include <sstream>
 #include <utility>
 #include <cctype>
-#include <iterator>
 
 #include <assert.h>
 
@@ -84,7 +83,7 @@ namespace generator {
     }
 
     template<typename T>
-    void send(std::string h, T* data, int nev, serialiser::NoSerialiser<T>) {
+    void send(std::string h, T* data, int nev, serialiser::NoSerialiser<T> serialiser) {
       RdKafka::ErrorCode resp =
         producer->produce(topic, partition,
                           RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
@@ -112,50 +111,41 @@ namespace generator {
     
     
     template<typename T>
-    void send(std::string h, T* data, int nev, serialiser::FlatBufSerialiser<T>) {
-      
-      // serialiser::FlatBufSerialiser<T> s;
-      // s(h,data,nev);
-      
-      RdKafka::ErrorCode resp =
-        producer->produce(topic, partition,
-                          RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
-                          //                          (void*)s(), s.size(),
-                          (void*)data, nev,
-                          NULL, NULL);
-      if (resp != RdKafka::ERR_NO_ERROR)
-        std::cerr << "% Produce failed: " <<
-          RdKafka::err2str(resp) << std::endl;
-      
-      std::cerr << "% Produced message (" << h.size()+sizeof(T)*nev 
-                << " bytes)" 
-                << std::endl;
+    void send(std::string h, T* data, int nev, serialiser::FlatBufSerialiser<T> serialiser) {
+      // serialiser.serialise(h,data,nev);
+      // RdKafka::ErrorCode resp =
+      //   producer->produce(topic, partition,
+      //                     RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
+      //                     //                          (void*)s(), s.size(),
+      //                     (void*)data, nev,
+      //                     NULL, NULL);
+      // if (resp != RdKafka::ERR_NO_ERROR)
+      //   std::cerr << "% Produce failed: " <<
+      //     RdKafka::err2str(resp) << std::endl;
+      // std::cerr << "% Produced message (" << h.size()+sizeof(T)*nev 
+      //           << " bytes)" 
+      //           << std::endl;
     }
 
 
     template<typename T>
-    void send(hws::HWstatus& hws, T* data, int nev, serialiser::FlatBufSerialiser<T>) {
+    void send(hws::HWstatus& hws, T* data, int nev, serialiser::FlatBufSerialiser<T> serialiser) {
 
       uint32_t timestamp= 123456;
-      serialiser::FlatBufSerialiser<T> s(hws,data,nev,timestamp);
+      serialiser.serialise(hws,data,nev,timestamp);
 
       RdKafka::ErrorCode resp =
         producer->produce(topic, partition,
                           RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
-                          (void*)s.get(), s.size(),
+                          (void*)serialiser.get(), serialiser.size(),
                           NULL, NULL);
 
       
-      std::copy(s.get()+0,
-		s.get()+s.size(), 
-		std::ostream_iterator<char>(std::cout, ""));
-      std::cout << "\n";
-
       if (resp != RdKafka::ERR_NO_ERROR)
         throw std::runtime_error("% Produce failed: "+RdKafka::err2str(resp));
       
-      std::cout << "% Produced message (" << s.size() << " bytes)" 
-                << std::endl;
+      // std::cout << "% Produced message (" << serialiser.size() << " bytes)" 
+      //           << std::endl;
     }
 
     template<typename T>

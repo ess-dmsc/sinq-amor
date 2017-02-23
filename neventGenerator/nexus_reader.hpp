@@ -246,6 +246,7 @@ namespace nexus {
             for(int l = 0;l< nCount; ++l) {
               signal[counter] = std::round(tof[k]/10.);
               signal[counter+nEvents] = detID;
+	      counter++;
             }
           }
         }

@@ -12,7 +12,7 @@
 
 namespace control {
 
-  const int default_rate = 10;
+  const uint32_t default_rate = 10;
 
   struct NoControl {
 
@@ -27,7 +27,7 @@ namespace control {
     bool run()   const { return true; }
     bool pause() const { return false; }
     bool stop()  const { return false; }
-    int rate() const   { return default_rate; }
+    uint32_t rate() const   { return default_rate; }
 
     void operator [](const std::string&) const { }    
   };
@@ -45,7 +45,7 @@ namespace control {
     bool run()    { return control["run"] == "run"; }
     bool pause()  { return control["run"] == "pause"; }
     bool stop()   { return control["run"] == "stop"; }
-    int rate()    { return atoi(control["rate"].c_str()); }
+    uint32_t rate()    { return atoi(control["rate"].c_str()); }
 
     std::string& operator [](std::string key) { return control[key]; }
 
@@ -84,13 +84,13 @@ namespace control {
     bool pause() const { return status == _pau; }
     bool stop() const { return status == _sto; }
 
-    int& rate()    { return _rate; }
+    uint32_t& rate()    { return _rate; }
     void operator [](const std::string&) { }
 
 
   private:
     int status;
-    int _rate;
+    uint32_t _rate;
     std::string s;
     enum  { _run, _pau, _sto };
     
