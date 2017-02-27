@@ -251,8 +251,8 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
           exit(1);
         }
       }
-      conf->set("fetch.message.max.bytes", "1000000000", errstr);
-      conf->set("receive.message.max.bytes", "1000000000", errstr);
+      conf->set("fetch.message.max.bytes", "23100100", errstr);
+      conf->set("receive.message.max.bytes", "23100100", errstr);
       std::cerr << errstr << std::endl;
       
       if(topic_str.empty()) {

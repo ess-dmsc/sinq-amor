@@ -6,6 +6,8 @@
 #include "mcstas_reader.hpp"
 #include "generator.hpp"
 
+#include "parser.hpp"
+
 using StreamFormat = nexus::ESSformat;
 
 typedef nexus::Amor Instrument;
@@ -64,16 +66,13 @@ void helper(Param input) {
             << std::endl;
   
   std::cout << "-a" << "\t" << "area detector source file (mcstas)" << "\n"
-            << "-b" << "\t" << "broker address (when use kafka)" << "\n"
             << "-c" << "\t" << "control file (when use file)" << "\n"
             << "-f" << "\t" << "NeXus file source [default = " << input["filename"] << "\n"
             << "-e" << "\t" << "header template [default = " << input["header"] << "\n"
             << "-i" << "\t" << "configuration file" << "\n"
             << "-m" << "\t" << "data multiplier [default = " << input["multiplier"] << "\n"
-            << "-p" << "\t" << "port used for streaming (kafka,zmq) [default = " << input["port"] << "]\n"
             << "-r" << "\t" << "set generator status to 'run'" << "\n"
             << "-s" << "\t" << "1D detector source file (mcstas)" << "\n"
-            << "-t" << "\t" << "topic name (kafka) [default = " << input["topic"] << "\n"
             << "-h" << "\t" << "this help" << "\n"
             << std::endl;
   exit(0);
@@ -86,34 +85,28 @@ void helper(Param input) {
  *  \date Fri Jun 17 12:20:25 2016
  */
 Param parse(int argc, char **argv) {
-  Param input;
+
   std::string configuration_file("config.in");
-
-  for(int i=0;i<argc;++i) {
-    if(std::string(*(argv+i)) == "-i" ) {
-      if( (*(argv+i+1))[0] == '-' ) {
-        throw std::runtime_error("Bad parameter for configuration file.");
-      }
-      else {
-        configuration_file=std::string( *(argv+i+1) );
-        std::cout << configuration_file << std::endl;
-      }
-      break;
-    }
-  }
-
+  Param input;
   input.read(configuration_file,uparam::RapidJSON());
   input["status"] = "pause";
 
+  parser::Parser::Param p;
+  {
+    parser::Parser parser;
+    parser.init(std::string(argv[1]));
+    p=parser.get();
+  }
+  if( p["host"] != "" )  input["brokers"]=p["host"];
+  if( p["port"] != "" )  input["port"]=p["port"];
+  if( p["topic"] != "" ) input["topic"]=p["topic"];
+
   opterr = 0;
   int opt;
-  while ((opt = getopt (argc, argv, "a:b:c:f:p:s:t:e:m:rh")) != -1) {
+  while ((opt = getopt (argc, argv, "a:c:f:s:e:m:rh")) != -1) {
     switch (opt) {
     case 'a': //area
       input["2D"] = std::string(optarg);
-      break;
-    case 'b':
-      input["brokers"] = std::string(optarg);
       break;
     case 'c':
       input["control"] = std::string(optarg);
@@ -121,14 +114,8 @@ Param parse(int argc, char **argv) {
     case 'f':
       input["filename"] = std::string(optarg);
       break;
-    case 'p':
-      input["port"] = std::string(optarg);
-      break;
     case 's': // single dimension detector
       input["1D"] = std::string(optarg);
-      break;
-    case 't':
-      input["topic"] = std::string(optarg);
       break;
     case 'e':
       input["header"] = std::string(optarg);
@@ -143,6 +130,8 @@ Param parse(int argc, char **argv) {
       helper(input);
     }
   }
+
+
 
   return std::move(input);
 }

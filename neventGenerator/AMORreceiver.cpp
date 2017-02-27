@@ -5,6 +5,7 @@
 #include "nexus_reader.hpp"
 #include "mcstas_reader.hpp"
 #include "generator.hpp"
+#include "parser.hpp"
 
 typedef nexus::Amor Instrument;
 typedef nexus::NeXusSource<Instrument,nexus::PSIformat> Source;
@@ -51,15 +52,22 @@ Param parse(int argc, char **argv) {
   // default values
   input.read("config.in",uparam::RapidJSON());
 
+  parser::Parser::Param p;
+  {
+    parser::Parser parser;
+    parser.init(std::string(argv[1]));
+    p=parser.get();
+  }
+  if( p["host"] != "" )  input["brokers"]=p["host"];
+  if( p["port"] != "" )  input["port"]=p["port"];
+  if( p["topic"] != "" ) input["topic"]=p["topic"];
+
   opterr = 0;
   int opt;
-  while ((opt = getopt (argc, argv, "a:b:c:f:p:s:t:e:o:")) != -1) {
+  while ((opt = getopt (argc, argv, "a:c:f:s:e:o:")) != -1) {
     switch (opt) {
     case 'a': //area
       input["2D"] = std::string(optarg);
-      break;
-    case 'b':
-      input["brokers"] = std::string(optarg);
       break;
     case 'c':
       input["control"] = std::string(optarg);
@@ -67,14 +75,8 @@ Param parse(int argc, char **argv) {
     case 'f':
       input["filename"] = std::string(optarg);
       break;
-    case 'p':
-      input["port"] = std::string(optarg);
-      break;
     case 's': // single dimension detector
       input["1D"] = std::string(optarg);
-      break;
-    case 't':
-      input["topic"] = std::string(optarg);
       break;
     case 'e':
       input["header"] = std::string(optarg);
