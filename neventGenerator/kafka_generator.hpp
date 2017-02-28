@@ -130,23 +130,17 @@ namespace generator {
 
     template<typename T>
     void send(hws::HWstatus& hws, T* data, int nev, serialiser::FlatBufSerialiser<T> serialiser) {
-
-      uint32_t timestamp= 123456;
-      serialiser.serialise(hws,data,nev,timestamp);
+      serialiser.serialise(hws,data,nev,hws.system_time);
 
       RdKafka::ErrorCode resp =
         producer->produce(topic, partition,
                           RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
                           (void*)serialiser.get(), serialiser.size(),
                           NULL, NULL);
-
-      
       if (resp != RdKafka::ERR_NO_ERROR)
         throw std::runtime_error("% Produce failed: "+RdKafka::err2str(resp));
-      
-      // std::cout << "% Produced message (" << serialiser.size() << " bytes)" 
-      //           << std::endl;
     }
+
 
     template<typename T>
     void send(hws::HWstatus& hws, T* data, int nev, serialiser::NoSerialiser<T>) {

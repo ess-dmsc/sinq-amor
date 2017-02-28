@@ -100,6 +100,7 @@ private:
 
     while(!control.stop()) {
 
+      hws.system_time = clock();
       if(control.run()) {
 	streamer.send(hws,stream,nev,serialiser);
       	++count;

@@ -46,6 +46,7 @@ namespace serialiser {
       data.resize(event->data()->size());
       std::copy(event->data()->begin(),event->data()->end(),data.begin());
       hwstat.pid = event->pid();
+      std::cout << event->timestamp() << std::endl;
       return;
     }
 
