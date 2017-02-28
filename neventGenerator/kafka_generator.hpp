@@ -13,8 +13,6 @@
 #include "uparam.hpp"
 #include "header.hpp"
 
-#include "hardware.hpp"
-
 namespace generator {
 
   enum {transmitter,receiver};
@@ -28,9 +26,6 @@ namespace generator {
   struct KafkaGen {
   
     KafkaGen(uparam::Param p) : brokers(p["brokers"]), topic_str(p["topic"]) {
-      /*! @param p see uparam::Param for description. Must contain "brokers" and "topic" key-value */
-      /*! Connects to the "broker" clients of the Kafka messaging system. Streams data to the "topic" topic.
-       */
       conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
       tconf = RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC);
 
@@ -41,7 +36,6 @@ namespace generator {
           exit(1);
         }
       }
-                                       
       conf->set("message.max.bytes", "23100100", errstr);
       std::cerr << errstr << std::endl;
 
@@ -49,14 +43,11 @@ namespace generator {
         std::cerr << "Topic not set" << std::endl;
         exit(1);
       }
-      
       producer = RdKafka::Producer::create(conf, errstr);
       if (!producer) {
         std::cerr << "Failed to create producer: " << errstr << std::endl;
         exit(1);
       }
-      //      std::cout << "% Created producer " << producer->name() << std::endl;
-      
       topic = RdKafka::Topic::create(producer, topic_str,
                                      tconf, errstr);
       if (!topic) {
@@ -67,9 +58,6 @@ namespace generator {
 
     template<typename T>
     void send(T* data,const int size, const int flag = 0) {
-      /*! @param data data to be sent
-       *  @param size number of elements
-       *  @param flag optional flag (unused) */
       RdKafka::ErrorCode resp =
         producer->produce(topic, partition,
                           RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
@@ -127,10 +115,11 @@ namespace generator {
       //           << std::endl;
     }
 
-
+    
     template<typename T>
-    void send(hws::HWstatus& hws, T* data, int nev, serialiser::FlatBufSerialiser<T> serialiser) {
-      serialiser.serialise(hws,data,nev,hws.system_time);
+    void send(const uint64_t& pid, const uint64_t& timestamp, T* data, int nev,
+              serialiser::FlatBufSerialiser<T> serialiser) {
+      serialiser.serialise(pid,timestamp,data,nev);
 
       RdKafka::ErrorCode resp =
         producer->produce(topic, partition,
@@ -143,32 +132,12 @@ namespace generator {
 
 
     template<typename T>
-    void send(hws::HWstatus& hws, T* data, int nev, serialiser::NoSerialiser<T>) {
-      
-      std::string header = hws.to_string(nev,1234);
-      RdKafka::ErrorCode resp =
-        producer->produce(topic, partition,
-                          RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
-                          (void*)&header[0], header.size(),
-                          NULL, NULL);
-      if (resp != RdKafka::ERR_NO_ERROR)
-        throw std::runtime_error("% Produce failed: "+RdKafka::err2str(resp));
-      if( nev > 0 ) {
-        RdKafka::ErrorCode resp =
-          producer->produce(topic, partition,
-                            RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
-                            (void*)data, nev*sizeof(T),
-                            NULL, NULL);
-        if (resp != RdKafka::ERR_NO_ERROR)
-          throw std::runtime_error("% Produce failed: "+RdKafka::err2str(resp));
-      }
-      
-      std::cerr << "% Produced message (" << header.size()+sizeof(T)*nev 
-                << " bytes)" 
-                << std::endl;
+    void send(const uint64_t& pid, const uint64_t& timestamp, T* data, int nev,
+              serialiser::NoSerialiser<T>) {
+      std::string header = std::string("{pid:")+std::to_string(pid)+
+        ",ts:"+std::to_string(timestamp)+" }";
+      send(header, data, nev, serialiser::NoSerialiser<T>());
     }
-    
-    
     
   private:
     std::string brokers;
@@ -176,7 +145,7 @@ namespace generator {
     std::string errstr;
     std::string debug;
     
-int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
+    int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
     int64_t start_offset = RdKafka::Topic::OFFSET_BEGINNING;
     
     RdKafka::Conf *conf;
@@ -187,43 +156,7 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
   };
 
 
-  
-  std::pair<int,int> consume_header(RdKafka::Message* message, void* opaque) {
-    // std::cout << "Read msg at offset " << message->offset() << std::endl;
-    opaque = message->payload();
-    std::copy(static_cast<char*>(message->payload()),
-              static_cast<char*>(message->payload())+message->len(),
-              static_cast<char*>(opaque));
-    return parse_header(std::string(static_cast<char*>(message->payload()) ));
-  }
-  
-  template<typename T>
-  void consume_data(RdKafka::Message* message, void* opaque) {
-    
-    // std::cout << "Len: " << message->len() << "\n";
-    // std::cout << "Do something with data..." << std::endl;
-    
-    //    opaque = message->payload();    
-    return;
-  }
-
-  template<typename T>
-  std::pair<int,int> consume_serialised(RdKafka::Message* message, 
-                                        void* opaque,
-                                        serialiser::FlatBufSerialiser<T>) {
-    std::pair<int,int> result;
-    serialiser::FlatBufSerialiser<T> s;
-    std::vector<T> data;
-    s.extract(reinterpret_cast<const char*>(message->payload()), result.first, data);
-    std::copy(data.begin(),data.end(),reinterpret_cast<T*>(opaque));
-
-    // std::cout << "Len: " << message->len() << "\n";
-    // std::cout << "Do something with data..." << std::endl;
-    
-    //    opaque = message->payload();    
-    return result;
-  }
-
+ 
 
 
 
@@ -232,12 +165,8 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
     static const int max_header_size=10000;
     
     KafkaListener(uparam::Param p) : brokers(p["brokers"]), topic_str(p["topic"]) {
-      /*! @param p see uparam::Param for description. Must contain "brokers" and "topic" key-value */
-      /*! Connects to the "broker" clients of the Kafka messaging system. Streams data to the "topic" topic.
-       */
       conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
       tconf = RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC);
-      
       conf->set("metadata.broker.list", brokers, errstr);
       if (!debug.empty()) {
         if (conf->set("debug", debug, errstr) != RdKafka::Conf::CONF_OK) {
@@ -253,14 +182,11 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
         std::cerr << "Topic required." << std::endl;
         exit(1);
       }
-      
       consumer = RdKafka::Consumer::create(conf, errstr);
       if (!consumer) {
         std::cerr << "Failed to create consumer: " << errstr << std::endl;
         exit(1);
       }
-      // std::cout << "% Created consumer " << consumer->name() << std::endl;
-      
       topic = RdKafka::Topic::create(consumer, topic_str,
                                      tconf, errstr);
       if (!topic) {
@@ -268,27 +194,18 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
         exit(1);
       }
       
-      /*
-       * Start consumer for topic+partition at start offset
-       */
       RdKafka::ErrorCode resp = consumer->start(topic, partition, start_offset);
       if (resp != RdKafka::ERR_NO_ERROR) {
         std::cerr << "Failed to start consumer: " <<
           RdKafka::err2str(resp) << std::endl;
         exit(1);
-      }
-      
+      }      
     }
 
 
     template<typename T>
     int recv(std::string& h, std::vector<T>& data, serialiser::NoSerialiser<T>) {
       void* value; 
-      int use_ccb = 1;
-
-      /*
-       * Consume messages
-       */
       std::pair<int,int> result;
       RdKafka::Message *msg = nullptr;
       do {
@@ -296,18 +213,13 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
       } while (  msg->err() != RdKafka::ERR_NO_ERROR );
       result = consume_header(msg, static_cast<void*>(&h[0]));
       h = std::string(static_cast<char*>(msg->payload()));
-      std::cout << h << std::endl;
-      
       if(result.second > 0) {
         msg = consumer->consume(topic, partition, 10000);
         if(msg->err() != RdKafka::ERR_NO_ERROR )
           std::cerr << "expected event data" << std::endl;
         consume_data<T>(msg,value);
       }
-
       delete msg;
-
-
       return result.first;
     }
     
@@ -315,13 +227,7 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
 
     template<typename T>
     int  recv(std::string& h, std::vector<T>& data, serialiser::FlatBufSerialiser<T>) {
-
       void* value; 
-      int use_ccb = 1;
-
-      /*
-       * Consume messages
-       */
       std::pair<int,int> result;
       RdKafka::Message *msg = nullptr;
       do {
@@ -334,41 +240,33 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
 
 
     template<typename T>
-    std::pair<uint64_t,uint64_t> recv(hws::HWstatus& hws,
-                                      std::vector<T>& data,
+    std::pair<uint64_t,uint64_t> recv(std::vector<T>& data,
                                       serialiser::NoSerialiser<T>) {
       return std::pair<uint64_t,uint64_t>(0,0);
     }
 
     template<typename T>
-    std::pair<uint64_t,uint64_t> recv(hws::HWstatus& hws,
-                                      std::vector<T>& data,
+    std::pair<uint64_t,uint64_t> recv(std::vector<T>& data,
                                       serialiser::FlatBufSerialiser<T>) {
 
       std::pair<int,int> result;
       RdKafka::Message *msg = nullptr;
       uint8_t rcv_stat = RdKafka::ERR_NO_ERROR;
       serialiser::FlatBufSerialiser<T> s;
-      
+
       do {
         msg = consumer->consume(topic, partition, 1000);
         rcv_stat = msg->err();
         if( rcv_stat != RdKafka::ERR_NO_ERROR) {
-          // if( (rcv_stat != RdKafka::ERR_NO_ERROR) &&
-          //     (rcv_stat != RdKafka::ERR__MSG_TIMED_OUT ) &&
-          //     rcv_stat == RdKafka::ERR_NO_ERROR ) {
           std::cerr << "message error: " << RdKafka::err2str(msg->err()) << std::endl;
 	}
       } while (  msg->err() != RdKafka::ERR_NO_ERROR );
 
-
-      s.extract(reinterpret_cast<const char*>(msg->payload()),data,hws);
-      
-      return std::pair<uint64_t,uint64_t>(hws.pid, msg->len());
+      uint64_t pid = -1, timestamp = -1;
+      s.extract(reinterpret_cast<const char*>(msg->payload()),data,pid,timestamp);
+      return std::pair<uint64_t,uint64_t>(pid, msg->len());
     }
 
-
-    //    int& pid;
   private:
 
     std::string brokers;
@@ -383,7 +281,34 @@ int32_t partition = 0;//RdKafka::Topic::PARTITION_UA;
     RdKafka::Conf *tconf;
     RdKafka::Consumer *consumer;
     RdKafka::Topic *topic;
-  
+
+
+    std::pair<int,int> consume_header(RdKafka::Message* message, void* opaque) {
+      opaque = message->payload();
+      std::copy(static_cast<char*>(message->payload()),
+                static_cast<char*>(message->payload())+message->len(),
+                static_cast<char*>(opaque));
+      return parse_header(std::string(static_cast<char*>(message->payload()) ));
+    }
+    
+    template<typename T>
+    void consume_data(RdKafka::Message* message, void* opaque) {  
+      return;
+    }
+
+    template<typename T>
+    std::pair<int,int> consume_serialised(RdKafka::Message* message, 
+                                          void* opaque,
+                                          serialiser::FlatBufSerialiser<T>) {
+      std::pair<int,int> result;
+      serialiser::FlatBufSerialiser<T> s;
+      std::vector<T> data;
+      s.extract(reinterpret_cast<const char*>(message->payload()), result.first, data);
+      std::copy(data.begin(),data.end(),reinterpret_cast<T*>(opaque));
+      
+      return result;
+    }
+
   };
 
 

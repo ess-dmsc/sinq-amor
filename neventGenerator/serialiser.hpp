@@ -7,7 +7,6 @@
 #include <type_traits>
 #include <iterator>
 
-#include "hardware.hpp"
 #include "amo0_psi_sinq_schema_generated.h"
 
 namespace serialiser {
@@ -19,15 +18,15 @@ namespace serialiser {
     typedef std::true_type is_serialised;
     FlatBufSerialiser() { }
 
-    std::vector<char>& serialise(hws::HWstatus& hwstat, T* value = NULL, int nev = 0, const T timestamp=0) {
+    std::vector<char>& serialise(const int& pid, const int& timestamp, T* value = NULL, int nev = 0) {
       flatbuffers::FlatBufferBuilder builder;
       auto htype = builder.CreateString("AMOR.event.stream");
       auto data = builder.CreateVector(value,nev);
       auto event = BrightnESS::EventGenerator::FlatBufs::AMOR::CreateEvent(builder,
     									   htype,
     									   timestamp,
-    									   hwstat.system_time,
-    									   hwstat.pid,
+    									   timestamp, // actually system_time
+    									   pid,
     									   data);  
       FinishEventBuffer(builder,event);
       buffer.assign(builder.GetBufferPointer(),
@@ -40,13 +39,13 @@ namespace serialiser {
 
     void extract(const char* msg,
                  std::vector<T>& data,
-                 hws::HWstatus& hwstat) {
-      auto event = BrightnESS::EventGenerator::FlatBufs::AMOR::GetEvent(reinterpret_cast<const void*>(msg));
-
+                 uint64_t& pid,
+                 uint64_t &timestamp) {
+      auto event = BrightnESS::EventGenerator::FlatBufs::AMOR::GetEvent(static_cast<const void*>(msg));
       data.resize(event->data()->size());
       std::copy(event->data()->begin(),event->data()->end(),data.begin());
-      hwstat.pid = event->pid();
-      std::cout << event->timestamp() << std::endl;
+      pid = event->pid();
+      timestamp = event->ts();
       return;
     }
 
@@ -57,25 +56,6 @@ namespace serialiser {
   };
 
 
-// ///  \author Michele Brambilla <mib.mic@gmail.com>
-// ///  \date Thu Aug 04 09:34:56 2016
-//   template<typename T>
-//   struct jSONSerialiser {
-//     typedef std::true_type is_serialised;
-    
-//     jSONSerialiser() : buf(nulptr) { };
-//     jSONSerialiser(hws::HWstatus&, T* = NULL, int =0, const T =0) { }
-//     char* get() { return reinterpret_cast<char*>(NULL); }
-    
-//     const int size() { return _size; }
-
-//   private:
-//     const int _size = 0;
-//     const uint8_t *buf;
-
-//   };
-
-
 
 ///  \author Michele Brambilla <mib.mic@gmail.com>
 ///  \date Fri Jun 17 12:22:01 2016
@@ -84,8 +64,7 @@ namespace serialiser {
     typedef std::false_type is_serialised;
     
     NoSerialiser() : buf(nullptr) { };
-    NoSerialiser(hws::HWstatus&, T* = nullptr, int =0, const T =0) { }
-    char* get() { return reinterpret_cast<char*>(nullptr); }
+    char* get() { return nullptr; }
     
     const int size() { return _size; }
 
