@@ -251,13 +251,15 @@ namespace generator {
 
       std::pair<int,int> result;
       RdKafka::Message *msg = nullptr;
-      uint8_t rcv_stat = RdKafka::ERR_NO_ERROR;
+      auto rcv_stat = RdKafka::ERR_NO_ERROR;
       serialiser::FlatBufSerialiser<T> s;
 
       do {
         msg = consumer->consume(topic, partition, 1000);
         rcv_stat = msg->err();
-        if( rcv_stat != RdKafka::ERR_NO_ERROR) {
+        if( (rcv_stat != RdKafka::ERR_NO_ERROR) &&
+            (rcv_stat != RdKafka::ERR__TIMED_OUT) &&
+            (rcv_stat != RdKafka::ERR__PARTITION_EOF) ) {
           std::cerr << "message error: " << RdKafka::err2str(msg->err()) << std::endl;
 	}
       } while (  msg->err() != RdKafka::ERR_NO_ERROR );
