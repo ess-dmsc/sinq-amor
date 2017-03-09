@@ -23,25 +23,44 @@ message(STATUS flatc: ${path_flatc})
 set(flatbuffers_schemata
   amo0_psi_sinq_schema
 )
-set(flatbuffers_generated_headers "")
+
+message(STATUS "ENV{streaming_data_types_dir}: $ENV{streaming_data_types_dir}")
+find_path(path_include_streaming_data_types NAMES schemas/amo0_psi_sinq.fbs PATHS
+$ENV{streaming_data_types_dir}
+"${CMAKE_CURRENT_SOURCE_DIR}/../../streaming-data-types"
+)
+message(STATUS "path_include_streaming_data_types: ${path_include_streaming_data_types}")
+
+
+set(schemas_subdir "schemas")
+set(head_out_dir "${CMAKE_CURRENT_BINARY_DIR}/${schemas_subdir}")
+file(MAKE_DIRECTORY ${head_out_dir})
+file(GLOB_RECURSE flatbuffers_schemata RELATIVE "${path_include_streaming_data_types}/schemas" "${path_include_streaming_data_types}/schemas/*.fbs")
+
+
+message(STATUS)
+
+message(STATUS "schema list: ${flatbuffers_schemata}")
 foreach (f ${flatbuffers_schemata})
-  set(fbs "${PROJECT_SOURCE_DIR}/sample/${f}.fbs")
-  set(fbh "${f}_generated.h")
-  message(STATUS ${fbs})
-  message(STATUS ${fbh})
-#  message(STATUS ${})
+  string(REGEX REPLACE "\\.fbs$" "" s0 ${f})
+  set(fbs "${s0}.fbs")
+  set(fbh "${s0}_generated.h")
+  message(STATUS "fbs: ${fbs}")
+  message(STATUS "fbh: ${fbh}")
+
   add_custom_command(
-    OUTPUT ${fbh}
-    COMMAND "${path_flatc}/flatc" --cpp "${fbs}"
-    DEPENDS "${fbs}"
-    COMMENT "Process ${fbs} using ${path_flatc}/flatc"
+    OUTPUT "${head_out_dir}/${fbh}"
+    COMMAND ${path_flatc}/flatc --cpp --gen-mutable --gen-name-strings --scoped-enums "${path_include_streaming_data_types}/schemas/${fbs}"
+    DEPENDS "${path_include_streaming_data_types}/schemas/${fbs}"
+    WORKING_DIRECTORY "${head_out_dir}"
+    COMMENT "Process ${fbs} using ${flatc}"
+    message(STATUS "Process ${fbs} using ${flatc}")
     )
-  list(APPEND flatbuffers_generated_headers "${fbh}")
-  message(STATUS flatbuffers_generated_headers:${flatbuffers_generated_headers})
+  list(APPEND flatbuffers_generated_headers "${head_out_dir}/${fbh}")
 
 endforeach()
 add_custom_target(flatbuffers_generate ALL DEPENDS ${flatbuffers_generated_headers})
-
+message(STATUS)
 
 
 #rapidjson
@@ -49,14 +68,7 @@ find_path(path_include_rapidjson NAMES rapidjson/document.h PATHS
  "$ENV{rapidjson_dir}/include"
  /opt/local/rapidjson.git/include
 )
-#find_library(path_lib_rapidjson NAMES librapidjson PATHS
-#"$ENV{rapidjson_dir}/lib"
-# /opt/local/rapidjson.git/lib
-#)
 message(STATUS rapidjson_inc: ${path_include_rapidjson})
-#message(STATUS ${path_lib_rapidjson})
-#add_library(librapidjson SHARED IMPORTED)
-#set_property(TARGET librapidjson PROPERTY IMPORTED_LOCATION ${path_lib_rapidjson})
 
 #0mq
 find_path(path_include_zmq NAMES zmq.h PATHS

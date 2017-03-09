@@ -43,8 +43,8 @@ int main(int argc, char **argv) {
    
   Generator<Communication,Control,Serialiser> g(input);
 
-  std::cout << stream.count() << std::endl;
-  g.run(&(stream.begin()[0]),stream.count());
+  int n_events = stream.count()/2;
+  g.run(&(stream.begin()[0]),n_events);
 
   return 0;
 }

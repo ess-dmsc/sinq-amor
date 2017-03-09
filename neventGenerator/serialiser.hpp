@@ -7,7 +7,8 @@
 #include <type_traits>
 #include <iterator>
 
-#include "amo0_psi_sinq_schema_generated.h"
+#include "schemas/amo0_psi_sinq_generated.h"
+
 
 namespace serialiser {
 
@@ -18,17 +19,22 @@ namespace serialiser {
     typedef std::true_type is_serialised;
     FlatBufSerialiser() { }
 
-    std::vector<char>& serialise(const int& pid, const int& timestamp, T* value = NULL, int nev = 0) {
+    std::vector<char>& serialise(const int& message_id, 
+				 const int& pulse_time, 
+				 T* value = NULL, 
+				 int nev = 0) {
+
       flatbuffers::FlatBufferBuilder builder;
-      auto htype = builder.CreateString("AMOR.event.stream");
-      auto data = builder.CreateVector(value,nev);
-      auto event = BrightnESS::EventGenerator::FlatBufs::AMOR::CreateEvent(builder,
-    									   htype,
-    									   timestamp,
-    									   timestamp, // actually system_time
-    									   pid,
-    									   data);  
-      FinishEventBuffer(builder,event);
+      auto source_name = builder.CreateString("AMOR.event.stream");
+      auto time_of_flight = builder.CreateVector(value,nev);
+      auto detector_id = builder.CreateVector(value+nev,nev);
+      auto event = CreateEventMessage(builder,
+				      source_name,
+				      message_id,
+				      pulse_time,
+				      time_of_flight,
+				      detector_id);
+      FinishEventMessageBuffer(builder,event);
       buffer.assign(builder.GetBufferPointer(),
 		    builder.GetBufferPointer()+builder.GetSize());
       return buffer;
@@ -41,11 +47,13 @@ namespace serialiser {
                  std::vector<T>& data,
                  uint64_t& pid,
                  uint64_t &timestamp) {
-      auto event = BrightnESS::EventGenerator::FlatBufs::AMOR::GetEvent(static_cast<const void*>(msg));
-      data.resize(event->data()->size());
-      std::copy(event->data()->begin(),event->data()->end(),data.begin());
-      pid = event->pid();
-      timestamp = event->ts();
+      auto event = GetEventMessage(static_cast<const void*>(msg));
+      data.resize(2*event->time_of_flight()->size());
+      std::copy(event->time_of_flight()->begin(),event->time_of_flight()->end(),data.begin());
+      std::copy(event->detector_id()->begin(),event->detector_id()->end(),
+		data.begin()+event->time_of_flight()->size());
+      pid = event->message_id();
+      timestamp = event->pulse_time();
       return;
     }
 
