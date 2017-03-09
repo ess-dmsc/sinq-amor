@@ -3,7 +3,7 @@
     "control" : "control.in",
     "topic" : "test_0",
     "brokers" : "ess01.psi.ch",
-    "filename" : "sample/amor2015n001774.hdf",
+    "filename" : "files/amor2015n001774.hdf",
     "header" : "header.amor",
     "multiplier" : "1",
     "rate" : "10"

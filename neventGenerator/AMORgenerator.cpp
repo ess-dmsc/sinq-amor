@@ -61,7 +61,7 @@ void helper(Param input) {
             << std::endl;
 
   std::cout << "Usage example:\n"
-            << "[0MQ]\t./AMORgenerator -p 1234 -f sample/amor2015n001774.hdf\n"
+            << "[0MQ]\t./AMORgenerator -p 1234 -f files/amor2015n001774.hdf\n"
             << "[kafka]\t./AMORgenerator -b ess01 -t test_0\n"
             << std::endl;
   
