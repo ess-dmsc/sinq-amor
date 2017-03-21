@@ -116,8 +116,7 @@ add_library(librdkafka++ SHARED IMPORTED)
 set_property(TARGET librdkafka++ PROPERTY IMPORTED_LOCATION ${path_lib_rdkafka++})
 
 #nexus
-find_path(path_include_nexus NAMES napi.h PATHS
-  "$ENV{nexus_dir}/include/nexus"
+find_path(path_include_nexus NAMES nexus/napi.h PATHS
   "$ENV{nexus_dir}/include"
 )
 find_library(path_lib_nexus NAMES NeXus PATHS
@@ -165,6 +164,7 @@ include_directories(
   ${path_include_rapidjson}
   ${path_include_zmq}
   ${path_include_hdf5}
+  ${path_include_nexus}
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
