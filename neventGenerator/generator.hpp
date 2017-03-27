@@ -14,7 +14,10 @@
 #include <stdlib.h>
 #include <time.h>
 
+#if HAVE_ZMQ
 #include "zmq_generator.hpp"
+#endif
+
 #include "kafka_generator.hpp"
 #include "file_writer.hpp"
 

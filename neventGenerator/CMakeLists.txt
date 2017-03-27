@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.8)
 set(PROJECT_NAME_STR neventGenerator)
 project(${PROJECT_NAME_STR} CXX)
 
-set (CMAKE_CXX_FLAGS "-std=c++11 -pthread  -D_GLIBCXX_USE_NANOSLEEP ${CMAKE_CXX_FLAGS}")
+set (CMAKE_CXX_FLAGS "-std=c++11 -pthread -D_GLIBCXX_USE_NANOSLEEP ${CMAKE_CXX_FLAGS}")
 
 add_custom_target(
   extern_lib
@@ -71,27 +71,34 @@ find_path(path_include_rapidjson NAMES rapidjson/document.h PATHS
 message(STATUS rapidjson_inc: ${path_include_rapidjson})
 
 #0mq
-find_path(path_include_zmq NAMES zmq.h PATHS
- "$ENV{zmq_dir}/include"
-)
-find_library(path_lib_zmq NAMES zmq PATHS
-"$ENV{zmq_dir}/lib"
-)
-message(STATUS zmq_inc: ${path_include_zmq})
-message(STATUS zmq_lib: ${path_lib_zmq} )
+option(HAVE_0MQ "Enable 0MQ" FALSE)
+if(${HAVE_0MQ})
+  find_path(path_include_zmq NAMES zmq.h PATHS
+    "$ENV{zmq_dir}/include"
+    )
+  find_library(path_lib_zmq NAMES zmq PATHS
+    "$ENV{zmq_dir}/lib"
+    )
+  message(STATUS zmq_inc: ${path_include_zmq})
+  message(STATUS zmq_lib: ${path_lib_zmq} )
+  add_library(libzmq SHARED IMPORTED)
+  set_property(TARGET libzmq PROPERTY IMPORTED_LOCATION ${path_lib_zmq})
 
-add_library(libzmq SHARED IMPORTED)
-set_property(TARGET libzmq PROPERTY IMPORTED_LOCATION ${path_lib_zmq})
+  #libsodium
+  find_library(path_lib_sodium NAMES sodium PATHS
+    "$ENV{zmq_dir}/lib"
+    )
+  message(STATUS sodium_lib: ${path_lib_sodium} )
+  add_library(libsodium SHARED IMPORTED)
+  set_property(TARGET libsodium PROPERTY IMPORTED_LOCATION ${path_lib_sodium})
 
-#libsodium
-find_library(path_lib_sodium NAMES sodium PATHS
-"$ENV{zmq_dir}/lib"
-)
-message(STATUS sodium_lib: ${path_lib_sodium} )
-
-add_library(libsodium SHARED IMPORTED)
-set_property(TARGET libsodium PROPERTY IMPORTED_LOCATION ${path_lib_sodium})
-
+include_directories(
+  ${path_include_zmq}
+  )
+link_libraries(libzmq libsodium)
+else()
+  message(STATUS "Build without 0MQ support")
+endif()
 
 #rdkafka
 find_path(path_include_rdkafka NAMES librdkafka/rdkafka.h PATHS
@@ -136,16 +143,10 @@ find_path(path_include_hdf5 NAMES hdf5.h PATHS
 find_library(path_lib_hdf5 NAMES hdf5-shared PATHS
   "$ENV{hdf5_dir}/lib"
   )
-#find_library(path_lib_hdf5cpp NAMES hdf5_cpp-shared PATHS
-#  "$ENV{hdf5_dir}/lib"
-#  )
 if( NOT path_lib_hdf5 )
   find_library(path_lib_hdf5 NAMES hdf5 PATHS
   "$ENV{hdf5_dir}/lib"
   )
-#  find_library(path_lib_hdf5cpp NAMES hdf5_cpp PATHS
-#    "$ENV{hdf5_dir}/lib"
-#    )
 endif()
 
 message(STATUS hdf5_inc: ${path_include_hdf5})
@@ -154,30 +155,35 @@ message(STATUS hdf5_lib: ${path_lib_hdf5})
 add_library(libhdf5 SHARED IMPORTED)
 set_property(TARGET libhdf5 PROPERTY IMPORTED_LOCATION ${path_lib_hdf5})
 
-#add_library(libhdf5cpp SHARED IMPORTED)
-#set_property(TARGET libhdf5cpp PROPERTY IMPORTED_LOCATION ${path_lib_hdf5cpp})
-
-
 include_directories(
   ${path_include_rdkafka}
   ${path_include_flatbuffers}
   ${path_include_rapidjson}
-  ${path_include_zmq}
   ${path_include_hdf5}
   ${path_include_nexus}
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
+
 link_libraries(librdkafka
   librdkafka++
-  libzmq
-  libsodium
 )
 
 add_executable(AMORgenerator AMORgenerator.cpp)
 add_executable(AMORreceiver AMORreceiver.cpp)
 target_link_libraries (AMORgenerator libNeXus libhdf5)
-#target_link_libraries (AMORreceiver)
 
 add_dependencies(AMORgenerator flatbuffers_generate)
 add_dependencies(AMORreceiver flatbuffers_generate)
+
+
+if(NOT ${CMAKE_INSTALL_PREFIX} EQUAL "")
+  message(STATUS "Files will be installed in : " ${CMAKE_INSTALL_PREFIX})
+  install(TARGETS AMORgenerator RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
+  install(FILES config.in DESTINATION ${CMAKE_INSTALL_PREFIX})
+  install(FILES files/amor2015n001774.hdf DESTINATION ${CMAKE_INSTALL_PREFIX}/files)
+else()
+  install(TARGETS AMORgenerator RUNTIME DESTINATION /opt/amor/simfiles)
+  install(FILES config.in DESTINATION ${CMAKE_INSTALL_PREFIX})
+  install(FILES files/amor2015n001774.hdf DESTINATION ${CMAKE_INSTALL_PREFIX}/files)
+endif()

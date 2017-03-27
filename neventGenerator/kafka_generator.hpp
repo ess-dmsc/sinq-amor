@@ -7,6 +7,9 @@
 
 #include <assert.h>
 
+extern "C" {
+    #include <librdkafka/rdkafka.h>
+}
 #include <librdkafka/rdkafkacpp.h>
 
 #include "serialiser.hpp"
