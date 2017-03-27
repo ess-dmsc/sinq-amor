@@ -1,18 +1,3 @@
-- stat: path=/usr/lib64/libsodium.so
-  register: st
-  
-- name: Install libsodium
-  become: yes
-  become_method: sudo
-  yum: name=libsodium.x86_64 state=present
-  when: not st.stat.exists
-  
-- name: Create link
-  become: yes
-  become_method: sudo
-  file: src=/usr/lib64/libsodium.so.13 dest=/usr/lib64/libsodium.so state=link
-  when: not st.stat.exists
-  
 - stat: path="{{ generator_home }}"
   register: generator_dir
 
@@ -22,47 +7,23 @@
   file: path="{{ generator_home }}" state=directory
   when: not generator_dir.stat.exists
 
-- stat: path="{{ generator_home }}/sample"
-  register: st
-
-- name: Create generator_home/sample folder
-  become: yes
-  become_method: sudo
-  file: path="{{ generator_home }}/sample" state=directory
-  when: not st.stat.exists
-
 - name: Clone generator from repository
   git: repo="{{ generator_src }}" dest=/tmp/neventGenerator force=yes accept_hostkey=yes
 
 - name: Create build folder
   file: path=/tmp/neventGenerator/neventGenerator/build state=directory
   
-- name: Compile generator
-  shell: cmake -DRDKAFKA_DIR=/usr/local -DNEXUS_DIR=/usr -DFLATBUFFERS_DIR=/usr/local/lib64 ../ && make chdir=/tmp/neventGenerator/neventGenerator/build
-  
-- name: Copy files to execution folder
-  become: yes
-  become_method: sudo
-  copy: src="/tmp/neventGenerator/neventGenerator/{{ item }}" dest="{{ generator_home }}" remote_src=yes
-  with_items:
-    - build/AMORgenerator
-    - header.in
-    - el737counter.py
-    - header.amor
-    
-- name: Copy files to sample subfolder
-  become: yes
-  become_method: sudo
-  copy: src="/tmp/neventGenerator/neventGenerator/{{ item }}" dest="{{ generator_home }}/{{ item }}" remote_src=yes
-  with_items:
-    - sample/amor2015n001774.hdf
+- name: Configure installation
+  shell: cmake -DCMAKE_INSTALL_PREFIX=/opt/amor/simfiles ../ chdir=/tmp/neventGenerator/neventGenerator/build 
 
-- name: Copy config files
+- name: Compile
+  shell: make chdir=/tmp/neventGenerator/neventGenerator/build chdir=/tmp/neventGenerator/neventGenerator/build 
+
+- name: Install
+  shell: make install chdir=/tmp/neventGenerator/neventGenerator/build
   become: yes
-  copy: src="{{ item }}" dest="{{ generator_home }}"
-  with_items:
-    - config.in
-    - control.in
+  become_method: sudo
+
     
 - name: Make generator executable
   become: yes

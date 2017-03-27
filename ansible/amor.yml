@@ -14,7 +14,7 @@
     - epics
     - generator
     - chopper_dornier
-    - forward-epics-to-kafka
+#    - forward-epics-to-kafka
   vars:
     local_download_dir: "/tmp"
     stow_dir: "/opt/stow"
@@ -42,3 +42,4 @@
     local_download_dir: "/tmp"
     stow_dir: "/opt/stow"
     install_dir: "/usr/local"
+    use_zmq: false
