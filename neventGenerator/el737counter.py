@@ -73,7 +73,7 @@ class EL737Controller(LineReceiver):
             l[:0] = ['./AMORgenerator']
             if data.startswith('echo 2'):
                 print l
-                reactor.spawnProcess(self.proc,'./AMORgenerator',args=l,env=os.environ)
+                reactor.spawnProcess(self.proc,'build/./AMORgenerator',args=l,env=os.environ)
                 self.remotestate = 2
                 self.write("\r")
             else:
@@ -123,6 +123,12 @@ class EL737Controller(LineReceiver):
                self.pausestart = time.time()
                self.write('\r')
                self.to_process('pause\r')
+               return
+
+           if data.startswith('rt'):
+               l = data.split()
+               self.to_process('rate\r')
+               self.to_process(l[1])
                return
 
            if data.startswith('co'):
