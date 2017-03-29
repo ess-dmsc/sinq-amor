@@ -31,3 +31,17 @@
   roles:
     - role: kafka
   vars:
+    local_download_dir: "{{local_download_dir}}"
+    stow_dir: "{{stow_dir}}"
+    install_dir: "{{install_dir}}"
+
+- hosts: generator_host
+  tags:
+    - generator
+  roles:
+    - generator
+  vars:
+    local_download_dir: "{{local_download_dir}}"
+    stow_dir: "{{stow_dir}}"
+    install_dir: "{{install_dir}}"
+    use_zmq: false
