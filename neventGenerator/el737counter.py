@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -p
 # 
 # fake SINQ EL737 counter box
 #
@@ -70,13 +70,16 @@ class EL737Controller(LineReceiver):
         if self.remotestate == 1:
             if data.startswith('echo 2'):
                 self.proc = MyPIPE()
-                cmd = ['./AMORgenerator']
+
+                cmd = ['/opt/amor/simfiles/AMORgenerator']
                 l = orig.split()
                 if len(l) < 3:
                     cmd.append("//:/")  # default
                 else:
                     cmd.append(l[2])
-                reactor.spawnProcess(self.proc,'./AMORgenerator',args=cmd,env=os.environ)
+                print cmd
+                
+                reactor.spawnProcess(self.proc,'/opt/amor/simfiles/AMORgenerator',args=cmd,env=os.environ)
                 self.remotestate = 2
                 self.write("\r")
             else:
@@ -255,3 +258,4 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv)
+
