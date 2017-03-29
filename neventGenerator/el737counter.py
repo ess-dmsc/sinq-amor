@@ -78,13 +78,12 @@ class EL737Controller(LineReceiver):
 
                 g.find('./build')
                 print orig.split()[2:]
-            
 #                if not g.validate(orig.split()[2:]):
 #                    self.remotestate = 1
 #                    return
-                
 
                 reactor.spawnProcess(self.proc,g.exe[0],args=orig.split()[2:],env=os.environ)
+
                 self.remotestate = 2
                 self.write("\r")
             else:
