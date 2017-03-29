@@ -14,7 +14,7 @@
   file: path=/tmp/neventGenerator/neventGenerator/build state=directory
   
 - name: Configure installation
-  shell: cmake -DCMAKE_INSTALL_PREFIX=/opt/amor/simfiles ../ chdir=/tmp/neventGenerator/neventGenerator/build 
+  shell: cmake -DCMAKE_INSTALL_PREFIX="{{ generator_home }}" ../ chdir=/tmp/neventGenerator/neventGenerator/build 
 
 - name: Compile
   shell: make chdir=/tmp/neventGenerator/neventGenerator/build chdir=/tmp/neventGenerator/neventGenerator/build 
