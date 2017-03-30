@@ -24,3 +24,8 @@
   template: 
     src: generator.j2 
     dest: /usr/lib/systemd/system/generator.service
+
+- name: install required python modules
+  include: python_modules.yml
+  become: yes
+  become_method: sudo
