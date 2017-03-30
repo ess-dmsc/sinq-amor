@@ -66,6 +66,7 @@ message(STATUS)
 #rapidjson
 find_path(path_include_rapidjson NAMES rapidjson/document.h PATHS
  "$ENV{rapidjson_dir}/include"
+ "${CMAKE_CURRENT_SOURCE_DIR}/rapidjson/include"
  /opt/local/rapidjson.git/include
 )
 message(STATUS rapidjson_inc: ${path_include_rapidjson})
@@ -151,9 +152,10 @@ endif()
 
 message(STATUS hdf5_inc: ${path_include_hdf5})
 message(STATUS hdf5_lib: ${path_lib_hdf5})
-
 add_library(libhdf5 SHARED IMPORTED)
 set_property(TARGET libhdf5 PROPERTY IMPORTED_LOCATION ${path_lib_hdf5})
+
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 include_directories(
   ${path_include_rdkafka}
@@ -163,7 +165,6 @@ include_directories(
   ${path_include_nexus}
   ${CMAKE_CURRENT_BINARY_DIR}
 )
-
 
 link_libraries(librdkafka
   librdkafka++
@@ -175,7 +176,6 @@ target_link_libraries (AMORgenerator libNeXus libhdf5)
 
 add_dependencies(AMORgenerator flatbuffers_generate)
 add_dependencies(AMORreceiver flatbuffers_generate)
-
 
 if(NOT ${CMAKE_INSTALL_PREFIX} EQUAL "")
   message(STATUS "Files will be installed in : " ${CMAKE_INSTALL_PREFIX})

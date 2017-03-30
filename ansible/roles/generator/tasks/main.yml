@@ -5,29 +5,32 @@
 - name: Make sure stow is installed
   include: stow.yml
   
-- name: 0MQ library
+- name: install 0MQ
   include: zmq.yml
   when: use_zmq
 
 - name: checks for files
   include: check.yml
 
-- name: NeXus library
+- name: install NeXus
   include: nexus.yml
   when:
     not lib_nexus.stat.exists
     
-- name: rdkafka library
+- name: install rdkafka
   include: rdkafka.yml
   when:
     not lib_rdkafka.stat.exists
 
-- name: flatbuffers library
+- name: install flatbuffers
   include: flatbuffers.yml 
   when:
     not lib_flatbuffers.stat.exists
-  
-- name: neventGenerator
+
+- name: download streaming data types
+  include: streaming_data_types.yml
+
+- name: install neventGenerator
   include: nevent_generator.yml 
 
 - name: add extra_path to ld_library_path
@@ -35,8 +38,13 @@
   become_method: sudo
   lineinfile: dest=/etc/environment line='export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib:/usr/local/lib64'
     
-- name: be sure generator service file is installed
+- name: make sure generator service file is installed
   become: yes
   copy:
     src: generator.service
     dest: /usr/lib/systemd/system
+
+- name: install required python modules
+  include: python_modules.yml
+  become: yes
+  become_method: sudo

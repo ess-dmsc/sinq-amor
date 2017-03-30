@@ -15,13 +15,15 @@
     - generator
     - chopper_dornier
 #    - forward-epics-to-kafka
+    - generator
   vars:
-    local_download_dir: "/tmp"
-    stow_dir: "/opt/stow"
-    install_dir: "/usr/local"
     # Used in roles: playbook_local_deps, forward-epics-to-kafka:
     repo_loc_essiip_fakesinqhw: "{{playbook_dir}}/../../essiip-fakesinqhw"
     repo_loc_forward_epics_to_kafka: "{{playbook_dir}}/../../forward-epics-to-kafka"
+    flatbuffers_dir: "{{install_dir}}"
+    librdkafka_dir: "{{install_dir}}"
+    nexus_dir: "{{install_dir}}"
+    use_zmq: false
 
 - hosts: kafka_server
   tags:
@@ -29,9 +31,7 @@
   roles:
     - role: kafka
   vars:
-    local_download_dir: "/tmp"
-    stow_dir: "/opt/stow"
-    install_dir: "/usr/local"
+
 
 - hosts: generator_host
   tags:
@@ -39,7 +39,9 @@
   roles:
     - generator
   vars:
-    local_download_dir: "/tmp"
-    stow_dir: "/opt/stow"
-    install_dir: "/usr/local"
     use_zmq: false
+  environment:
+    flatbuffers_dir: "{{install_dir}}"
+    librdkafka_dir: "{{install_dir}}"
+    nexus_dir: "{{install_dir}}"
+
