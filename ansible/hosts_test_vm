@@ -1,0 +1,11 @@
+[simulation]
+192.168.10.12 ansible_user=vagrant ansible_ssh_pass=4N518L3
+#129.129.188.233
+
+[kafka_server]
+#192.168.10.11 ansible_user=vagrant ansible_ssh_pass=4N518L3
+#129.129.188.233
+
+[generator_host]
+192.168.10.12 ansible_user=vagrant ansible_ssh_pass=4N518L3
+
