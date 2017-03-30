@@ -51,3 +51,12 @@
   become_method: sudo
   file: path="{{ generator_home }}/AMORgenerator" mode="a+x"
   
+- name: be sure detector simulation service file installed
+  become: yes
+  copy:
+    src: generator.service
+    dest: /usr/lib/systemd/system
+
+- name: install telnet 
+  package: 
+    name=telnet state=present
