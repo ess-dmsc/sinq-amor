@@ -13,8 +13,8 @@
     - dimetix
     - epics
     - generator
-    - chopper_dornier
-#    - forward-epics-to-kafka
+#    - chopper_dornier
+    - forward-epics-to-kafka
     - generator
   vars:
     # Used in roles: playbook_local_deps, forward-epics-to-kafka:
@@ -31,17 +31,3 @@
   roles:
     - role: kafka
   vars:
-
-
-- hosts: generator_host
-  tags:
-    - generator
-  roles:
-    - generator
-  vars:
-    use_zmq: false
-  environment:
-    flatbuffers_dir: "{{install_dir}}"
-    librdkafka_dir: "{{install_dir}}"
-    nexus_dir: "{{install_dir}}"
-
