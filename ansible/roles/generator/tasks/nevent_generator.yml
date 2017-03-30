@@ -10,6 +10,25 @@
 - name: Clone generator from repository
   git: repo="{{ generator_src }}" dest=/tmp/neventGenerator force=yes accept_hostkey=yes
 
+- name: 
+  stat: 
+    path: /tmp/neventGenerator/neventGenerator/rapidjson/include/rapidjson/rapidjson.h
+  register: rapidjson
+
+- fail: 
+    msg: Rapidjson not found    
+  when: rapidjson.stat.exists == False
+
+- debug:
+    msg: Export rapidjson include path
+  env: 
+    rapidjson_dir: /tmp/neventGenerator/neventGenerator/rapidjson
+  when: rapidjson.stat.exists == True
+  
+- debug:
+    var: hostvars[rapidjson_dir]
+    verbosity: 4
+
 - name: Create build folder
   file: path=/tmp/neventGenerator/neventGenerator/build state=directory
   
