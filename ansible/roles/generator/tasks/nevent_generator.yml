@@ -8,7 +8,7 @@
   when: not generator_dir.stat.exists
 
 - name: Clone generator from repository
-  git: repo="{{ generator_src }}" dest=/tmp/neventGenerator force=yes accept_hostkey=yes
+  git: repo="{{ generator_src }}" dest=/tmp/neventGenerator force=yes accept_hostkey=yes version=dev
 
 - name: 
   stat: 
@@ -54,3 +54,7 @@
   copy:
     src: generator.service
     dest: /usr/lib/systemd/system
+
+- name: install telnet 
+  package: 
+    name=telnet state=present
