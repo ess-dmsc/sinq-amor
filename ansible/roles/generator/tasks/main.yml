@@ -48,9 +48,7 @@
     
 - name: make sure generator service file is installed
   become: yes
-  copy:
-    src: generator.service
-    dest: /usr/lib/systemd/system
+  template: src=generator.j2 dest=/usr/lib/systemd/system/generator.service
 
 - name: install required python modules
   include: python_modules.yml
