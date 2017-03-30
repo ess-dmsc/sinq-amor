@@ -66,6 +66,7 @@ message(STATUS)
 #rapidjson
 find_path(path_include_rapidjson NAMES rapidjson/document.h PATHS
  "$ENV{rapidjson_dir}/include"
+ "${CMAKE_CURRENT_SOURCE_DIR}/rapidjson/include"
  /opt/local/rapidjson.git/include
 )
 message(STATUS rapidjson_inc: ${path_include_rapidjson})
