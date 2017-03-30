@@ -4,6 +4,9 @@
   become: yes
   become_method: sudo
 
+- name: Make sure stow is installed
+  include: stow.yml
+  
 - name: install 0MQ
   include: zmq.yml
   when: use_zmq
@@ -16,16 +19,39 @@
   when:
     not lib_nexus.stat.exists
     
+<<<<<<< HEAD
+=======
+- name: install rdkafka
+  include: rdkafka.yml
+  when:
+    not lib_rdkafka.stat.exists
+
+- name: install flatbuffers
+  include: flatbuffers.yml 
+  when:
+    not lib_flatbuffers.stat.exists
+
+- name: download streaming data types
+  include: streaming_data_types.yml
+
+>>>>>>> make ansible work again
 - name: install neventGenerator
   include: nevent_generator.yml 
 
 - name: make sure generator service file is installed
   become: yes
+<<<<<<< HEAD
   template: 
     src: generator.j2 
     dest: /usr/lib/systemd/system/generator.service
 
 - name: install required python modules
   include: python_modules.yml
+=======
+  become_method: sudo
+  lineinfile: dest=/etc/environment line='export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib:/usr/local/lib64'
+    
+- name: make sure generator service file is installed
+>>>>>>> make ansible work again
   become: yes
   become_method: sudo

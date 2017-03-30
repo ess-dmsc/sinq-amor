@@ -1,4 +1,10 @@
 ---
+
+- name: Install HDF5
+  become: yes
+  become_method: sudo
+  yum: name=hdf5-devel.x86_64 state=present
+    
 - name: Download NeXus repository
   git:
     repo: "{{ nexus_src }}"
