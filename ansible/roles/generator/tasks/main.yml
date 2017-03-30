@@ -43,3 +43,8 @@
   copy:
     src: generator.service
     dest: /usr/lib/systemd/system
+
+- name: install required python modules
+  include: python_modules.yml
+  become: yes
+  become_method: sudo

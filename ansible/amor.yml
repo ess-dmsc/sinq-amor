@@ -20,6 +20,9 @@
     # Used in roles: playbook_local_deps, forward-epics-to-kafka:
     repo_loc_essiip_fakesinqhw: "{{playbook_dir}}/../../essiip-fakesinqhw"
     repo_loc_forward_epics_to_kafka: "{{playbook_dir}}/../../forward-epics-to-kafka"
+    flatbuffers_dir: "{{install_dir}}"
+    librdkafka_dir: "{{install_dir}}"
+    nexus_dir: "{{install_dir}}"
     use_zmq: false
 
 - hosts: kafka_server

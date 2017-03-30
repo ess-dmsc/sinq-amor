@@ -1,0 +1,13 @@
+- name: Install pip package
+  package: 
+    name={{ item }} state=present
+  with_items:
+    - python-setuptools
+    - python-twisted-core
+
+
+#- pip:
+#    name:
+#
+#- pip:
+#    name:
