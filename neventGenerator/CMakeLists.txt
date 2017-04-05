@@ -10,25 +10,16 @@ add_custom_target(
 )
 
 # flatbuffers
-find_path(path_include_flatbuffers NAMES flatbuffers/flatbuffers.h PATHS
- "$ENV{flatbuffers_dir}/include"
- /opt/local/flatbuffers.git/include
-)
-find_path(path_flatc NAMES flatc PATHS
-  $ENV{flatc_dir}
-)
+find_path(path_include_flatbuffers NAMES flatbuffers/flatbuffers.h)
+find_program(path_flatc NAMES flatc)
+message(STATUS "path_include_flatbuffers: ${path_include_flatbuffers}")
+message(STATUS "flatc: " ${path_flatc})
 
-message(STATUS flatbuffers_inc: ${path_include_flatbuffers})
-message(STATUS flatc: ${path_flatc})
 set(flatbuffers_schemata
   amo0_psi_sinq_schema
 )
 
-message(STATUS "ENV{streaming_data_types_dir}: $ENV{streaming_data_types_dir}")
-find_path(path_include_streaming_data_types NAMES schemas/amo0_psi_sinq.fbs PATHS
-$ENV{streaming_data_types_dir}
-"${CMAKE_CURRENT_SOURCE_DIR}/../../streaming-data-types"
-)
+find_path(path_include_streaming_data_types NAMES schemas/amo0_psi_sinq.fbs)
 message(STATUS "path_include_streaming_data_types: ${path_include_streaming_data_types}")
 
 
@@ -50,7 +41,7 @@ foreach (f ${flatbuffers_schemata})
 
   add_custom_command(
     OUTPUT "${head_out_dir}/${fbh}"
-    COMMAND ${path_flatc}/flatc --cpp --gen-mutable --gen-name-strings --scoped-enums "${path_include_streaming_data_types}/schemas/${fbs}"
+    COMMAND ${path_flatc} --cpp --gen-mutable --gen-name-strings --scoped-enums "${path_include_streaming_data_types}/schemas/${fbs}"
     DEPENDS "${path_include_streaming_data_types}/schemas/${fbs}"
     WORKING_DIRECTORY "${head_out_dir}"
     COMMENT "Process ${fbs} using ${flatc}"
@@ -64,96 +55,66 @@ message(STATUS)
 
 
 #rapidjson
-find_path(path_include_rapidjson NAMES rapidjson/document.h PATHS
- "$ENV{rapidjson_dir}/include"
- "${CMAKE_CURRENT_SOURCE_DIR}/rapidjson/include"
- /opt/local/rapidjson.git/include
-)
-message(STATUS rapidjson_inc: ${path_include_rapidjson})
+find_path(path_include_rapidjson NAMES rapidjson/document.h)
+message(STATUS "path_include_rapidjson: " ${path_include_rapidjson})
 
 #0mq
 option(HAVE_0MQ "Enable 0MQ" FALSE)
 if(${HAVE_0MQ})
-  find_path(path_include_zmq NAMES zmq.h PATHS
-    "$ENV{zmq_dir}/include"
-    )
-  find_library(path_lib_zmq NAMES zmq PATHS
-    "$ENV{zmq_dir}/lib"
-    )
-  message(STATUS zmq_inc: ${path_include_zmq})
-  message(STATUS zmq_lib: ${path_lib_zmq} )
+  find_path(path_include_zmq NAMES zmq.h)
+  find_library(path_lib_zmq NAMES zmq)
+  message(STATUS "path_include_zmq: " ${path_include_zmq})
+  message(STATUS "path_lib_zmq: " ${path_lib_zmq} )
   add_library(libzmq SHARED IMPORTED)
   set_property(TARGET libzmq PROPERTY IMPORTED_LOCATION ${path_lib_zmq})
 
   #libsodium
-  find_library(path_lib_sodium NAMES sodium PATHS
-    "$ENV{zmq_dir}/lib"
-    )
-  message(STATUS sodium_lib: ${path_lib_sodium} )
+  find_library(path_lib_sodium NAMES sodium)
+  message(STATUS "path_lib_sodium: " ${path_lib_sodium} )
   add_library(libsodium SHARED IMPORTED)
   set_property(TARGET libsodium PROPERTY IMPORTED_LOCATION ${path_lib_sodium})
 
-include_directories(
-  ${path_include_zmq}
-  )
+include_directories( ${path_include_zmq} )
 link_libraries(libzmq libsodium)
 else()
   message(STATUS "Build without 0MQ support")
 endif()
 
 #rdkafka
-find_path(path_include_rdkafka NAMES librdkafka/rdkafka.h PATHS
- "$ENV{librdkafka_dir}/include"
- /opt/local/rdkafka/install/include
- /usr/local/include
-)
-find_library(path_lib_rdkafka NAMES rdkafka PATHS
-"$ENV{librdkafka_dir}/lib"
-/opt/local/rdkafka/install/lib
-/usr/local/lib
-)
+find_path(path_include_rdkafka NAMES librdkafka/rdkafka.h)
+find_library(path_lib_rdkafka NAMES rdkafka)
 add_library(librdkafka SHARED IMPORTED)
 set_property(TARGET librdkafka PROPERTY IMPORTED_LOCATION ${path_lib_rdkafka})
 
-find_library(path_lib_rdkafka++ NAMES rdkafka++ PATHS
- "$ENV{librdkafka_dir}/lib"
- /opt/local/rdkafka/install/lib
- /usr/local/lib
-)
+find_library(path_lib_rdkafka++ NAMES rdkafka++)
 add_library(librdkafka++ SHARED IMPORTED)
 set_property(TARGET librdkafka++ PROPERTY IMPORTED_LOCATION ${path_lib_rdkafka++})
 
+message(STATUS "path_include_rdkafka: " ${path_include_rdkafka})
+message(STATUS "path_lib_rdkafka: " ${path_lib_rdkafka})
+message(STATUS "path_lib_rdkafka++: " ${path_lib_rdkafka++})
+
 #nexus
-find_path(path_include_nexus NAMES nexus/napi.h PATHS
-  "$ENV{nexus_dir}/include"
-)
-find_library(path_lib_nexus NAMES NeXus PATHS
-  "$ENV{nexus_dir}/lib"
-  "$ENV{nexus_dir}/lib/nexus"
-  )
-message(STATUS NeXus_inc: ${path_include_nexus})
-message(STATUS NeXus_lib: ${path_lib_nexus})
+find_path(path_include_nexus NAMES nexus/napi.h)
+find_library(path_lib_nexus NAMES NeXus)
+
+message(STATUS "path_include_nexus: " ${path_include_nexus})
+message(STATUS "path_lib_nexus: " ${path_lib_nexus})
 add_library(libNeXus SHARED IMPORTED)
 set_property(TARGET libNeXus PROPERTY IMPORTED_LOCATION ${path_lib_nexus})
 
 
 #hdf5
-find_path(path_include_hdf5 NAMES hdf5.h PATHS
-  "$ENV{hdf5_dir}/include"
-)
-find_library(path_lib_hdf5 NAMES hdf5-shared PATHS
-  "$ENV{hdf5_dir}/lib"
-  )
+find_path(path_include_hdf5 NAMES hdf5.h)
+find_library(path_lib_hdf5 NAMES hdf5-shared)
 if( NOT path_lib_hdf5 )
-  find_library(path_lib_hdf5 NAMES hdf5 PATHS
-  "$ENV{hdf5_dir}/lib"
-  )
+  find_library(path_lib_hdf5 NAMES hdf5)
 endif()
-
-message(STATUS hdf5_inc: ${path_include_hdf5})
-message(STATUS hdf5_lib: ${path_lib_hdf5})
 add_library(libhdf5 SHARED IMPORTED)
 set_property(TARGET libhdf5 PROPERTY IMPORTED_LOCATION ${path_lib_hdf5})
+
+message(STATUS "path_include_hdf5: " ${path_include_hdf5})
+message(STATUS "path_lib_hdf5: " ${path_lib_hdf5})
 
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
