@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <iterator>
 
-#include "schemas/amo0_psi_sinq_generated.h"
+#include "schemas/ev42_events_generated.h"
 
 namespace serialiser {
 
