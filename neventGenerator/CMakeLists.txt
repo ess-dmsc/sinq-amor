@@ -127,8 +127,9 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-link_libraries(librdkafka
-  librdkafka++
+link_libraries(librdkafka++
+  librdkafka
+  z
 )
 
 add_executable(AMORgenerator AMORgenerator.cpp)

@@ -1,11 +1,4 @@
 - name: Make sure NeXus is present
-  stat: path="{{ install_dir }}/lib64/libNeXus.a"
+  stat: 
+    path: "{{ install_dir }}/lib64/libNeXus.a"
   register: lib_nexus
-
-- name: Make sure rdkafka is present
-  stat: path="{{ install_dir }}/lib/librdkafka.a"
-  register: lib_rdkafka
-
-- name: Make sure flatbuffers is present
-  stat: path="{{ install_dir }}/lib/libflatbuffers.a"
-  register: lib_flatbuffers

@@ -1,18 +1,2 @@
-
-generator_src: https://github.com/ess-dmsc/sinq-amorsim
-generator_home: /opt/amor/simfiles
-
-rdkafka_src: https://github.com/edenhill/librdkafka.git
-rdkafka_src_dir: "{{ local_download_dir }}/librdkafka"
-rdkafka_install_dir: "{{ stow_dir }}/librdkafka"
-
-nexus_src: https://github.com/nexusformat/code.git
-nexus_src_dir: "{{ local_download_dir }}/nexusformat"
-nexus_install_dir: "{{ stow_dir }}/nexusformat"
-
-flatbuffers_src: https://github.com/google/flatbuffers.git
-flatbuffers_src_dir: "{{ local_download_dir }}/flatbuffers"
-flatbuffers_install_dir: "{{ stow_dir }}/flatbuffers"
-
-streaming_data_types_src: https://github.com/ess-dmsc/streaming-data-types.git
-streaming_data_types_dir: "{{ local_download_dir }}/streaming-data-types"
+include_path: "/opt/software/streming-data-types-master/;/opt/software/rapidjson-master/include/;/opt/stow/nexusformat/include"
+library_path: "/opt/stow/nexusformat/lib64"
