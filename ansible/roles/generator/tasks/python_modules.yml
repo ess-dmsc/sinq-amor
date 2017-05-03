@@ -1,6 +1,7 @@
-- name: Install pip package
+- name: Install twisted
   package: 
-    name={{ item }} state=present
+    name: "{{ item }}"
+    state: present
   with_items:
     - python-setuptools
     - python-twisted-core
