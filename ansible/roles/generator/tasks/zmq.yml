@@ -1,24 +1,33 @@
 ---
 - name: Install 0MQ
   become: yes
-  yum: name=zeromq-devel state=present
+  yum: 
+    name: zeromq-devel 
+    state: present
   with_items:
     - zeromq-devel
     - czmq-devel
     - cppzmq-devel
 
-- stat: path=/usr/lib64/libsodium.so
+- name: Check whether libsodium is installed
+  stat: 
+    path: /usr/lib64/libsodium.so
   register: st
   
 - name: Install libsodium
   become: yes
   become_method: sudo
-  yum: name=libsodium.x86_64 state=present
+  yum: 
+    name: libsodium.x86_64 
+    state: present
   when: not st.stat.exists
   
 - name: Create link
   become: yes
   become_method: sudo
-  file: src=/usr/lib64/libsodium.so.13 dest=/usr/lib64/libsodium.so state=link
+  file: 
+    src: /usr/lib64/libsodium.so.13 
+    dest: /usr/lib64/libsodium.so 
+    state: link
   when: not st.stat.exists
   

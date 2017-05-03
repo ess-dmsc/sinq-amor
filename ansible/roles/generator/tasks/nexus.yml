@@ -1,9 +1,4 @@
 ---
-- name: Install HDF5
-  become: yes
-  become_method: sudo
-  yum: name=hdf5-devel.x86_64 state=present
-    
 - name: Download NeXus repository
   git:
     repo: "{{ nexus_src }}"
@@ -26,4 +21,5 @@
 
 - name: Create link in "{{ install_dir }}"
   become: yes
+  when: "{{use_stow}}"
   shell: "stow -t {{ install_dir }} nexusformat chdir={{ stow_dir }}"
