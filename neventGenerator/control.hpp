@@ -78,6 +78,7 @@ private:
         rate_.store(std::stoi(value));
         std::cout << value << std::endl;
       }
+      std::cout << "status : " << status_ << std::endl;
     }
     std::cout << "status : " << status_ << "\t"
               << "tr : " << std::to_string(rate_) << "\n";
