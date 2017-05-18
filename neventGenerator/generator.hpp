@@ -51,35 +51,30 @@ template <typename Streamer, typename Control, typename Serialiser>
 struct Generator {
   typedef Generator<Streamer, Control, Serialiser> self_t;
 
-  Generator(uparam::Param &p) : streamer(p), control(p), initial_status(false) {
-
+  Generator(uparam::Param &p) : streamer(p), control{ new Control() } {
     if (p["status"] == "run") {
       initial_status = true;
     }
-
     /*! @param p see uparam::Param for description. Set of key-value used for
      * initializations. */
     /*! Constructor: initialize the streamer, the header and the control. */
-    //    get_control();
   }
 
   template <class T> void run(T *stream, int nev = 0) {
     std::thread ts(&self_t::run_impl<T>, this, stream, nev);
-    control.read();
+    control->update();
     ts.join();
   }
 
   template <class T> void listen(std::vector<T> stream, int nev = 0) {
-
     std::thread tr(&self_t::listen_impl<T>, this, stream);
     tr.join();
-
     listen_impl<T>(stream);
   }
 
 private:
   Streamer streamer;
-  Control control;
+  std::unique_ptr<Control> control;
   Serialiser serialiser;
   bool initial_status;
   std::default_random_engine engine;
@@ -95,18 +90,18 @@ private:
     using namespace std::chrono;
     uint64_t pulseID = 0;
     int count = 0;
-    control.run(initial_status);
+    control->start(initial_status);
 
     using std::chrono::system_clock;
     auto start = system_clock::now();
     std::time_t to_time = system_clock::to_time_t(start);
     auto timeout = std::localtime(&to_time);
 
-    while (!control.stop()) {
+    while (!control->stop()) {
       nanoseconds ns =
           duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
       auto timestamp = ns.count();
-      if (control.run()) {
+      if (control->run()) {
         streamer.send(pulseID, timestamp, stream, nev, serialiser);
         ++count;
       } else {
@@ -114,12 +109,12 @@ private:
       }
       ++pulseID;
 
-      if (pulseID % control.rate() == 0) {
+      if (pulseID % control->rate() == 0) {
         ++timeout->tm_sec;
         std::this_thread::sleep_until(
             system_clock::from_time_t(mktime(timeout)));
-        control.update();
-        generate_timestamp(stream, stream + nev, floor(1e9 / control.rate()));
+        control->update();
+        generate_timestamp(stream, stream + nev, floor(1e9 / control->rate()));
       }
 
       if (std::chrono::duration_cast<std::chrono::seconds>(
@@ -145,15 +140,13 @@ private:
     using std::chrono::system_clock;
     auto start = system_clock::now();
 
-    std::pair<uint64_t, uint64_t> msg;
-
     while (1) {
 
-      msg = streamer.recv(stream, Serialiser());
+      auto msg = streamer.recv(stream, Serialiser());
       pid = msg.first;
       if (pid - pulseID != 0) {
         pulseID = pid;
-        missed++;
+        ++missed;
       } else {
         ++count;
         size += msg.second;
