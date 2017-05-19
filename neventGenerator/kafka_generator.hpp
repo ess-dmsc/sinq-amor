@@ -1,9 +1,9 @@
 #pragma once
 
-#include <string>
-#include <sstream>
-#include <utility>
 #include <cctype>
+#include <sstream>
+#include <string>
+#include <utility>
 
 #include <assert.h>
 
@@ -12,16 +12,13 @@ extern "C" {
 }
 #include <librdkafka/rdkafkacpp.h>
 
+#include "header.hpp"
 #include "serialiser.hpp"
 #include "uparam.hpp"
-#include "header.hpp"
 
 namespace generator {
 
-enum {
-  transmitter,
-  receiver
-};
+enum { transmitter, receiver };
 /*! \struct KafkaGen
  *  Uses Kafka as the streamer
  *
@@ -124,7 +121,8 @@ template <int mode_selector> struct KafkaGen {
 
     // RdKafka::ErrorCode resp = producer->produce(
     //     topic->name(), partition, RdKafka::Producer::RK_MSG_COPY,
-    //     (void *)serialiser.get(), serialiser.size(), NULL, 0, timestamp, NULL);
+    //     (void *)serialiser.get(), serialiser.size(), NULL, 0, timestamp,
+    //     NULL);
     if (resp != RdKafka::ERR_NO_ERROR)
       throw std::runtime_error("% Produce failed: " + RdKafka::err2str(resp));
   }
