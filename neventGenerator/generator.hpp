@@ -1,13 +1,13 @@
 #ifndef _GENERATOR_H
 #define _GENERATOR_H
 
-#include <iostream>
-#include <fstream>
-#include <map>
-#include <thread>
 #include <chrono>
 #include <ctime>
+#include <fstream>
+#include <iostream>
+#include <map>
 #include <random>
+#include <thread>
 
 #include <assert.h>
 
@@ -18,8 +18,8 @@
 #include "zmq_generator.hpp"
 #endif
 
-#include "kafka_generator.hpp"
 #include "file_writer.hpp"
+#include "kafka_generator.hpp"
 
 #include "control.hpp"
 
@@ -47,7 +47,7 @@ template <typename Streamer, typename Control, typename Serialiser>
 struct Generator {
   typedef Generator<Streamer, Control, Serialiser> self_t;
 
-  Generator(uparam::Param &p) : streamer(p), control{ new Control() } {
+  Generator(uparam::Param &p) : streamer(p), control{new Control()} {
     if (p["status"] == "run") {
       initial_status = true;
     }
@@ -111,10 +111,11 @@ private:
         generate_timestamp(stream, stream + nev, floor(1e9 / control->rate()));
       }
 
-      if (std::chrono::duration_cast<std::chrono::seconds>(
-              system_clock::now() - start).count() > 10) {
+      if (std::chrono::duration_cast<std::chrono::seconds>(system_clock::now() -
+                                                           start)
+              .count() > 10) {
         std::cout << "Sent " << count << " packets @ "
-                  << count *nev * sizeof(T) / (10 * 1e6) << "MB/s"
+                  << count * nev * sizeof(T) / (10 * 1e6) << "MB/s"
                   << "\t(timestamp : " << timestamp << ")" << std::endl;
         count = 0;
         start = system_clock::now();
@@ -145,8 +146,9 @@ private:
         ++count;
         size += msg.second;
       }
-      if (std::chrono::duration_cast<std::chrono::seconds>(
-              system_clock::now() - start).count() > 10) {
+      if (std::chrono::duration_cast<std::chrono::seconds>(system_clock::now() -
+                                                           start)
+              .count() > 10) {
         std::cout << "Missed " << missed << " packets" << std::endl;
         std::cout << "Received " << count << "packets"
                   << " @ " << size * 1e-1 * 1e-6 << "MB/s" << std::endl;

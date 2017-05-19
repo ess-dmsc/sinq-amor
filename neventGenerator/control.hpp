@@ -11,7 +11,7 @@ const uint32_t default_rate = 10;
 struct Control {
   int update() { return stop_; };
   virtual int start(int) { return stop_; };
-  const uint32_t&& rate() { return std::move(rate_.load()); };
+  const uint32_t &&rate() { return std::move(rate_.load()); };
   bool run() const { return status_ == run_; }
   bool pause() const { return status_ == pause_; }
   bool stop() const { return status_ == stop_; }
@@ -22,14 +22,14 @@ protected:
   std::atomic<uint32_t> rate_{default_rate};
 };
 
-  //using ControlFactory = factory::ObjectFactory<Control, std::string>;
+// using ControlFactory = factory::ObjectFactory<Control, std::string>;
 
 struct NoControl : public Control {
   NoControl() { status_.store(run_); }
   NoControl(const NoControl &) { status_.store(run_); }
   NoControl(const uparam::Param &) { status_.store(run_); }
 
-  int&& update() { return std::move(status_.load()); }
+  int &&update() { return std::move(status_.load()); }
 };
 
 struct CommandlineControl : public Control {
@@ -57,9 +57,9 @@ struct CommandlineControl : public Control {
   }
 
 private:
-  int&& update_impl() {
+  int &&update_impl() {
     std::cout << "run_status : " << status_ << "\t"
-              << "transmissison_rate : " << std::to_string(rate_) << "\n";
+              << "transmission_rate : " << std::to_string(rate_) << "\n";
     std::string value;
     while (status_ != stop_) {
       std::cin >> value;
