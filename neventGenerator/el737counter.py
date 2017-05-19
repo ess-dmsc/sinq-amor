@@ -13,6 +13,9 @@ import sys
 import subprocess as sp
 import os
 
+import generator
+
+
 class EL737Controller(LineReceiver):
     def __init__(self):
         self.remotestate = 0
@@ -27,6 +30,7 @@ class EL737Controller(LineReceiver):
         self.pausedTime = 0.
         self.threshold = 0
         self.thresholdcounter = 1
+        self.generator = generator.Generator()
 
     def write(self, data):
         print "transmitted:", data
@@ -58,6 +62,7 @@ class EL737Controller(LineReceiver):
 
         orig = data.strip()
         data = data.lower().strip()
+        g = self.generator
 
         if self.remotestate == 0:
             if data.startswith('rmt 1'):
@@ -71,15 +76,15 @@ class EL737Controller(LineReceiver):
             if data.startswith('echo 2'):
                 self.proc = MyPIPE()
 
-                cmd = ['/opt/amor/simfiles/AMORgenerator']
-                l = orig.split()
-                if len(l) < 3:
-                    cmd.append("//:/")  # default
-                else:
-                    cmd.append(l[2])
-                print cmd
+                g.find('./build')
+                print orig.split()[2:]
+            
+#                if not g.validate(orig.split()[2:]):
+#                    self.remotestate = 1
+#                    return
                 
-                reactor.spawnProcess(self.proc,'/opt/amor/simfiles/AMORgenerator',args=cmd,env=os.environ)
+
+                reactor.spawnProcess(self.proc,g.exe[0],args=orig.split()[2:],env=os.environ)
                 self.remotestate = 2
                 self.write("\r")
             else:
