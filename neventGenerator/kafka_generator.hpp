@@ -119,8 +119,6 @@ template <int mode_selector> struct KafkaGen {
         topic, partition, RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
         (void *)serialiser.get(), serialiser.size(), NULL, NULL);
 
-    // RdKafka::ErrorCode resp = producer->produce(
-    //     topic->name(), partition, RdKafka::Producer::RK_MSG_COPY,
     if (resp != RdKafka::ERR_NO_ERROR)
       throw std::runtime_error("% Produce failed: " + RdKafka::err2str(resp));
   }
