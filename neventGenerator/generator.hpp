@@ -23,11 +23,7 @@
 
 #include "control.hpp"
 
-using milliseconds = std::chrono::milliseconds;
 using nanoseconds = std::chrono::nanoseconds;
-constexpr milliseconds operator"" _ms(const unsigned long long int value) {
-  return milliseconds(value);
-}
 
 /*! \struct Generator
  *
@@ -108,12 +104,10 @@ private:
         streamer.send(pulseID, timestamp, stream, 0, serialiser);
       }
       ++pulseID;
-
       if (pulseID % control->rate() == 0) {
         ++timeout->tm_sec;
         std::this_thread::sleep_until(
             system_clock::from_time_t(mktime(timeout)));
-        control->update();
         generate_timestamp(stream, stream + nev, floor(1e9 / control->rate()));
       }
 
