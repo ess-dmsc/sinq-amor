@@ -47,7 +47,7 @@
 
 - name: Amorsim source dir
   file: 
-    path: "{{sinq_amorsim_dir}}" 
+    path: "{{amorsim_dir}}" 
     state: directory  
     owner: "{{ansible_user_uid}}" 
     group: "{{ansible_user_gid}}"
@@ -56,4 +56,4 @@
 - name: Amorsim source
   synchronize:
     src:  "{{role_path}}/../../../."
-    dest: "{{sinq_amorsim_dir}}"
+    dest: "{{amorsim_dir}}"

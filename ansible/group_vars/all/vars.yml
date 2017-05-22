@@ -1,4 +1,7 @@
 local_download_dir: "/tmp"
 base_dir: "/opt/software"
 install_dir: "/usr/local"
-sinq_amorsim_dir: "/opt/amor/sinq-amorsim"
+amor_dir: "/opt/amor"
+amorsim_dir: "{{amor_dir}}/sinq-amorsim"
+simfiles_dir: "{{amor_dir}}/simfiles"
+epics_dir: "{{amor_dir}}/epics"
