@@ -31,12 +31,12 @@ class EL734Controller(LineReceiver):
             self.loadConfig(initFile)
 
     def write(self, data):
-        print "transmitted:", data
+#        print "transmitted:", data
         if self.transport is not None: 
             self.transport.write(data)
 
     def lineReceived(self, data):
-        print "lineReceived:", data
+#        print "lineReceived:", data
         data = data.lower().strip()
 
         if self.remotestate == 0:
