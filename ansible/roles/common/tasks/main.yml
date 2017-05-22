@@ -1,88 +1,59 @@
-- name: be sure telnet is installed
+- name: be sure required packages are installed
   become: yes
   yum:
-    name: telnet
+    name: "{{item}}"
     state: latest
+  with_items:
+    - epel-release
+    - python
+    - python-devel
+    - python-pip
+    - python2-crypto
+    - openssl-devel
 
-- name: python
-  yum: name=python  state=latest
-  become: yes
-
-- name: python-devel  (at least for twisted)
-  yum: name=python-devel  state=latest
-  become: yes
-
-- name: Enable EPEL so we can actually find python-pip
-  become: yes
-  yum: name=epel-release  state=latest
-
-- name: be sure pip is installed
-  become: yes
-  yum:
-    name: python-pip
-    state: latest
-
-- name: pip update
-  pip: name=pip  state=latest
-  become: true
-
-- name: be sure python2-crypto is installed
-  become: yes
-  yum:
-    name: python2-crypto
-    state: latest
-
-- name: be sure PyEPICS is installed
-  become: yes
+- name: install python packages
+  become : yes
   pip:
-    name: pyepics
+    name: "{{item}}"
     state: latest
-
-- name: be sure twisted is installed
-  become: yes
-  pip:
-    name: twisted
-    state: latest
-
+  with_items:
+    - pip
+    - pyepics
+    - twisted
+    - pyopenssl
+    - service_identity 
 
 - name: download procServ
-  get_url:
-    url: https://sourceforge.net/projects/procserv/files/2.6.0/procServ-2.6.0.tar.gz/download
-    dest: /tmp/procServ.tar.gz
-
-- name: be sure procServ is unarchived
-  unarchive:
-    copy: no
-    src: /tmp/procServ.tar.gz
-    dest: /tmp
+  git:
+    repo: 'https://github.com/ralphlange/procServ.git'
+    dest: /tmp/procServ
+    version: V2.6.0
 
 - name: configure procServ
-  command: ./configure
+  shell: make && ./configure --disable-doc
   args:
-    chdir: /tmp/procServ-2.6.0
+    chdir: /tmp/procServ
 
 - name: build and install procServ
   become: yes
-  command: make install
-  args:
-    chdir: /tmp/procServ-2.6.0
-
-- name: be sure procServ file is absent
-  file:
-    path: /tmp/procServ.tar.gz
-    state: absent
+  make: 
+    chdir: /tmp/procServ
+    target: install
 
 - name: be sure procServ directory is absent
   file:
-    path: /tmp/procServ-2.6.0
+    path: /tmp/procServ
     state: absent
 
-
 - name: Amorsim source dir
-  file: path=/opt/amor/sinq-amorsim  state=directory  owner={{ansible_user_uid}}  group={{ansible_user_gid}}
+  file: 
+    path: "{{sinq_amorsim_dir}}" 
+    state: directory  
+    owner: "{{ansible_user_uid}}" 
+    group: "{{ansible_user_gid}}"
   become: true
 
 - name: Amorsim source
   synchronize:
     src:  "{{role_path}}/../../../."
-    dest: /opt/amor/sinq-amorsim
+    dest: "{{sinq_amorsim_dir}}"
