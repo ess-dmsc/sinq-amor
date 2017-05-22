@@ -1,3 +1,4 @@
 local_download_dir: "/tmp"
 base_dir: "/opt/software"
 install_dir: "/usr/local"
+sinq_amorsim_dir: "/opt/amor/sinq-amorsim"
