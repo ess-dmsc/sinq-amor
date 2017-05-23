@@ -1,30 +1,28 @@
 ---
 - name: Install HDF5
-  become: yes
-  become_method: sudo
-  yum: name=hdf5-devel.x86_64 state=present
-    
+  yum: 
+    name: hdf5-devel
+    state: latest
+
 - name: Download NeXus repository
   git:
-    repo: "{{ nexus_src }}"
-    dest: "{{ nexus_src_dir }}"
-  
+    repo: "{{nexus_src}}"
+    dest: "{{sources}}/nexusformat-{{nexus_version}}"
+    version: "{{nexus_version}}"
+
 - name: Create build folder
   file:
-    path: "{{ nexus_src_dir }}/build"
+    path: "{{builds}}/nexusformat-{{nexus_version}}"
     state: directory
-  
-- name: Compile NeXus library
-  environment:
-    HDF5_INCLUDE_DIRS: /usr/include
-    HDF5_LIBRARIES: /usr/lib64
-  shell: "cmake -DENABLE_HDF5=1 -DENABLE_CXX=1 -DENABLE_APPS=ON -DCMAKE_INSTALL_PREFIX={{ nexus_install_dir }} ../ && make chdir={{ nexus_src_dir }}/build"
 
-- name: Install NeXus
-  become: yes
-  shell: make install chdir="{{ nexus_src_dir }}/build"
+- name: Configure NeXus
+  command: "cmake -DENABLE_HDF5=1 -DENABLE_CXX=1 -DENABLE_APPS=ON -DCMAKE_INSTALL_PREFIX={{nexus}} {{sources}}/nexusformat-{{nexus_version}}"
+  args:
+    chdir: "{{builds}}/nexusformat-{{nexus_version}}"
 
-- name: Create link in "{{ install_dir }}"
-  become: yes
-  when: "{{use_stow}}"
-  shell: "stow -t {{ install_dir }} nexusformat chdir={{ stow_dir }}"
+- name: Compile and install NeXus
+  make:
+    target: install
+    chdir: "{{builds}}/nexusformat-{{nexus_version}}"
+    params:
+      NUM_THREADS: 4

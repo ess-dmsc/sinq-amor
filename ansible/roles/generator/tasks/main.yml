@@ -1,12 +1,22 @@
 ---
+- name: make sure cmake is installed
+  yum:
+    name: cmake
+  become: yes
+
 - name: install required python modules
   include: python_modules.yml
   become: yes
-  become_method: sudo
 
 - name: install 0MQ
   include: zmq.yml
   when: use_zmq
+
+- name: create software storage folder
+  become: yes
+  file:
+    path: "{{software_dest}}"
+    state: directory
 
 - name: checks for files
   include: check.yml
@@ -14,8 +24,33 @@
 - name: install NeXus
   include: nexus.yml
   when:
-    not lib_nexus.stat.exists
-    
+    st_nexus.stat.exists == False
+  become: yes
+
+- name: install flatbuffers
+  include: flatbuffers.yml
+  when:
+    st_flatbuffers.stat.exists == False
+  become: yes
+
+- name: install rdkafka
+  include: rdkafka.yml
+  when:
+    st_rdkafka.stat.exists == False
+  become: yes
+
+- name: install rapidjson
+  include: rapidjson.yml
+  when:
+    st_rapidjson.stat.exists == False
+  become: yes
+
+- name: install streaming-data-types
+  include: streaming_data_types.yml
+  when:
+    st_sdt.stat.exists == False
+  become: yes
+
 - name: install neventGenerator
   include: nevent_generator.yml 
 
