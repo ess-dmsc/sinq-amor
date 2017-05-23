@@ -1,10 +1,10 @@
 # For some reason, have to put this into main.yml for it to be available
 # also already in the name: area of the ansible task.
 ---
-install_path: /opt/amor
-src_repo_essiip_fakesinqhw: "https://bitbucket.org/europeanspallationsource/essiip-fakesinqhw.git"
+install_path: "{{amor_dir}}"
+src_repo_essiip_fakesinqhw: "https://github.com/ess-dmsc/essiip-fakesinqhw.git"
 
-chopper_ess_facade_for_sinq_conf_path: /opt/amor/etc
+chopper_ess_facade_for_sinq_conf_path: "{{amor_dir}}/etc"
 broker_configuration_address: 'localhost:9092'
 broker_configuration_topic:   'configuration.global'
 broker_data_address:          'localhost'
