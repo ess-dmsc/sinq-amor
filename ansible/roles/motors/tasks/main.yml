@@ -25,24 +25,43 @@
 
 - name: be sure motor simulation services are installed
   become: yes
-  copy:
-    src: "{{item}}"
-    dest: /usr/lib/systemd/system
-  with_items:
-    - mota.service
-    - motb.service
-    - motc.service
+  template:
+    src: mota.j2
+    dest: /usr/lib/systemd/system/mota.service
 
-- name: be sure motor simulation services are enabled
+- name: be sure motor simulation services are installed
   become: yes
-  service:
-    name: "{{item}}"
-    enabled: yes
-    state: stopped
-  with_items:
-    - mota
-    - motb
-    - motc
+  template:
+    src: motb.j2
+    dest: /usr/lib/systemd/system/motb.service
+
+- name: be sure motor simulation services are installed
+  become: yes
+  template:
+    src: motc.j2
+    dest: /usr/lib/systemd/system/motc.service
+
+
+#- name: be sure motor simulation services are installed
+#  become: yes
+#  copy:
+#    src: "{{item}}"
+#    dest: /usr/lib/systemd/system
+#  with_items:
+#    - mota.service
+#    - motb.service
+#    - motc.service
+
+#- name: be sure motor simulation services are enabled
+#  become: yes
+#  service:
+#    name: "{{item}}"
+#    enabled: yes
+#    state: stopped
+#  with_items:
+#    - mota
+#    - motb
+#    - motc
     
 - name: Make sure that epics dir exists
   file: 
