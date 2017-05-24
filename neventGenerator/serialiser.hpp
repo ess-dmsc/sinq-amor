@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <iterator>
 
-#include "schemas/amo0_psi_sinq_generated.h"
+#include "schemas/ev42_events_generated.h"
 
 namespace serialiser {
 
@@ -17,7 +17,7 @@ template <typename T> struct FlatBufSerialiser {
   typedef std::true_type is_serialised;
   FlatBufSerialiser() {}
 
-  std::vector<char> &serialise(const int &message_id, const int &pulse_time,
+  std::vector<char> &serialise(const int &message_id, const uint64_t &pulse_time,
                                T *value = NULL, int nev = 0) {
 
     flatbuffers::FlatBufferBuilder builder;
@@ -43,6 +43,7 @@ template <typename T> struct FlatBufSerialiser {
               data.begin());
     std::copy(event->detector_id()->begin(), event->detector_id()->end(),
               data.begin() + event->time_of_flight()->size());
+
     pid = event->message_id();
     timestamp = event->pulse_time();
     return;

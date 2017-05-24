@@ -124,8 +124,8 @@ class EL734Motor(object):
         if self.moving:
             tdiff = time.time() - self.starttime
             stepsDone = tdiff * self.speed
-            print('tdiff, stepsDone, startstep, targetstep, starttime: ' + str(tdiff) + ', ' + str(stepsDone) + ', ' +
-                 str(self.startstep) + ', ' + str(self.targetstep) + ', ' + str(self.starttime) )
+#            print('tdiff, stepsDone, startstep, targetstep, starttime: ' + str(tdiff) + ', ' + str(stepsDone) + ', ' +
+#                 str(self.startstep) + ', ' + str(self.targetstep) + ', ' + str(self.starttime) )
             if self.sign == 1:
                 # moving positive
                 curpos = self.startstep + stepsDone
@@ -244,7 +244,7 @@ class EL734Motor(object):
             
         msr += '0'
 
-        print('raw msr ' + msr[::-1])
+#        print('raw msr ' + msr[::-1])
         return "%d" % int(msr[::-1],2)
 
     def calcss(self):

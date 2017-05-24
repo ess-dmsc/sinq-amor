@@ -1,17 +1,26 @@
 ---
+
 - name: Download librdkafka
   git:
-    repo: "{{ rdkafka_src }}"
-    dest: "{{ rdkafka_src_dir }}"
+    repo: "{{rdkafka_src}}"
+    dest: "{{sources}}/rdkafka-{{rdkafka_version}}"
     force: yes
     
-- name: Configure, compile and install rdkafka
-  shell: "./configure --prefix=/opt/stow/librdkafka && make clean && make chdir={{ rdkafka_src_dir }}"
+- name: Configure rdkafka
+  command: "./configure --prefix={{rdkafka}}"
+  args:
+    chdir: "{{sources}}/rdkafka-{{rdkafka_version}}"
+
+- name: Compile rdkafka
+  make:
+    chdir: "{{sources}}/rdkafka-{{rdkafka_version}}"
+    params:
+      NUM_THREADS: 4
 
 - name: Install rdkafka
-  become: yes
-  shell: "make install chdir={{ rdkafka_src_dir }}"
+  make:
+    target: install
+    chdir: "{{sources}}/rdkafka-{{rdkafka_version}}"
+    params:
+      NUM_THREADS: 4
 
-- name: Create link in {{ install_dir }}
-  become: yes
-  shell: "stow -t {{ install_dir }} librdkafka chdir={{ stow_dir }}"

@@ -1,22 +1,25 @@
 ---
+
 - name: Download flatbuffers
   git:
-    repo: "{{ flatbuffers_src }}"
-    dest: "{{ flatbuffers_src_dir }}"
-    version: "v1.4.0"
+    repo: "{{flatbuffers_src}}"
+    dest: "{{sources}}/flatbuffers-{{flatbuffers_version}}"
+    version: "{{flatbuffers_version}}"
 
 - name: Create build folder
   file:
-    path: "{{ flatbuffers_src_dir }}/build"
+    path: "{{builds}}/flatbuffers-{{flatbuffers_version}}"
     state: directory
 
-- name: Compile flatbuffers
-  shell: "cmake -DCMAKE_INSTALL_PREFIX={{ flatbuffers_install_dir }} ../ && make chdir={{ flatbuffers_src_dir }}/build"
+- name: Configure flatbuffers
+  command: "cmake -DCMAKE_INSTALL_PREFIX={{flatbuffers}} {{sources}}/flatbuffers-{{flatbuffers_version}}"
+  args:
+    chdir: "{{builds}}/flatbuffers-{{flatbuffers_version}}"
 
-- name: Install flatbuffers
-  become: yes
-  shell: "make install chdir={{ flatbuffers_src_dir }}/build"
+- name: Compile and install flatbuffers
+  make:
+    target: install
+    chdir: "{{builds}}/flatbuffers-{{flatbuffers_version}}"
+    params:
+      NUM_THREADS: 4
 
-- name: Create link in {{ install_dir }}
-  become: yes
-  shell: "stow -t {{ install_dir }} flatbuffers chdir={{ stow_dir }}"

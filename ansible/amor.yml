@@ -5,23 +5,28 @@
       that: ansible_version.major >= 2 and ansible_version.minor >= 2
 
 - hosts: simulation
+  tags:
+    - simulation
   roles:
     - common
+    - playbook_local_deps
     - motors
     - magnet 
     - sps
     - dimetix
     - epics
-    - generator
     - chopper_dornier
 #    - forward-epics-to-kafka
+    - generator
   vars:
-    local_download_dir: "/tmp"
-    stow_dir: "/opt/stow"
-    install_dir: "/usr/local"
     # Used in roles: playbook_local_deps, forward-epics-to-kafka:
     repo_loc_essiip_fakesinqhw: "{{playbook_dir}}/../../essiip-fakesinqhw"
     repo_loc_forward_epics_to_kafka: "{{playbook_dir}}/../../forward-epics-to-kafka"
+    use_zmq: false
+#  environment:
+#    path_include_epics_pvAccess: "{{ lookup('env', 'EPICS_MODULES_PATH') }}/pvAccessCPP/5.0.0/3.15.4/include"
+#    path_include_epics_pvData: "{{ lookup('env', 'EPICS_MODULES_PATH') }}/pvDataCPP/5.0.2/3.15.4/include"
+#    path_include_epics_pvDatabase: "{{ lookup('env', 'EPICS_MODULES_PATH') }}/pvDatabaseCPP/4.2.0/3.15.4/include"
 
 - hosts: kafka_server
   tags:
@@ -29,17 +34,3 @@
   roles:
     - role: kafka
   vars:
-    local_download_dir: "/tmp"
-    stow_dir: "/opt/stow"
-    install_dir: "/usr/local"
-
-- hosts: generator_host
-  tags:
-    - generator
-  roles:
-    - generator
-  vars:
-    local_download_dir: "/tmp"
-    stow_dir: "/opt/stow"
-    install_dir: "/usr/local"
-    use_zmq: false

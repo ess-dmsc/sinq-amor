@@ -1,0 +1,11 @@
+[Unit]
+Description=neventGenerator controller
+After=rc-local.service
+
+[Service]
+WorkingDirectory=/opt/amor/simfiles
+Environment=LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib:/usr/local/lib64
+ExecStart=/usr/bin/python el737counter.py
+
+[Install]
+WantedBy=multi-user.target

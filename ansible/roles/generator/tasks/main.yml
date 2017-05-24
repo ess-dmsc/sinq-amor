@@ -1,42 +1,61 @@
 ---
-- name: Make sure cmake is installed
-  include: cmake.yml 
+- name: make sure cmake is installed
+  yum:
+    name: cmake
+  become: yes
 
-- name: Make sure stow is installed
-  include: stow.yml
-  
-- name: 0MQ library
+- name: install required python modules
+  include: python_modules.yml
+  become: yes
+
+- name: install 0MQ
   include: zmq.yml
   when: use_zmq
+
+- name: create software storage folder
+  become: yes
+  file:
+    path: "{{software_dest}}"
+    state: directory
 
 - name: checks for files
   include: check.yml
 
-- name: NeXus library
+- name: install NeXus
   include: nexus.yml
   when:
-    not lib_nexus.stat.exists
-    
-- name: rdkafka library
+    st_nexus.stat.exists == False
+  become: yes
+
+- name: install flatbuffers
+  include: flatbuffers.yml
+  when:
+    st_flatbuffers.stat.exists == False
+  become: yes
+
+- name: install rdkafka
   include: rdkafka.yml
   when:
-    not lib_rdkafka.stat.exists
+    st_rdkafka.stat.exists == False
+  become: yes
 
-- name: flatbuffers library
-  include: flatbuffers.yml 
+- name: install rapidjson
+  include: rapidjson.yml
   when:
-    not lib_flatbuffers.stat.exists
-  
-- name: neventGenerator
+    st_rapidjson.stat.exists == False
+  become: yes
+
+- name: install streaming-data-types
+  include: streaming_data_types.yml
+  when:
+    st_sdt.stat.exists == False
+  become: yes
+
+- name: install neventGenerator
   include: nevent_generator.yml 
 
-- name: add extra_path to ld_library_path
+- name: make sure generator service file is installed
   become: yes
-  become_method: sudo
-  lineinfile: dest=/etc/environment line='export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib:/usr/local/lib64'
-    
-- name: be sure generator service file is installed
-  become: yes
-  copy:
-    src: generator.service
-    dest: /usr/lib/systemd/system
+  template: 
+    src: generator.j2 
+    dest: /usr/lib/systemd/system/generator.service

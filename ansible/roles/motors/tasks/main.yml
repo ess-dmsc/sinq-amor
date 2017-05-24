@@ -1,96 +1,62 @@
-- name: Make sure that /opt/amor/simfiles exists
-  file: path=/opt/amor/simfiles state=directory recurse=yes
+- name: Make sure that simfiles directory exists
+  file: 
+    path: "{{simfiles_dir}}"
+    state: directory 
+    recurse: yes
   become: yes
 
 - name: be sure EL734 controller is installed
   become: yes
   copy:
     src: el734controller.py
-    dest: /opt/amor/simfiles
+    dest: "{{simfiles_dir}}"
     mode: 0755
 
-- name: be sure EL734 motor is installed
+- name: be sure EL734 motor and parameters are installed
   become: yes
   copy:
-    src: el734motor.py
-    dest: /opt/amor/simfiles
+    src: "{{item}}"
+    dest: "{{simfiles_dir}}"
+  with_items: 
+    - el734motor.py
+    - mota
+    - motb
+    - motc
 
-- name: make sure that parameters for the first motor controller are installed
+- name: be sure motor simulation services are installed
   become: yes
   copy:
-    src: mota
-    dest: /opt/amor/simfiles
-
-
-- name: make sure that parameters for the second motor controller are installed
-  become: yes
-  copy:
-    src: motb
-    dest: /opt/amor/simfiles
-
-- name: make sure that parameters for the third motor controller are installed
-  become: yes
-  copy:
-    src: motc
-    dest: /opt/amor/simfiles
-
-- name: be sure motor simulation service file for mota is installed
-  become: yes
-  copy:
-    src: mota.service
+    src: "{{item}}"
     dest: /usr/lib/systemd/system
+  with_items:
+    - mota.service
+    - motb.service
+    - motc.service
 
-- name: be sure motor simulation service mota is enabled
+- name: be sure motor simulation services are enabled
   become: yes
   service:
-    name: mota
+    name: "{{item}}"
     enabled: yes
     state: stopped
+  with_items:
+    - mota
+    - motb
+    - motc
     
-- name: be sure motor simulation service file for motb is installed
-  become: yes
-  copy:
-    src: motb.service
-    dest: /usr/lib/systemd/system
-
-- name: be sure motor simulation service motb is enabled
-  become: yes
-  service:
-    name: motb
-    enabled: yes
-    state: stopped
-
-- name: be sure motor simulation service file for motc is installed
-  become: yes
-  copy:
-    src: motc.service
-    dest: /usr/lib/systemd/system
-
-- name: be sure motor simulation service motc is enabled
-  become: yes
-  service:
-    name: motc
-    enabled: yes
-    state: stopped
-    
-- name: Make sure that /opt/amor/epics exists
-  file: path=/opt/amor/epics state=directory recurse=yes
+- name: Make sure that epics dir exists
+  file: 
+    path: "{{epics_dir}}"
+    state: directory 
+    recurse: yes
   become: yes
 
-- name: be sure mota substitutions file is installed
+- name: be sure motor substitutions files are installed
   become: yes
   copy:
-    src: mota.substitutions
-    dest: /opt/amor/epics
-    
-- name: be sure motb substitutions file is installed
-  become: yes
-  copy:
-    src: motb.substitutions
-    dest: /opt/amor/epics
-
-- name: be sure motc substitutions file is installed
-  become: yes
-  copy:
-    src: motc.substitutions
-    dest: /opt/amor/epics
+    src: "{{item}}"
+    dest: "{{epics_dir}}"
+  with_items:
+    - mota.substitutions
+    - motb.substitutions
+    - motc.substitutions

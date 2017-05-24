@@ -26,9 +26,9 @@
 # Variables for install location are currently defined on top level
 
 - name: Push europeanspallationsource/essiip-fakesinqhw
-  synchronize:
-    src: "{{repo_loc_essiip_fakesinqhw}}"
-    dest: "{{install_path}}/"
+  git:
+    repo: "{{src_repo_essiip_fakesinqhw}}"
+    dest: "{{install_path}}/essiip-fakesinqhw"
   tags:
     - dornier
   become: true

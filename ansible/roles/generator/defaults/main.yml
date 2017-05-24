@@ -1,0 +1,35 @@
+
+software_dest: /opt/software
+sources: "{{software_dest}}/sources"
+builds:  "{{software_dest}}/builds"
+
+nexus_src: https://github.com/nexusformat/code.git
+nexus_version: master
+nexus: "{{software_dest}}/nexusformat-{{nexus_version}}"
+
+flatbuffers_src: https://github.com/google/flatbuffers.git
+flatbuffers_version: master
+flatbuffers: "{{software_dest}}/flatbuffers-{{flatbuffers_version}}"
+
+rapidjson_src: https://github.com/miloyip/rapidjson.git
+rapidjson_version: master
+rapidjson: "{{ software_dest }}/rapidjson-{{rapidjson_version}}"
+
+rdkafka_src: https://github.com/edenhill/librdkafka.git
+rdkafka_version: v0.9.5
+rdkafka: "{{ software_dest }}/rdkafka-{{rdkafka_version}}"
+
+streaming_data_types_src: https://github.com/ess-dmsc/streaming-data-types.git
+streaming_data_types_version: master
+streaming_data_types: "{{software_dest}}/streaming-data-types-{{streaming_data_types_version}}"
+
+generator_src: https://github.com/ess-dmsc/sinq-amorsim
+generator_home: "{{amor_dir}}/simfiles"
+generator_version: dev
+
+generator_inc: '"{{nexus}}/include;{{flatbuffers}}/include;{{rapidjson}}/include;{{rdkafka}}/include;{{streaming_data_types}}"'
+generator_lib: '"{{nexus}}/lib;{{flatbuffers}}/lib;{{rapidjson}}/lib;{{rdkafka}}/lib"'
+generator_exe: "{{flatbuffers}}/bin"
+
+use_stow: false
+

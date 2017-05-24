@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -p
 # 
 # fake SINQ EL737 counter box
 #
@@ -12,6 +12,9 @@ import time
 import sys
 import subprocess as sp
 import os
+
+import generator
+
 
 class EL737Controller(LineReceiver):
     def __init__(self):
@@ -27,7 +30,7 @@ class EL737Controller(LineReceiver):
         self.pausedTime = 0.
         self.threshold = 0
         self.thresholdcounter = 1
-        self.proc = MyPIPE()
+        self.generator = generator.Generator()
 
     def write(self, data):
         print "transmitted:", data
@@ -54,11 +57,12 @@ class EL737Controller(LineReceiver):
                     self.endtime = self.starttime + self.preset/1000
         print('count flag after calculateCountStatus ' + str(self.counting))
 
-
     def lineReceived(self, data):
         print "lineReceived:", data
 
+        orig = data.strip()
         data = data.lower().strip()
+        g = self.generator
 
         if self.remotestate == 0:
             if data.startswith('rmt 1'):
@@ -69,11 +73,17 @@ class EL737Controller(LineReceiver):
             return
 
         if self.remotestate == 1:
-            l = data.split()[2:]
-            l[:0] = ['./AMORgenerator']
             if data.startswith('echo 2'):
-                print l
-                reactor.spawnProcess(self.proc,'build/./AMORgenerator',args=l,env=os.environ)
+                self.proc = MyPIPE()
+
+                g.find('./build')
+                print orig.split()[2:]
+#                if not g.validate(orig.split()[2:]):
+#                    self.remotestate = 1
+#                    return
+
+                reactor.spawnProcess(self.proc,g.exe[0],args=orig.split()[2:],env=os.environ)
+
                 self.remotestate = 2
                 self.write("\r")
             else:
@@ -110,11 +120,12 @@ class EL737Controller(LineReceiver):
                self.to_process('run\r')
                return
                
-           if data.startswith('s'):
+           if data.startswith('st'):
                self.counting = False
                self.endtime = time.time()
                self.write('\r')
                self.to_process('stop\r')
+               self.remotestate = 1
                return
 
            if data.startswith('ps'):
@@ -204,20 +215,37 @@ class EL737Controller(LineReceiver):
 
            self.write('?2\r')
 
+           def connectionLost(self, reason):
+               print "Goodbye..."
+               print reason
+
 
 class MyPIPE(protocol.ProcessProtocol):
     def connectionMade(self):
-        print "Connection made!"
-    def outReceived(self,data):
-        print "out",data
-    def errReceived(self,data):
-        print "err",data
-    def processExited(self,reason):
-        print "exit",reason
-    def processEnded(self,reason):
-        print "process ended"
-        print "quitting"
+        print "  Connection made"
 
+    def childDataReceived(self, childFD, data):
+        print "Message from ",childFD,":"
+        print data
+
+    def connectionLost(self, reason):
+        print "Goodbye..."
+
+    def outReceived(self,data):
+        print "out : ",data
+
+    def errReceived(self,data):
+        print "err : ",data
+
+    def processExited(self,reason):
+        if reason.value.exitCode != 0 :
+            print "exit : ",reason.value
+        else :
+            print "exit"
+
+    def processEnded(self,reason):
+        print "process ended : ",reason.value
+        print "quitting"
 
 
 
@@ -234,3 +262,4 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv)
+
