@@ -32,16 +32,21 @@
     chdir: /tmp/sinq-amorsim/neventGenerator/build
     params:
       NUM_THREADS: 4
-  become: yes
 
 - name: Make generator executable
   file: 
     path: "{{generator_home}}/AMORgenerator" 
     mode: "a+x"
-  become: yes  
 
 - name: delete sources and build
   file:
-    path: /tmp/sinq-amorsim/neventGenerator/build
+    path: /tmp/sinq-amorsim
     state: absent
 
+- name: be sure EL737 counterbox is installed
+  copy:
+    src: "{{item}}"
+    dest: "{{simfiles_dir}}"
+  with_items:
+    - el737counter.py
+    - generator.py
