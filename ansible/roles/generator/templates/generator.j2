@@ -3,7 +3,7 @@ Description=event generator controller
 After=rc-local.service
 
 [Service]
-ExecStart={{simfiles_dir}}/el737counter.py > /tmp/generator.log
+ExecStart=/bin/python {{simfiles_dir}}/el737counter.py 62000 > /tmp/generator.log
 
 [Install]
 WantedBy=multi-user.target

@@ -1,0 +1,9 @@
+[Unit]
+Description=Motor simulation motc
+After=rc-local.service
+
+[Service]
+ExecStart={{simfiles_dir}}/el734controller.py 60003 {{simfiles_dir}}/motc > /tmp/motc.log
+
+[Install]
+WantedBy=multi-user.target
