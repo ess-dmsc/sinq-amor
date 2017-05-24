@@ -84,7 +84,6 @@ class EL737Controller(LineReceiver):
 
                 reactor.spawnProcess(self.proc,g.exe[0],args=orig.split()[2:],env=os.environ)
 
- path in el737counter
                 self.remotestate = 2
                 self.write("\r")
             else:
