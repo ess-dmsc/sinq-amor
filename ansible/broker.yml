@@ -1,0 +1,6 @@
+
+- hosts: kafka_server
+  tags:
+    - kafkaServer
+  roles:
+    - role: kafka

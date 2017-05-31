@@ -1,19 +1,19 @@
 ---
-- name: copy service files
-  become: yes
-  copy:
-    src: "{{ item }}"
-    dest: /usr/lib/systemd/system
+- name: install service files
+  template:
+    src: "{{ item }}.j2"
+    dest: "/usr/lib/systemd/system/{{item}}.service"
     force: yes
   with_items:
-    - kafka.service
-    - zookeeper.service
+    - kafka
+    - zookeeper
 
-- name: start kafka
-  become: yes
+- name: start services
   service:
-    name: "{{ item }}"
+    name: "{{ item }}.service"
     state: started
+    enabled: yes
+    daemon_reload: yes
   with_items:
     - zookeeper
     - kafka

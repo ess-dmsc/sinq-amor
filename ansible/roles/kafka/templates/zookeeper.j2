@@ -1,0 +1,8 @@
+[Unit]
+Description=Run zookeeper server
+After=rc-local.service
+
+[Service]
+ExecStart={{kafka_install_dir}}/kafka_{{scala_version}}-{{kafka_version}}/bin/zookeeper-server-start.sh {{kafka_install_dir}}/kafka_{{scala_version}}-{{kafka_version}}/config/zookeeper.properties
+ExecStop={{kafka_install_dir}}/kafka_{{scala_version}}-{{kafka_version}}/bin/zookeeper-server-stop.sh
+SuccessExitStatus=143
