@@ -1,8 +1,0 @@
-[Unit]
-Description=Run zookeeper server
-After=rc-local.service
-
-[Service]
-ExecStart=/usr/local/bin/zookeeper-server-start.sh /usr/local/config/zookeeper.properties
-ExecStop=/usr/local/bin/zookeeper-server-stop.sh 
-SuccessExitStatus=143

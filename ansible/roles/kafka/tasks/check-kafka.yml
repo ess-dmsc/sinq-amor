@@ -1,22 +1,16 @@
-- name: be sure stow directory exists
-  become: yes
-  file:
-    path: "{{ stow_dir }}"
-    state: directory
-    mode: 0755
+- name: check if kafka is already installed
+  stat:
+    path: "{{ install_dir }}/kafka-server.sh"
+  register: kafka_installed 
     
 - name: check if kafka package is available locally
-  register: kafka_pkg_local
   stat:
     path: "{{ local_download_dir }}/{{ kafka_pkg }}.tar.gz"
-
+  when: not kafka_installed.stat.exists
+  register: kafka_pkg_local 
+    
 - name: be sure kafka directory exists
   file:
     dest: "{{ kafka_install_dir }}"
     state: directory
-
-- name: check if kafka is already installed
-  register: kafka_installed
-  stat:
-    path: "{{ install_dir }}/kafka-server.sh"
-
+  become: yes
