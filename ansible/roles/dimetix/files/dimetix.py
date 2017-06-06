@@ -28,13 +28,13 @@ class Dimetix(LineReceiver):
         pass
         
     def write(self, data):
-        print "transmitted:", data
+#        print "transmitted:", data
         if self.transport is not None: 
             self.transport.write(data+'\r\n')
     
     def lineReceived(self, data):
         global laseron, Readback
-        print "lineReceived:", data
+#        print "lineReceived:", data
         data = data.lower().strip()
 
         if data.startswith('s0o'):

@@ -29,7 +29,7 @@ class SLSVME(LineReceiver):
      
  
     def write(self, data):
-        print "transmitted:", data
+#        print "transmitted:", data
         if self.transport is not None: 
             self.transport.write(data + '\n')
 
@@ -83,7 +83,7 @@ class SLSVME(LineReceiver):
             return
                        
     def lineReceived(self, data):
-        print "lineReceived:", data
+#        print "lineReceived:", data
         data = data.lower().strip()
 
         comlist = data.split()
