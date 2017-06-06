@@ -33,12 +33,12 @@ class EL737Controller(LineReceiver):
         self.generator = generator.Generator()
 
     def write(self, data):
-        print "transmitted:", data
+#        print "transmitted:", data
         if self.transport is not None: 
             self.transport.write(data)
 
     def to_process(self, data):
-        print "transmitted to process:", data
+#        print "transmitted to process:", data
         if self.transport is not None: 
             self.proc.transport.write(data)
     
@@ -58,7 +58,7 @@ class EL737Controller(LineReceiver):
         print('count flag after calculateCountStatus ' + str(self.counting))
 
     def lineReceived(self, data):
-        print "lineReceived:", data
+#        print "lineReceived:", data
 
         orig = data.strip()
         data = data.lower().strip()
@@ -77,7 +77,7 @@ class EL737Controller(LineReceiver):
                 self.proc = MyPIPE()
 
                 g.find('./build')
-                print orig.split()[2:]
+#                print orig.split()[2:]
 #                if not g.validate(orig.split()[2:]):
 #                    self.remotestate = 1
 #                    return
