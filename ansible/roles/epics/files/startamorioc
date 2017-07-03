@@ -1,0 +1,4 @@
+#!/bin/bash
+export EPICS_BASE=/usr/local/epics/base-3.14.12
+export EPICS_HOST_ARCH=RHEL7-x86_64
+/opt/amor/epics/st.cmd

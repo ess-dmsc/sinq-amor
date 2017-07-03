@@ -3,7 +3,7 @@ Description=AMOR IOC
 
 
 [Service]
-ExecStart=/usr/local/bin/procServ -f -n "AMOR IOC" -i ^D^C 20001 /opt/amor/epics/st.cmd
+ExecStart=/usr/local/bin/procServ -f -n "AMOR IOC" -i ^D^C 20001 /opt/amor/epics/startamorioc
 
 [Install]
 WantedBy=multi-user.target

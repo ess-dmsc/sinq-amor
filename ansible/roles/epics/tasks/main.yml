@@ -1,18 +1,6 @@
 - name: Make sure that /opt/amor/epics exists
   file: path=/opt/amor/epics state=directory recurse=yes
 
-- name: make sure that the IOC executable is installed
-  become: yes
-  copy:
-    src: sinqEPICS
-    dest: /opt/amor/epics
-    mode: 0755
-
-- name: make sure that envPaths installed
-  become: yes
-  copy:
-    src: envPaths
-    dest: /opt/amor/epics
 
 - name: make sure that dbd files are installed
   become: yes
@@ -30,6 +18,13 @@
   become: yes
   copy:
     src: st.cmd
+    dest: /opt/amor/epics
+    mode: 0755
+
+- name: make sure that the startamorioc file is installed
+  become: yes
+  copy:
+    src: startamorioc
     dest: /opt/amor/epics
     mode: 0755
 
