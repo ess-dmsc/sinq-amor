@@ -14,8 +14,8 @@
 - name: Install deps via pip
   pip: name={{ item }}
   environment:
-    EPICS_BASE: "{{ env_EPICS_BASE }}"
-    EPICS_HOST_ARCH: "{{ env_EPICS_HOST_ARCH }}"
+    EPICS_BASE: "{{ lookup('env','EPICS_BASE') }}"
+    EPICS_HOST_ARCH: "{{ lookup('env','EPICS_HOST_ARCH') }}"
   with_items:
     - pyepics
     - pcaspy

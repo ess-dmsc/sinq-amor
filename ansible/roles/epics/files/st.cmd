@@ -1,16 +1,9 @@
-#!/opt/amor/epics/sinqEPICS
+#!/usr/local/bin/iocsh
+
+require sinq,koennecke
 
 
-cd /opt/amor/epics
-
-< envPaths
-
-
-## Register all support components
-dbLoadDatabase "dbd/sinqEPICS.dbd"
-dbLoadDatabase "dbd/sinq.dbd"
-sinqEPICS_registerRecordDeviceDriver pdbbase
-
+epicsEnvSet("TOP","/opt/amor/epics")
 
 #---------- connect to controllers
 drvAsynIPPortConfigure("serial1", "localhost:60001",0,0,0)
@@ -22,18 +15,18 @@ EL734CreateController("motc","serial3",12);
 
 ### Motors
 
-dbLoadRecords("$(ASYN)/db/asynRecord.db","P=SQ:AMOR:,R=serial1,PORT=serial1,ADDR=0,OMAX=80,IMAX=80")
-dbLoadRecords("$(ASYN)/db/asynRecord.db","P=SQ:AMOR:,R=serial2,PORT=serial1,ADDR=0,OMAX=80,IMAX=80")
-dbLoadRecords("$(ASYN)/db/asynRecord.db","P=SQ:AMOR:,R=serial3,PORT=serial1,ADDR=0,OMAX=80,IMAX=80")
+dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=serial1,PORT=serial1,ADDR=0,OMAX=80,IMAX=80")
+dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=serial2,PORT=serial1,ADDR=0,OMAX=80,IMAX=80")
+dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=serial3,PORT=serial1,ADDR=0,OMAX=80,IMAX=80")
 
-dbLoadTemplate "mota.substitutions"
-dbLoadTemplate "motb.substitutions"
-dbLoadTemplate "motc.substitutions"
+dbLoadTemplate "$(TOP)/mota.substitutions"
+dbLoadTemplate "$(TOP)/motb.substitutions"
+dbLoadTemplate "$(TOP)/motc.substitutions"
 
 
 #--------- load EL737 counter box
 drvAsynIPPortConfigure("cter1","localhost:62000",0,0,0)
-dbLoadRecords("$(ASYN)/db/asynRecord.db","P=SQ:AMOR:,R=cter1,PORT=cter1,ADDR=0,OMAX=80,IMAX=80")
+dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=cter1,PORT=cter1,ADDR=0,OMAX=80,IMAX=80")
 dbLoadRecords("${TOP}/db/el737Record.db")
 
 #asynSetTraceIOMask("cter1",0,2)
@@ -42,7 +35,7 @@ dbLoadRecords("${TOP}/db/el737Record.db")
 drvAsynIPPortConfigure("slsvme", "localhost:60066",0,0,0)
 #drvAsynIPPortConfigure("slsvme", "localhost:8080",0,0,0)
 
-dbLoadRecords("$(ASYN)/db/asynRecord.db","P=SQ:AMOR:,R=slsvme,PORT=slsvme,ADDR=0,OMAX=80,IMAX=80")
+dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=slsvme,PORT=slsvme,ADDR=0,OMAX=80,IMAX=80")
 
 epicsEnvSet ("STREAM_PROTOCOL_PATH", "$(TOP)/db:.")
 
@@ -52,12 +45,12 @@ dbLoadRecords("$(TOP)/db/slsvme.db","PREFIX=SQ:AMOR:ABY:,NO=3")
 
 #-------------- load SPS
 drvAsynIPPortConfigure("sps1", "localhost:60077",0,0,0)
-dbLoadRecords("$(ASYN)/db/asynRecord.db","P=SQ:AMOR:,R=spsdirect,PORT=sps1,ADDR=0,OMAX=80,IMAX=80")
+dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=spsdirect,PORT=sps1,ADDR=0,OMAX=80,IMAX=80")
 dbLoadRecords("$(TOP)/db/spsamor.db","PREFIX=SQ:AMOR:SPS1:")
 
 #------------- Load dimetix distance measurement device
 drvAsynIPPortConfigure("dimetix", "localhost:60088",0,0,0)
-dbLoadRecords("$(ASYN)/db/asynRecord.db","P=SQ:AMOR:,R=dimetixdirect,PORT=dimetix,ADDR=0,OMAX=80,IMAX=80")
+dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=dimetixdirect,PORT=dimetix,ADDR=0,OMAX=80,IMAX=80")
 dbLoadRecords("$(TOP)/db/dimetix.db","PREFIX=SQ:AMOR:DIMETIX:")
 
 
