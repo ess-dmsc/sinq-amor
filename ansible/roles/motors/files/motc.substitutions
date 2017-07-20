@@ -15,3 +15,21 @@ pattern
 {SQ:AMOR:motc:, 11,"d2t",   "asynMotor",  motc,  11, "d2t",  mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3, 26.514,  -3.486,  ""}
 {SQ:AMOR:motc:, 12,"d2b",   "asynMotor",  motc,  12, "d2b",  mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,  100,         -5, ""}
 }
+
+file "$(TOP)/db/motorMessage.db"
+{
+pattern
+{P,N, M,PORT}
+{SQ:AMOR:motc:, 1, "d5v",motc}
+{SQ:AMOR:motc:, 2, "d5h",motc}
+{SQ:AMOR:motc:, 3, "d1l",motc}
+{SQ:AMOR:motc:, 4, "d1r",motc}
+{SQ:AMOR:motc:, 5, "d3t",motc}
+{SQ:AMOR:motc:, 6, "d3b",motc}
+{SQ:AMOR:motc:, 7, "d4t",motc}
+{SQ:AMOR:motc:, 8, "d4b",motc}
+{SQ:AMOR:motc:, 9, "d1t",motc}
+{SQ:AMOR:motc:, 10, "d1b",motc}
+{SQ:AMOR:motc:, 11, "d2t",motc}
+{SQ:AMOR:motc:, 12, "d2b",motc}
+}

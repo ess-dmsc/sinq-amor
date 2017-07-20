@@ -13,3 +13,19 @@ pattern
 {SQ:AMOR:motb:, 9, "ftz",   "asynMotor",  motb,  11, "ftz",   mm,      Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   69.49, -28.51,  ""}
 {SQ:AMOR:motb:, 10,"dbs",   "asynMotor",  motb,  12, "dbs",   mm,      Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,  72.8,  -47.2,    ""}
 }
+
+file "$(TOP)/db/motorMessage.db"
+{
+pattern
+{P,N, M,PORT}
+{SQ:AMOR:motb:, 1, "aom",motb}
+{SQ:AMOR:motb:, 2, "aoz",motb}
+{SQ:AMOR:motb:, 3, "atz",motb}
+{SQ:AMOR:motb:, 4, "mom",motb}
+{SQ:AMOR:motb:, 5, "moz",motb}
+{SQ:AMOR:motb:, 6, "mtz",motb}
+{SQ:AMOR:motb:, 7, "mty",motb}
+{SQ:AMOR:motb:, 8, "fom",motb}
+{SQ:AMOR:motb:, 9, "ftz",motb}
+{SQ:AMOR:motb:, 10, "dbs",motb}
+}
