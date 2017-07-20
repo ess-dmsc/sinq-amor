@@ -1,11 +1,11 @@
-file "$(MOTOR)/db/basic_asyn_motor.db"
+file "$(TOP)/db/basic_asyn_motor.db"
 {
 pattern
 {P,             N,     M,          DTYP,  PORT, ADDR, DESC,  EGU,      DIR,   VELO,  VBAS, ACCL, BDST, BVEL, BACC,   MRES, PREC, DHLM, DLLM,     INIT}
-{SQ:AMOR:motc:, 1, "d5t",   "asynMotor",  motc,  1, "d5t",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   172,    .05,    ""}
-{SQ:AMOR:motc:, 2, "d5b",   "asynMotor",  motc,  2, "d5b",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   150,    0 ,     ""}
-{SQ:AMOR:motc:, 3, "dnl",   "asynMotor",  motc,  3, "dnl",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   100,    0,      ""}
-{SQ:AMOR:motc:, 4, "dnr",   "asynMotor",  motc,  4, "dnr",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,39.045,-30.955,    ""}
+{SQ:AMOR:motc:, 1, "d5v",   "asynMotor",  motc,  1, "d5v",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   172,    .05,    ""}
+{SQ:AMOR:motc:, 2, "d5h",   "asynMotor",  motc,  2, "d5h",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   150,    0 ,     ""}
+{SQ:AMOR:motc:, 3, "d1l",   "asynMotor",  motc,  3, "d1l",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   100,    0,      ""}
+{SQ:AMOR:motc:, 4, "d1r",   "asynMotor",  motc,  4, "d1r",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,39.045,-30.955,    ""}
 {SQ:AMOR:motc:, 5, "d3t",   "asynMotor",  motc,  5, "d3t",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3, 26.405,-3.595,    ""}
 {SQ:AMOR:motc:, 6, "d3b",   "asynMotor",  motc,  6, "d3b",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,  179.9,   -16.1,  ""}
 {SQ:AMOR:motc:, 7, "d4t",   "asynMotor",  motc,  7, "d4t",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   26.845,-3.155,  ""}
