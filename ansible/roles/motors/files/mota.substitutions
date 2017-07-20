@@ -14,3 +14,21 @@ pattern
 {SQ:AMOR:mota:, 10,"stz",   "asynMotor",  mota,  11, "stz",   mm,      Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,  300,     -10,    ""}
 {SQ:AMOR:mota:, 11,"sch",   "asynMotor",  mota,  12, "sch",   degree,  Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,  2.428,   -1.372, ""}
 }
+
+file "$(TOP)/db/motorMessage.db"
+{
+pattern
+{P,N, M,PORT}
+{SQ:AMOR:mota:, 1, "com",mota}
+{SQ:AMOR:mota:, 2, "coz",mota}
+{SQ:AMOR:mota:, 3, "c3z",mota}
+{SQ:AMOR:mota:, 4, "cox",mota}
+{SQ:AMOR:mota:, 5, "eoz",mota}
+{SQ:AMOR:mota:, 6, "xlz",mota}
+{SQ:AMOR:mota:, 7, "eom",mota}
+{SQ:AMOR:mota:, 8, "som",mota}
+{SQ:AMOR:mota:, 9, "soz",mota}
+{SQ:AMOR:mota:, 10, "stz",mota}
+{SQ:AMOR:mota:, 11, "sch",mota}
+}
+
