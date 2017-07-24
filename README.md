@@ -82,19 +82,24 @@ directory.
  following way: There are three motor controller named A, B and
  C. This maps to motor controllers SQ:AMOR:mota, SQ:AMOR:motb and
  SQ:AMOR:motc. You get the full name of the motor record by appending
- the motor name to this. Example: coz is SQ:AMOR:mota:coz. 
+ the motor name to this. Example: coz is SQ:AMOR:mota:coz. In addition, for each 
+motor there is a -MsgTxt EPICS database field which contains messages from the motor driver. 
+For example: SQ:AMOR:mots:coz-MsgTxt. 
 
 *distance.tex* is a description of how the AMOR geometry is calculated
  from virtual motor positions. 
  
 ## Documentation for Additional Hardware
 
-There is a scaler record called SQ:AMOR:cter1 for counting. This
+There is a scaler record called SQ:AMOR:counter for counting. This
 record controls counting. In the SINQ and simulation implementation it
 also starts streaming neutron events. The standard EPICS scaler record does not support all status states of a
 neutron counter. I therefore put additional status information into
 the monitor S10. If S10 is 2, this means no beam, if it is 3, this
-means paused.
+means paused. The counter status is also available in a separate field: SQ:AMOR:counter:Status. Driver error 
+messages apear in an EPICS PV with the name SQ:AMOR:counter:MsgTxt. There is a binary output with the name 
+SQ:AMOR:counter:Pause which allows to pause counting. Set to 1 in order to pause, set to 0 to continue counting. 
+In order to avoid surprises this field should be set to 0 before each counting operation.  
 
 
 AMOR also has three magnets:
