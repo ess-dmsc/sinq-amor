@@ -16,8 +16,8 @@ EL734CreateController("motc","serial3",12);
 ### Motors
 
 dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=serial1,PORT=serial1,ADDR=0,OMAX=80,IMAX=80")
-dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=serial2,PORT=serial1,ADDR=0,OMAX=80,IMAX=80")
-dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=serial3,PORT=serial1,ADDR=0,OMAX=80,IMAX=80")
+dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=serial2,PORT=serial2,ADDR=0,OMAX=80,IMAX=80")
+dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=serial3,PORT=serial3,ADDR=0,OMAX=80,IMAX=80")
 
 dbLoadTemplate "$(TOP)/mota.substitutions"
 dbLoadTemplate "$(TOP)/motb.substitutions"
