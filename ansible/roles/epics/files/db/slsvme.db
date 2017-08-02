@@ -89,6 +89,6 @@ record(bo, "$(PREFIX)PowerStatus") {
   field(DESC, "Set the power status")
   field(DTYP, "stream")
   field(OUT, "@slsvme.proto setpower($(NO)) slsvme 0")
-  field(ZNAM, "on")
-  field(ONAM, "off")
+  field(ZNAM, "off")
+  field(ONAM, "on")
 }
