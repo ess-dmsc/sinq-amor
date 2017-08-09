@@ -1,9 +1,19 @@
 
-record(scaler,"")
+record(bo,"$(P):Pause")
 {
-        field(NAME,"SQ:AMOR:cter1")
-        field(DESC,"AMOR EL737 counter")
-	field(DTYP,"asynScalerEL737")
-	field(OUT,"INST_IO @asyn(cter1,0)")
+   field(DTYP,"Soft Channel")
 }
-
+record(longin,"$(P):Status")
+{
+   field(DTYP,"Soft Channel")
+}
+record(stringin,"$(P):MsgTxt")
+{
+   field(DTYP,"Soft Channel")
+}
+record(scaler,"$(P)")
+{
+        field(DESC,"$(DESC)")
+	field(DTYP,"asynScalerEL737")
+	field(OUT,"INST_IO @asyn($(PORT),0)")
+}

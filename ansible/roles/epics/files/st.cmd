@@ -16,8 +16,8 @@ EL734CreateController("motc","serial3",12);
 ### Motors
 
 dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=serial1,PORT=serial1,ADDR=0,OMAX=80,IMAX=80")
-dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=serial2,PORT=serial1,ADDR=0,OMAX=80,IMAX=80")
-dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=serial3,PORT=serial1,ADDR=0,OMAX=80,IMAX=80")
+dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=serial2,PORT=serial2,ADDR=0,OMAX=80,IMAX=80")
+dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=serial3,PORT=serial3,ADDR=0,OMAX=80,IMAX=80")
 
 dbLoadTemplate "$(TOP)/mota.substitutions"
 dbLoadTemplate "$(TOP)/motb.substitutions"
@@ -27,7 +27,7 @@ dbLoadTemplate "$(TOP)/motc.substitutions"
 #--------- load EL737 counter box
 drvAsynIPPortConfigure("cter1","localhost:62000",0,0,0)
 dbLoadRecords("$(TOP)/db/asynRecord.db","P=SQ:AMOR:,R=cter1,PORT=cter1,ADDR=0,OMAX=80,IMAX=80")
-dbLoadRecords("${TOP}/db/el737Record.db")
+dbLoadRecords("${TOP}/db/el737Record.db","P=SQ:AMOR:counter,PORT=cter1,DESC=AMORCounter")
 
 #asynSetTraceIOMask("cter1",0,2)
 
