@@ -120,12 +120,12 @@ class EL737Controller(LineReceiver):
                self.to_process('run\r')
                return
                
-           if data.startswith('st'):
+           if data.startswith('s'):
                self.counting = False
                self.endtime = time.time()
                self.write('\r')
-               self.to_process('stop\r')
-               self.remotestate = 1
+               #self.to_process('stop\r')
+               #self.remotestate = 1
                return
 
            if data.startswith('ps'):
@@ -215,9 +215,10 @@ class EL737Controller(LineReceiver):
 
            self.write('?2\r')
 
-           def connectionLost(self, reason):
-               print "Goodbye..."
-               print reason
+    def connectionLost(self, reason):
+        self.to_process('stop\r')
+        print "Goodbye..."
+        print reason
 
 
 class MyPIPE(protocol.ProcessProtocol):
