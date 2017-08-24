@@ -1,5 +1,5 @@
 local_download_dir: "/tmp"
-base_dir: "/opt/software"
+base_dir: "/home/scratch/software"
 install_dir: "/usr/local"
 amor_dir: "/opt/amor"
 amorsim_dir: "{{amor_dir}}/sinq-amorsim"

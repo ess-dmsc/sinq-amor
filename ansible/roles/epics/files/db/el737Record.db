@@ -11,6 +11,14 @@ record(stringin,"$(P):MsgTxt")
 {
    field(DTYP,"Soft Channel")
 }
+record(longout,"$(P):ThresholdCounter")
+{
+   field(DTYP,"Soft Channel")
+}
+record(longout,"$(P):Threshold")
+{
+   field(DTYP,"Soft Channel")
+}
 record(scaler,"$(P)")
 {
         field(DESC,"$(DESC)")

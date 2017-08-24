@@ -1,5 +1,5 @@
 
-software_dest: /opt/software
+software_dest: /home/scratch/software
 sources: "{{software_dest}}/sources"
 builds:  "{{software_dest}}/builds"
 
