@@ -1,3 +1,9 @@
+- name: Make sure that some packages are not available
+  become: yes
+  package:
+    name: python-twisted-core
+    state: absent
+
 - name: be sure required packages are installed
   become: yes
   yum:
@@ -7,8 +13,11 @@
     - epel-release
     - python
     - python-devel
+    - python-setuptools
     - python-pip
     - python2-crypto
+    - python-zope-interface
+    - pyOpenSSL
     - openssl-devel
 
 - name: install python packages
@@ -20,8 +29,13 @@
     - pip
     - pyepics
     - twisted
-    - pyopenssl
-    - service_identity 
+    - service_identity
+
+- name: Make sure that pip installation doesn't interfere
+  become: yes
+  pip:
+    name: pyopenssl
+    state: absent
 
 - name: download procServ
   git:

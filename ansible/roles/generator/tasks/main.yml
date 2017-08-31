@@ -4,10 +4,6 @@
     name: cmake
   become: yes
 
-- name: install required python modules
-  include: python_modules.yml
-  become: yes
-
 - name: install 0MQ
   include: zmq.yml
   when: use_zmq

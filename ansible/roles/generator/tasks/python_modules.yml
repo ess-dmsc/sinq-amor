@@ -1,7 +1,0 @@
-- name: Install twisted
-  package: 
-    name: "{{ item }}"
-    state: latest
-  with_items:
-    - python-setuptools
-    - python-twisted-core
