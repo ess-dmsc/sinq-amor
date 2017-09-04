@@ -1,9 +1,12 @@
 #include <gtest/gtest.h>
 
+#include "command_line_args.hpp"
+CLA argin;
+
 int main(int argc, char **argv) {
-  std::cout << CMAKE_CURRENT_SOURCE_DIR << std::endl;
-  
   ::testing::InitGoogleTest(&argc, argv);
+  argin.argc = argc;
+  argin.argv = argv;  
 
   return RUN_ALL_TESTS();
 }

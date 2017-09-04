@@ -4,6 +4,8 @@
 
 #include <fstream>
 #include <regex>
+#include <iostream>
+#include <getopt.h>
 
 std::string get_protocol(const std::string &s, const std::string &deft = "") {
   std::smatch m;
@@ -62,20 +64,53 @@ int SINQAmorSim::ConfigurationParser::parse_configuration_file(
   if(d.HasParseError () ) {
     return d.GetParseError();
   }
-  parse_configuration_file_impl(d);
-  return ConfigurationError::error_no_configuration_error;
+  return parse_configuration_file_impl(d);
 }
 
 int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl(
-    rapidjson::Document &d) {
+    rapidjson::Document &document) {
+  assert(document.IsObject());
 
-  
-  return ConfigurationError::error_unknown;
+  for (auto& m : document.GetObject()) {
+    if( m.name.GetString() == std::string("producer_broker")) {
+      if(!m.value.IsString()) {
+        return ConfigurationError::error_parsing_json;
+      }
+      config.producer = parse_string_uri(m.value.GetString());      
+    }
+    if( m.name.GetString() == std::string("multiplier")) {
+      if(!m.value.IsInt()) {
+        return ConfigurationError::error_parsing_json;
+      }
+      config.multiplier = m.value.GetInt();
+    }
+    if( m.name.GetString() == std::string("rate")) {
+      if(!m.value.IsInt()) {
+        return ConfigurationError::error_parsing_json;
+      }
+      config.rate = m.value.GetInt();
+    }
+    if( m.name.GetString() == std::string("source")) {
+      if(!m.value.IsString()) {
+        return ConfigurationError::error_parsing_json;
+      }
+      config.source = m.value.GetString();      
+    }
+
+  }
+  return ConfigurationError::error_no_configuration_error;
 }
 
 
 int SINQAmorSim::ConfigurationParser::parse_command_line(int argc,
                                                          char** argv) {
+
+  if(argc == 1) {
+    return ConfigurationError::error_no_configuration_error;
+  }
+
+
+  
   return ConfigurationError::error_unknown;
 }
 
