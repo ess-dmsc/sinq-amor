@@ -3,6 +3,17 @@ set(PROJECT_NAME_STR neventGenerator)
 project(${PROJECT_NAME_STR} CXX)
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${PROJECT_SOURCE_DIR}/cmake")
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9.0")
+    message(FATAL_ERROR "GCC below 4.9.0 does not fully support c++11.")
+  endif()
+endif()
+
+if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9.3")
+else ()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=auto")
+endif()
+
 set (CMAKE_CXX_FLAGS "-std=c++11 -pthread -D_GLIBCXX_USE_NANOSLEEP ${CMAKE_CXX_FLAGS}")
 
 add_custom_target(
@@ -25,9 +36,6 @@ else()
 endif()
 
 find_package(Googletest)
-if (have_gtest)
-add_gtest_to_target(${tgt})
-endif()
 
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 

@@ -24,7 +24,7 @@ namespace parser {
 //   Param p;
 //   std::smatch m;
 
-//   std::string _get_protocol(const std::string &s, const std::string &d = "")
+//   std::string get_protocol(const std::string &s, const std::string &d = "")
 // {
 //     if (std::regex_search(s, m, std::regex("^[A-Za-z]+"))) {
 //       return std::move(std::string(m[0]));
