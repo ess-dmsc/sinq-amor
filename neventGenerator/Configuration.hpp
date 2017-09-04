@@ -18,9 +18,9 @@ class Configuration {
 
 public:
   KafkaConfiguration producer;
-  std::string protocol{""};
+  //  std::string protocol{""};
   std::string configuration_file{""};
-  std::string filename{""};
+  std::string source{""};
   int multiplier{1};
   int rate{0};
 };
