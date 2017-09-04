@@ -1,26 +1,28 @@
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ../tests)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ../../tests)
 
 message(STATUS "Compiling tests")
 
-set(tgt "tests")
 set(sources
   tests.cxx
   parser.cxx
   ../Configuration.cxx
 )
-
 include_directories(
-  ${path_include_rdkafka}
-  ${path_include_flatbuffers}
-  ${path_include_rapidjson}
-  ${path_include_hdf5}
-  ${path_include_nexus}
+  ${RDKAFKA_INCLUDE_DIR}
+  ${FLATBUFFERS_INCLUDE_DIR}
+  ${RAPIDJSON_INCLUDE_DIR}
+  ${HDF5_INCLUDE_DIR}
+  ${NEXUS_INCLUDE_DIR}
+  ${ZMQ_INCLUDE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
   )
 
+set(tgt "tests")
+
 add_executable(${tgt} ${sources})
-add_dependencies(${tgt} flatbuffers_generate)
 target_compile_definitions(${tgt} PRIVATE ${compile_defs_common})
+target_compile_definitions(${tgt} PRIVATE CMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 target_include_directories(${tgt} PRIVATE ${path_include_common})
 target_link_libraries(${tgt} ${libraries_common})
+
 add_gtest_to_target(${tgt})
