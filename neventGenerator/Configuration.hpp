@@ -21,20 +21,28 @@ public:
   //  std::string protocol{""};
   std::string configuration_file{""};
   std::string source{""};
-  int multiplier{1};
+  int multiplier{0};
   int rate{0};
+  bool valid{true};
 };
 
 class ConfigurationParser {
-
+  // Looks into command line if any configuration file is specified. If so
+  // generates an initial configuration based on it, else looks for a default
+  // config file. If the latter is missing expects that all the relevant
+  // informations have been provided as command line argument.
 public:
   int parse_configuration_file(const std::string &input);
-  int parse_command_line(int argc, char** argv);
-
+  int parse_configuration(int argc, char** argv);
+  void override_configuration_with(const Configuration& other);
+  int validate();
+  
   int parse_configuration_file_impl(rapidjson::Document &d);
+  Configuration parse_command_line(int argc, char** argv);
+  
   KafkaConfiguration parse_string_uri(const std::string &uri,
                                       const bool use_defaults=false);
-
+  
   Configuration config;
 };
 }

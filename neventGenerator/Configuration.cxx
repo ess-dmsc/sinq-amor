@@ -5,6 +5,7 @@
 #include <fstream>
 #include <regex>
 #include <iostream>
+#include <sstream>
 #include <getopt.h>
 
 std::string get_protocol(const std::string &s, const std::string &deft = "") {
@@ -64,6 +65,7 @@ int SINQAmorSim::ConfigurationParser::parse_configuration_file(
   if(d.HasParseError () ) {
     return d.GetParseError();
   }
+  
   return parse_configuration_file_impl(d);
 }
 
@@ -102,15 +104,123 @@ int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl(
 }
 
 
-int SINQAmorSim::ConfigurationParser::parse_command_line(int argc,
-                                                         char** argv) {
-
-  if(argc == 1) {
-    return ConfigurationError::error_no_configuration_error;
+int
+SINQAmorSim::ConfigurationParser::parse_configuration(int argc,
+                                                      char** argv) {
+  int error = ConfigurationError::error_no_configuration_error;
+  Configuration command_line_config;
+  if(argc > 1) {
+    command_line_config = parse_command_line(argc,argv);
   }
 
-
+  if( command_line_config.configuration_file != "") {
+    error = parse_configuration_file(command_line_config.configuration_file);
+  } else {
+    error = parse_configuration_file("config.json");
+  }
   
-  return ConfigurationError::error_unknown;
+  if(error == ConfigurationError::error_no_configuration_error) {
+    override_configuration_with(command_line_config);
+    return validate();
+  } else {
+    return error;
+  }
 }
 
+SINQAmorSim::Configuration
+SINQAmorSim::ConfigurationParser::parse_command_line(int argc,
+                                                     char** argv) {
+  SINQAmorSim::Configuration result;
+
+  static struct option long_options[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"config-file", required_argument, nullptr, 0},
+    {"producer-uri", required_argument, nullptr, 0},
+    {"status-uri", required_argument, nullptr, 0},
+    {"use-signal-handler", required_argument, nullptr, 0},
+    {"source", required_argument, nullptr, 0},
+    {"multiplier", required_argument, nullptr, 0},
+    {"rate", required_argument, nullptr, 0},
+    {nullptr, 0, nullptr, 0},
+  };
+  std::string cmd;
+  int option_index = 0;
+  bool getopt_error = false;
+  while (true) {
+    int c = getopt_long(argc, argv, "h", long_options, &option_index);
+    if (c == -1)
+      break;
+    if (c == '?') {
+      getopt_error = true;
+    }
+    switch (c) {
+    case 'h':
+      break;
+    case 0:
+      auto lname = long_options[option_index].name;
+      if (std::string("help") == lname) {
+      }
+      if (std::string("config-file") == lname) {
+        result.configuration_file = optarg;
+      }
+      if (std::string("producer-uri") == lname) {
+        result.producer = parse_string_uri(optarg);
+      }
+      if (std::string("source") == lname) {
+        result.source = optarg;
+      }
+      if (std::string("multiplier") == lname) {
+        std::istringstream buffer(optarg);
+        buffer >> result.multiplier;
+      }
+      if (std::string("rate") == lname) {
+        std::istringstream buffer(optarg);
+        buffer >> result.rate;
+      }
+      break;
+    }
+  }
+
+  if (getopt_error) {
+    result.valid = false;
+    std::cerr << "ERROR parsing command line options\n";
+  }
+  
+  return std::move(result);
+}
+
+void
+SINQAmorSim::ConfigurationParser::override_configuration_with(const SINQAmorSim::Configuration& other) {
+
+  if(!other.producer.broker.empty()) {
+    config.producer.broker = other.producer.broker;
+  }
+  if(!other.producer.topic.empty()) {
+    config.producer.topic = other.producer.topic;
+  }
+  if(!other.configuration_file.empty()) {
+    config.configuration_file = other.configuration_file;
+  }
+  if(!other.source.empty()) {
+    config.source = other.source;
+  }
+  if(other.multiplier > 0) {
+    config.multiplier = other.multiplier ;
+  }
+  if(other.rate > 0) {
+    config.rate = other.rate;
+  }
+}
+
+int
+SINQAmorSim::ConfigurationParser::validate() {
+  if( config.producer.broker.empty() ||
+      config.producer.topic.empty() ||
+      config.source.empty() ||
+      config.multiplier <= 0 ||
+      config.rate <= 0 ) {
+    return ConfigurationError::error_configuration_invalid;
+  } else {
+    return ConfigurationError::error_no_configuration_error; 
+  }
+}
