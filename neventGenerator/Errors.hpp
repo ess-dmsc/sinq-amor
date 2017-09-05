@@ -3,6 +3,8 @@
 #include <string>
 
 namespace SINQAmorSim {
+  const std::string Err2Str(const int& id);
+  
   enum GenericError {
     error_unknown = -1001
   };
