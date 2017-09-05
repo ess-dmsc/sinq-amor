@@ -1,11 +1,9 @@
 #include <iostream>
-#include <unistd.h> // getopt
 
-#include "uparam.hpp"
 #include "nexus_reader.hpp"
 #include "mcstas_reader.hpp"
 #include "generator.hpp"
-#include "parser.hpp"
+#include "Configuration.hpp"
 
 typedef nexus::Amor Instrument;
 typedef nexus::NeXusSource<Instrument,nexus::PSIformat> Source;
@@ -23,15 +21,21 @@ typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
 typedef generator::KafkaListener<generator::receiver> Transport;
 //typedef FileWriterGen Transport
 
-typedef uparam::Param Param;
 
-
-Param parse(int, char **);
 int main(int argc, char **argv) {
 
-  Param input = parse(argc,argv);
+  SINQAmorSim::ConfigurationParser parser;
+  auto err = parser.parse_configuration(argc,argv);
+  if(!err) {
+    parser.print();  
+  } else {
+    std::cout << SINQAmorSim::Err2Str(err) << "\n";
+    return -1;
+  }
+  auto& config = parser.config;
   
-  Generator<Transport,Control,Serialiser> g(input);
+  Generator<Transport,Control,Serialiser> g(config.producer.broker,
+                                            config.producer.topic);
 
   std::vector<Source::value_type> stream;
   g.listen(stream);
@@ -39,56 +43,3 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-
-
-
-/*!
- * Default arguments and command line parser
- *  \author Michele Brambilla <mib.mic@gmail.com>
- *  \date Fri Jun 17 12:20:25 2016
- */
-Param parse(int argc, char **argv) {
-  Param input;
-  // default values
-  input.read("config.in",uparam::RapidJSON());
-
-  parser::Parser::Param p;
-  {
-    parser::Parser parser;
-    parser.init(std::string(argv[1]));
-    p=parser.get();
-  }
-  if( p["host"] != "" )  input["brokers"]=p["host"];
-  if( p["port"] != "" )  input["port"]=p["port"];
-  if( p["topic"] != "" ) input["topic"]=p["topic"];
-
-  opterr = 0;
-  int opt;
-  while ((opt = getopt (argc, argv, "a:c:f:s:e:o:")) != -1) {
-    switch (opt) {
-    case 'a': //area
-      input["2D"] = std::string(optarg);
-      break;
-    case 'c':
-      input["control"] = std::string(optarg);
-      break;
-    case 'f':
-      input["filename"] = std::string(optarg);
-      break;
-    case 's': // single dimension detector
-      input["1D"] = std::string(optarg);
-      break;
-    case 'e':
-      input["header"] = std::string(optarg);
-      break;
-    case 'o':
-      input["host"] = std::string(optarg);
-      break;
-    case '?':
-      // TODO help
-      exit(0);
-    }
-  }
-
-  return std::move(input);
-}
