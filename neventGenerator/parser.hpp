@@ -1,6 +1,6 @@
+#include <map>
 #include <regex>
 #include <string>
-#include <map>
 
 namespace parser {
 
@@ -55,7 +55,7 @@ class Parser {
 public:
   using Param = std::map<std::string, std::string>;
 
-  Parser() {};
+  Parser(){};
 
   Param &init(const std::string &input) {
     p["protocol"] = _get_protocol(input);
@@ -87,7 +87,7 @@ private:
   }
   std::string _get_topic(const std::string &s, const std::string &d = "") {
     size_t last = s.find_last_of("/");
-    return std::move(s.substr(last+1));
+    return std::move(s.substr(last + 1));
   }
 };
 }

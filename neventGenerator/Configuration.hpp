@@ -33,17 +33,17 @@ class ConfigurationParser {
   // informations have been provided as command line argument.
 public:
   int parse_configuration_file(const std::string &input);
-  int parse_configuration(int argc, char** argv);
-  void override_configuration_with(const Configuration& other);
+  int parse_configuration(int argc, char **argv);
+  void override_configuration_with(const Configuration &other);
   int validate();
   void print();
-  
+
   int parse_configuration_file_impl(rapidjson::Document &d);
-  Configuration parse_command_line(int argc, char** argv);
-  
+  Configuration parse_command_line(int argc, char **argv);
+
   KafkaConfiguration parse_string_uri(const std::string &uri,
-                                      const bool use_defaults=false);
-  
+                                      const bool use_defaults = false);
+
   Configuration config;
 };
 }
