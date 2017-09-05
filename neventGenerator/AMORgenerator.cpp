@@ -7,6 +7,7 @@
 #include "uparam.hpp"
 
 #include "parser.hpp"
+#include "Configuration.hpp"
 
 using StreamFormat = nexus::ESSformat;
 
@@ -32,7 +33,10 @@ Param parse(int, char **);
 ///  \author Michele Brambilla <mib.mic@gmail.com>
 ///  \date Wed Jun 08 15:14:10 2016
 int main(int argc, char **argv) {
-
+  
+  SINQAmorSim::ConfigurationParser parser;
+  auto err = parser.parse_configuration(argc,argv);
+  
   Param input = parse(argc, argv);
   input.print();
   Source stream(input, uparam::to_num<int>(input["multiplier"]));

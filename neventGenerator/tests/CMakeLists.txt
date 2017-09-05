@@ -5,8 +5,9 @@ message(STATUS "Compiling tests")
 set(sources
   tests.cxx
   parser.cxx
-  ../Configuration.cxx
-)
+  errors.cxx
+  $<TARGET_OBJECTS:nevent-generator__objects>
+  )
 include_directories(
   ${RDKAFKA_INCLUDE_DIR}
   ${FLATBUFFERS_INCLUDE_DIR}

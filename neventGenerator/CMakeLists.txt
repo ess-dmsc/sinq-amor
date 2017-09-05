@@ -60,8 +60,18 @@ pthread
 z
 )
 
+set(tgt "nevent-generator__objects")
+add_library(${tgt} OBJECT
+Configuration.cxx
+Errors.cxx
+)
+
 foreach(tgt AMORgenerator AMORreceiver)
-  add_executable(${tgt} ${tgt}.cpp)
+  set(sources
+    ${tgt}.cpp
+    $<TARGET_OBJECTS:nevent-generator__objects>
+    )
+  add_executable(${tgt} ${sources})
   target_link_libraries(${tgt} ${libraries_common})
   add_dependencies(${tgt} flatbuffers_generate)
 endforeach()
