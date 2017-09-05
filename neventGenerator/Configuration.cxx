@@ -127,6 +127,8 @@ SINQAmorSim::ConfigurationParser::parse_configuration(int argc,
   }
 }
 
+void usage(const std::string& executable);
+
 SINQAmorSim::Configuration
 SINQAmorSim::ConfigurationParser::parse_command_line(int argc,
                                                      char** argv) {
@@ -155,6 +157,7 @@ SINQAmorSim::ConfigurationParser::parse_command_line(int argc,
     }
     switch (c) {
     case 'h':
+      usage(std::string(argv[0]));
       break;
     case 0:
       auto lname = long_options[option_index].name;
@@ -223,4 +226,24 @@ SINQAmorSim::ConfigurationParser::validate() {
   } else {
     return ConfigurationError::error_no_configuration_error; 
   }
+}
+
+void SINQAmorSim::ConfigurationParser::print() {
+  std::cout << "producer:\n"
+            << "\tbroker: " << config.producer.broker << "\n"
+            << "\ttopic: " << config.producer.topic  << "\n"
+            << "source: " << config.source << "\n"
+            << "multiplier: " << config.multiplier << "\n"
+            << "rate: " << config.rate << "\n"
+            << "\n";
+}
+
+
+void usage(const std::string& exe) {
+  std::cout << "Usage: "<<  exe << " [OPTIONS]\n";
+  std::cout << "\t--config-file: " << "\n";
+  std::cout << "\t--producer-uri: " << "\n";
+  std::cout << "\t--source: " << "\n";
+  std::cout << "\t--multiplier: " << "\n";
+  std::cout << "\t--rate: " << "\n";
 }

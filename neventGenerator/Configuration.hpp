@@ -36,6 +36,7 @@ public:
   int parse_configuration(int argc, char** argv);
   void override_configuration_with(const Configuration& other);
   int validate();
+  void print();
   
   int parse_configuration_file_impl(rapidjson::Document &d);
   Configuration parse_command_line(int argc, char** argv);

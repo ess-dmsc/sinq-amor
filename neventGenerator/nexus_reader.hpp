@@ -37,8 +37,12 @@ template <typename Instrument, typename Format> struct NeXusSource {
   const_iterator end() const { return data.end(); }
 
   NeXusSource(uparam::Param p, const int multiplier = 1) {
-    if (NXopen(p["filename"].c_str(), NXACC_READ, &handle) != NX_OK) {
-      throw std::runtime_error("Failed to open NeXus file " + p["filename"]);
+    NeXusSource(p["filename"],multiplier);
+  }
+
+  NeXusSource(const std::string& filename, const int multiplier = 1) {
+    if (NXopen(filename.c_str(), NXACC_READ, &handle) != NX_OK) {
+      throw std::runtime_error("Failed to open NeXus file " + filename);
     }
     read();
     if (multiplier > 1) {
@@ -48,6 +52,7 @@ template <typename Instrument, typename Format> struct NeXusSource {
     }
   }
 
+  
   int count() const { return data.size(); }
 
 private:
