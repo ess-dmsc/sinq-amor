@@ -47,8 +47,8 @@ template <typename Streamer, typename Control, typename Serialiser>
 struct Generator {
   typedef Generator<Streamer, Control, Serialiser> self_t;
 
-  Generator(const std::string& broker, const std::string& topic) :
-    streamer(broker,topic), control{new Control()} { }
+  Generator(const std::string &broker, const std::string &topic)
+      : streamer(broker, topic), control{new Control()} {}
 
   template <class T> void run(T *stream, int nev = 0) {
     std::thread ts(&self_t::run_impl<T>, this, stream, nev);

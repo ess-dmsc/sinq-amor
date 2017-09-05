@@ -3,10 +3,10 @@
 #include "rapidjson/istreamwrapper.h"
 
 #include <fstream>
-#include <regex>
-#include <iostream>
-#include <sstream>
 #include <getopt.h>
+#include <iostream>
+#include <regex>
+#include <sstream>
 
 std::string get_protocol(const std::string &s, const std::string &deft = "") {
   std::smatch m;
@@ -32,21 +32,23 @@ std::string get_port(const std::string &s, const std::string &deft = "") {
 std::string get_topic(const std::string &s, const std::string &deft = "") {
   std::smatch m;
   if (std::regex_search(s, m, std::regex("/[A-Za-z0-9-_:.]*$")))
-    return std::move(std::string(m[0]).erase(0,1));
+    return std::move(std::string(m[0]).erase(0, 1));
   return std::move(deft);
 }
 
-SINQAmorSim::KafkaConfiguration SINQAmorSim::ConfigurationParser::parse_string_uri(const std::string &uri,const bool use_defaults) {
+SINQAmorSim::KafkaConfiguration
+SINQAmorSim::ConfigurationParser::parse_string_uri(const std::string &uri,
+                                                   const bool use_defaults) {
   KafkaConfiguration configuration;
-  if(use_defaults) {
-    configuration.broker = get_broker(uri, "localhost") + ":" + get_port(uri, "9092");
+  if (use_defaults) {
+    configuration.broker =
+        get_broker(uri, "localhost") + ":" + get_port(uri, "9092");
     configuration.topic = get_topic(uri, "empty-topic");
-  }
-  else {
+  } else {
     auto broker = get_broker(uri);
-    auto port =  get_port(uri);
-    if(broker!="" && port != "") {
-      configuration.broker =  broker + ":" + port;
+    auto port = get_port(uri);
+    if (broker != "" && port != "") {
+      configuration.broker = broker + ":" + port;
     }
     configuration.topic = get_topic(uri);
   }
@@ -56,16 +58,16 @@ SINQAmorSim::KafkaConfiguration SINQAmorSim::ConfigurationParser::parse_string_u
 int SINQAmorSim::ConfigurationParser::parse_configuration_file(
     const std::string &input) {
   std::ifstream ifs(input);
-  if( !ifs.good()) {
+  if (!ifs.good()) {
     return ConfigurationError::error_input_file;
   }
   rapidjson::IStreamWrapper isw(ifs);
   rapidjson::Document d;
   d.ParseStream(isw);
-  if(d.HasParseError () ) {
+  if (d.HasParseError()) {
     return d.GetParseError();
   }
-  
+
   return parse_configuration_file_impl(d);
 }
 
@@ -73,53 +75,50 @@ int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl(
     rapidjson::Document &document) {
   assert(document.IsObject());
 
-  for (auto& m : document.GetObject()) {
-    if( m.name.GetString() == std::string("producer_broker")) {
-      if(!m.value.IsString()) {
+  for (auto &m : document.GetObject()) {
+    if (m.name.GetString() == std::string("producer_broker")) {
+      if (!m.value.IsString()) {
         return ConfigurationError::error_parsing_json;
       }
-      config.producer = parse_string_uri(m.value.GetString());      
+      config.producer = parse_string_uri(m.value.GetString());
     }
-    if( m.name.GetString() == std::string("multiplier")) {
-      if(!m.value.IsInt()) {
+    if (m.name.GetString() == std::string("multiplier")) {
+      if (!m.value.IsInt()) {
         return ConfigurationError::error_parsing_json;
       }
       config.multiplier = m.value.GetInt();
     }
-    if( m.name.GetString() == std::string("rate")) {
-      if(!m.value.IsInt()) {
+    if (m.name.GetString() == std::string("rate")) {
+      if (!m.value.IsInt()) {
         return ConfigurationError::error_parsing_json;
       }
       config.rate = m.value.GetInt();
     }
-    if( m.name.GetString() == std::string("source")) {
-      if(!m.value.IsString()) {
+    if (m.name.GetString() == std::string("source")) {
+      if (!m.value.IsString()) {
         return ConfigurationError::error_parsing_json;
       }
-      config.source = m.value.GetString();      
+      config.source = m.value.GetString();
     }
-
   }
   return ConfigurationError::error_no_configuration_error;
 }
 
-
-int
-SINQAmorSim::ConfigurationParser::parse_configuration(int argc,
-                                                      char** argv) {
+int SINQAmorSim::ConfigurationParser::parse_configuration(int argc,
+                                                          char **argv) {
   int error = ConfigurationError::error_no_configuration_error;
   Configuration command_line_config;
-  if(argc > 1) {
-    command_line_config = parse_command_line(argc,argv);
+  if (argc > 1) {
+    command_line_config = parse_command_line(argc, argv);
   }
 
-  if( command_line_config.configuration_file != "") {
+  if (command_line_config.configuration_file != "") {
     error = parse_configuration_file(command_line_config.configuration_file);
   } else {
     error = parse_configuration_file("config.json");
   }
-  
-  if(error == ConfigurationError::error_no_configuration_error) {
+
+  if (error == ConfigurationError::error_no_configuration_error) {
     override_configuration_with(command_line_config);
     return validate();
   } else {
@@ -127,23 +126,22 @@ SINQAmorSim::ConfigurationParser::parse_configuration(int argc,
   }
 }
 
-void usage(const std::string& executable);
+void usage(const std::string &executable);
 
 SINQAmorSim::Configuration
-SINQAmorSim::ConfigurationParser::parse_command_line(int argc,
-                                                     char** argv) {
+SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
   SINQAmorSim::Configuration result;
 
   static struct option long_options[] = {
-    {"help", no_argument, nullptr, 'h'},
-    {"config-file", required_argument, nullptr, 0},
-    {"producer-uri", required_argument, nullptr, 0},
-    {"status-uri", required_argument, nullptr, 0},
-    {"use-signal-handler", required_argument, nullptr, 0},
-    {"source", required_argument, nullptr, 0},
-    {"multiplier", required_argument, nullptr, 0},
-    {"rate", required_argument, nullptr, 0},
-    {nullptr, 0, nullptr, 0},
+      {"help", no_argument, nullptr, 'h'},
+      {"config-file", required_argument, nullptr, 0},
+      {"producer-uri", required_argument, nullptr, 0},
+      {"status-uri", required_argument, nullptr, 0},
+      {"use-signal-handler", required_argument, nullptr, 0},
+      {"source", required_argument, nullptr, 0},
+      {"multiplier", required_argument, nullptr, 0},
+      {"rate", required_argument, nullptr, 0},
+      {nullptr, 0, nullptr, 0},
   };
   std::string cmd;
   int option_index = 0;
@@ -188,62 +186,62 @@ SINQAmorSim::ConfigurationParser::parse_command_line(int argc,
     result.valid = false;
     std::cerr << "ERROR parsing command line options\n";
   }
-  
+
   return std::move(result);
 }
 
-void
-SINQAmorSim::ConfigurationParser::override_configuration_with(const SINQAmorSim::Configuration& other) {
+void SINQAmorSim::ConfigurationParser::override_configuration_with(
+    const SINQAmorSim::Configuration &other) {
 
-  if(!other.producer.broker.empty()) {
+  if (!other.producer.broker.empty()) {
     config.producer.broker = other.producer.broker;
   }
-  if(!other.producer.topic.empty()) {
+  if (!other.producer.topic.empty()) {
     config.producer.topic = other.producer.topic;
   }
-  if(!other.configuration_file.empty()) {
+  if (!other.configuration_file.empty()) {
     config.configuration_file = other.configuration_file;
   }
-  if(!other.source.empty()) {
+  if (!other.source.empty()) {
     config.source = other.source;
   }
-  if(other.multiplier > 0) {
-    config.multiplier = other.multiplier ;
+  if (other.multiplier > 0) {
+    config.multiplier = other.multiplier;
   }
-  if(other.rate > 0) {
+  if (other.rate > 0) {
     config.rate = other.rate;
   }
 }
 
-int
-SINQAmorSim::ConfigurationParser::validate() {
-  if( config.producer.broker.empty() ||
-      config.producer.topic.empty() ||
-      config.source.empty() ||
-      config.multiplier <= 0 ||
-      config.rate <= 0 ) {
+int SINQAmorSim::ConfigurationParser::validate() {
+  if (config.producer.broker.empty() || config.producer.topic.empty() ||
+      config.source.empty() || config.multiplier <= 0 || config.rate <= 0) {
     return ConfigurationError::error_configuration_invalid;
   } else {
-    return ConfigurationError::error_no_configuration_error; 
+    return ConfigurationError::error_no_configuration_error;
   }
 }
 
 void SINQAmorSim::ConfigurationParser::print() {
   std::cout << "producer:\n"
             << "\tbroker: " << config.producer.broker << "\n"
-            << "\ttopic: " << config.producer.topic  << "\n"
+            << "\ttopic: " << config.producer.topic << "\n"
             << "source: " << config.source << "\n"
             << "multiplier: " << config.multiplier << "\n"
             << "rate: " << config.rate << "\n"
             << "\n";
 }
 
-
-void usage(const std::string& exe) {
-  std::cout << "Usage: "<<  exe << " [OPTIONS]\n";
-  std::cout << "\t--config-file: " << "\n";
-  std::cout << "\t--producer-uri: " << "\n";
-  std::cout << "\t--source: " << "\n";
-  std::cout << "\t--multiplier: " << "\n";
-  std::cout << "\t--rate: " << "\n";
+void usage(const std::string &exe) {
+  std::cout << "Usage: " << exe << " [OPTIONS]\n";
+  std::cout << "\t--config-file: "
+            << "\n";
+  std::cout << "\t--producer-uri: "
+            << "\n";
+  std::cout << "\t--source: "
+            << "\n";
+  std::cout << "\t--multiplier: "
+            << "\n";
+  std::cout << "\t--rate: "
+            << "\n";
 }

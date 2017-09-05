@@ -26,11 +26,11 @@ enum { transmitter, receiver };
  */
 template <int mode_selector> struct KafkaGen {
 
-  KafkaGen(const std::string& broker_, const std::string& topic_) :
-    brokers(broker_), topic_str(topic_) {
+  KafkaGen(const std::string &broker_, const std::string &topic_)
+      : brokers(broker_), topic_str(topic_) {
     conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
     tconf = RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC);
-    
+
     conf->set("metadata.broker.list", brokers, errstr);
     if (!debug.empty()) {
       if (conf->set("debug", debug, errstr) != RdKafka::Conf::CONF_OK) {
@@ -149,7 +149,7 @@ private:
 template <int mode_selector> struct KafkaListener {
   static const int max_header_size = 10000;
 
-  KafkaListener(const std::string& broker_, const std::string& topic_)
+  KafkaListener(const std::string &broker_, const std::string &topic_)
       : brokers(broker_), topic_str(topic_) {
     conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
     tconf = RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC);

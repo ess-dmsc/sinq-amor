@@ -1,11 +1,11 @@
 #pragma once
 
-#include <iostream>
 #include <fstream>
-#include <string>
 #include <inttypes.h>
-#include <type_traits>
+#include <iostream>
 #include <iterator>
+#include <string>
+#include <type_traits>
 
 #include "schemas/ev42_events_generated.h"
 
@@ -17,8 +17,9 @@ template <typename T> struct FlatBufSerialiser {
   typedef std::true_type is_serialised;
   FlatBufSerialiser() {}
 
-  std::vector<char> &serialise(const int &message_id, const uint64_t &pulse_time,
-                               T *value = NULL, int nev = 0) {
+  std::vector<char> &serialise(const int &message_id,
+                               const uint64_t &pulse_time, T *value = NULL,
+                               int nev = 0) {
 
     flatbuffers::FlatBufferBuilder builder;
     auto source_name = builder.CreateString("AMOR.event.stream");
@@ -59,7 +60,7 @@ private:
 template <typename T> struct NoSerialiser {
   typedef std::false_type is_serialised;
 
-  NoSerialiser() : buf(nullptr) {};
+  NoSerialiser() : buf(nullptr){};
   char *get() { return nullptr; }
 
   const int size() { return _size; }
