@@ -4,8 +4,6 @@
 #include "mcstas_reader.hpp"
 #include "nexus_reader.hpp"
 
-#include "Configuration.hpp"
-
 using StreamFormat = nexus::ESSformat;
 
 using Instrument = nexus::Amor;
@@ -35,8 +33,7 @@ int main(int argc, char **argv) {
   auto &config = parser.config;
 
   Source stream(config.source, config.multiplier);
-  Generator<Communication, Control, Serialiser> g(config.producer.broker,
-                                                  config.producer.topic);
+  Generator<Communication, Control, Serialiser> g(config);
   
   int n_events = stream.count() / 2;
   g.run<StreamFormat::value_type,TimeStamp>(&(stream.begin()[0]), n_events);

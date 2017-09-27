@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "Configuration.hpp"
+
 #if HAVE_ZMQ
 #include "zmq_generator.hpp"
 #endif
@@ -48,8 +50,8 @@ template <typename Streamer, typename Control, typename Serialiser>
 struct Generator {
   typedef Generator<Streamer, Control, Serialiser> self_t;
 
-  Generator(const std::string &broker, const std::string &topic)
-      : streamer(broker, topic), control{new Control()} {}
+  Generator(const SINQAmorSim::Configuration& configuration)
+    : config(configuration), streamer(config.producer.broker, config.producer.broker), control{new Control()} {}
 
   template <class T, class Type> void run(T *stream, int nev = 0) {
     std::thread ts(&self_t::run_impl<T,Type>, this, stream, nev);
@@ -68,7 +70,8 @@ private:
   std::unique_ptr<Control> control;
   Serialiser serialiser;
   bool initial_status;
-
+  SINQAmorSim::Configuration config;
+  
   template <class T, class Type> void run_impl(T *stream, int nev = 0) {
     using namespace std::chrono;
     uint64_t pulseID = 0;
