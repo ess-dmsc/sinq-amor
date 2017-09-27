@@ -18,6 +18,7 @@ enum ConfigurationError {
 
 
   class ConfigurationParsingException: public std::exception {
+  public:
     virtual const char* what() const throw() {
       return "Error parsing configuration";
     }

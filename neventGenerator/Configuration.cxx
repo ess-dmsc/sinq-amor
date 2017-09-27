@@ -122,12 +122,16 @@ int SINQAmorSim::ConfigurationParser::parse_configuration(int argc,
     command_line_config = parse_command_line(argc, argv);
   }
 
-  if (command_line_config.configuration_file != "") {
-    error = parse_configuration_file(command_line_config.configuration_file);
-  } else {
-    error = parse_configuration_file("config.json");
+  try {
+    if (command_line_config.configuration_file.empty()) {
+      error = parse_configuration_file("config.json");
+    } else {
+      error = parse_configuration_file(command_line_config.configuration_file);
+    }
+  } catch (const ConfigurationParsingException& e) {
+    std::cout << e.what() << "\n";
   }
-
+  
   if (error == ConfigurationError::error_no_configuration_error) {
     override_configuration_with(command_line_config);
     return validate();
@@ -175,7 +179,7 @@ SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
         result.configuration_file = optarg;
       }
       if (std::string("producer-uri") == lname) {
-        result.producer = parse_string_uri(optarg);
+        result.producer = parse_string_uri(optarg,true);
       }
       if (std::string("source") == lname) {
         result.source = optarg;
