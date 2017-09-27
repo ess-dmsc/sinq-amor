@@ -15,20 +15,17 @@ std::string get_protocol(const std::string &s, const std::string &deft = "") {
   }
   return std::move(deft);
 }
-std::string get_broker(const std::string &s, const std::string &deft = "") {
+
+std::string get_broker_topic(const std::string &s, const std::string &deft = "") {
   std::smatch m;
-  if (std::regex_search(s, m, std::regex("//[A-Za-z\\d.]+")))
-    return std::move(std::string(m[0]).substr(2));
-  return std::move(deft);
-}
-std::string get_port(const std::string &s, const std::string &deft = "") {
-  std::smatch m;
-  if (std::regex_search(s, m, std::regex(":\\d+/"))) {
-    std::string result(m[0]);
-    return std::move(result.substr(1, result.length() - 2));
+  if (std::regex_search(s, m, std::regex("//[A-Za-z0-9.,:]+/"))) {
+    auto result = std::string(m[0]).substr(2);
+    result.pop_back();
+    return std::move(result);
   }
   return std::move(deft);
 }
+
 std::string get_topic(const std::string &s, const std::string &deft = "") {
   std::smatch m;
   if (std::regex_search(s, m, std::regex("/[A-Za-z0-9-_:.]*$")))
@@ -36,21 +33,34 @@ std::string get_topic(const std::string &s, const std::string &deft = "") {
   return std::move(deft);
 }
 
+bool broker_topic_is_valid(const std::string& broker, const std::string& topic) {
+  if(topic.empty() ||
+     broker.empty() ||
+     broker.front() == ':' ||
+     broker.back() == ':' ) {
+    return false;
+  }
+  if(broker.find(":,") != std::string::npos  ||
+     broker.find(",:") != std::string::npos ) {
+    return false;
+  }
+
+  return true;
+}
+
 SINQAmorSim::KafkaConfiguration
 SINQAmorSim::ConfigurationParser::parse_string_uri(const std::string &uri,
                                                    const bool use_defaults) {
   KafkaConfiguration configuration;
   if (use_defaults) {
-    configuration.broker =
-        get_broker(uri, "localhost") + ":" + get_port(uri, "9092");
+    configuration.broker = get_broker_topic(uri,"localhost:9092");
     configuration.topic = get_topic(uri, "empty-topic");
   } else {
-    auto broker = get_broker(uri);
-    auto port = get_port(uri);
-    if (broker != "" && port != "") {
-      configuration.broker = broker + ":" + port;
-    }
+    configuration.broker = get_broker_topic(uri);
     configuration.topic = get_topic(uri);
+    if(!broker_topic_is_valid(configuration.broker,configuration.topic) ) {
+      throw ConfigurationParsingException();
+    }
   }
   return configuration;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <exception>
 
 namespace SINQAmorSim {
 const std::string Err2Str(const int &id);
@@ -14,4 +15,13 @@ enum ConfigurationError {
   error_parsing_command_line = -12,
   error_configuration_invalid = -13
 };
+
+
+  class ConfigurationParsingException: public std::exception {
+    virtual const char* what() const throw() {
+      return "Error parsing configuration";
+    }
+  };
+  
+
 }
