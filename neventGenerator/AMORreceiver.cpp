@@ -32,8 +32,7 @@ int main(int argc, char **argv) {
   }
   auto &config = parser.config;
 
-  Generator<Transport, Control, Serialiser> g(config.producer.broker,
-                                              config.producer.topic);
+  Generator<Transport, Control, Serialiser> g(config);
 
   std::vector<Source::value_type> stream;
   g.listen(stream);
