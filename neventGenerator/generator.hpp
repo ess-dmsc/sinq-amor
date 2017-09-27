@@ -22,6 +22,7 @@
 #include "kafka_generator.hpp"
 
 #include "control.hpp"
+#include "timestamp_generator.hpp"
 
 using nanoseconds = std::chrono::nanoseconds;
 
@@ -50,8 +51,8 @@ struct Generator {
   Generator(const std::string &broker, const std::string &topic)
       : streamer(broker, topic), control{new Control()} {}
 
-  template <class T> void run(T *stream, int nev = 0) {
-    std::thread ts(&self_t::run_impl<T>, this, stream, nev);
+  template <class T, class Type> void run(T *stream, int nev = 0) {
+    std::thread ts(&self_t::run_impl<T,Type>, this, stream, nev);
     control->update();
     ts.join();
   }
@@ -67,16 +68,8 @@ private:
   std::unique_ptr<Control> control;
   Serialiser serialiser;
   bool initial_status;
-  std::default_random_engine engine;
 
-  template <class T>
-  void generate_timestamp(T *first, T *last, const uint32_t pulse_lag) {
-    std::uniform_int_distribution<T> distr(0, pulse_lag);
-    auto rng = std::bind(distr, engine);
-    std::generate(first, last, rng);
-  }
-
-  template <class T> void run_impl(T *stream, int nev = 0) {
+  template <class T, class Type> void run_impl(T *stream, int nev = 0) {
     using namespace std::chrono;
     uint64_t pulseID = 0;
     int count = 0;
@@ -91,6 +84,8 @@ private:
       nanoseconds ns =
           duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
       auto timestamp = ns.count();
+      generate_timestamp(stream, stream + nev, control->rate(), timestamp,Type());
+
       if (control->run()) {
         streamer.send(pulseID, timestamp, stream, nev, serialiser);
         ++count;
@@ -102,7 +97,6 @@ private:
         ++timeout->tm_sec;
         std::this_thread::sleep_until(
             system_clock::from_time_t(mktime(timeout)));
-        generate_timestamp(stream, stream + nev, floor(1e9 / control->rate()));
       }
 
       if (std::chrono::duration_cast<std::chrono::seconds>(system_clock::now() -
