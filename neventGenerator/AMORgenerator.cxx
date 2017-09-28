@@ -36,6 +36,6 @@ int main(int argc, char **argv) {
 
   Generator<Communication, Control, Serialiser> g(config);
   g.run<StreamFormat::value_type>(data);
-  
+
   return 0;
 }

@@ -1,10 +1,10 @@
 #pragma once
 
 #include <cctype>
+#include <chrono>
 #include <sstream>
 #include <string>
 #include <utility>
-#include <chrono>
 
 #include <librdkafka/rdkafkacpp.h>
 
@@ -21,10 +21,9 @@ uint64_t timestamp_now() {
       .count();
 }
 
+////////////////
+// Producer
 
-  ////////////////
-  // Producer
-  
 template <class Serialiser> class KafkaTransmitter {
 
 public:
@@ -38,10 +37,10 @@ public:
 
     std::unique_ptr<RdKafka::Conf> conf{
         RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL)};
-    if(!conf) {
+    if (!conf) {
       throw std::runtime_error("Unable to create RdKafka::Conf");
     }
-    
+
     std::string errstr;
     std::string debug;
     conf->set("metadata.broker.list", brokers, errstr);
@@ -76,7 +75,7 @@ public:
   }
 
   int poll() { return producer->poll(-1); }
-  
+
 private:
   Serialiser serialiser;
   std::string topic_name;
@@ -100,11 +99,9 @@ size_t KafkaTransmitter<FlatBufferSerialiser>::send(const uint64_t &pid,
   return 0;
 }
 
+////////////////
+// Consumer
 
-
-  ////////////////
-  // Consumer
-  
 struct KafkaListener {
   static const int max_header_size = 10000;
 
