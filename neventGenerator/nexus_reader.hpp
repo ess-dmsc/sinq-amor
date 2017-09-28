@@ -24,8 +24,8 @@ namespace SINQAmorSim {
 ///  \author Michele Brambilla <mib.mic@gmail.com>
 ///  \date Wed Jun 08 16:49:17 2016
 template <typename Instrument, typename Format> struct NeXusSource {
-  typedef NeXusSource self_t;
-  typedef typename Format::value_type value_type;
+  using self_t = NeXusSource;
+  using value_type = typename Format::value_type;
   typedef typename std::vector<value_type>::iterator iterator;
   typedef typename std::vector<value_type>::const_iterator const_iterator;
 
@@ -51,7 +51,7 @@ template <typename Instrument, typename Format> struct NeXusSource {
   }
 
   int count() const { return data.size(); }
-
+  std::vector<value_type> get() { return data; }
 private:
   NXhandle handle;
   Instrument instrum;

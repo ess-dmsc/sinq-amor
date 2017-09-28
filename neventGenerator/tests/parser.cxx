@@ -293,3 +293,80 @@ TEST(ConfigurationParser, error_incomplete_configuration) {
   destroy_command_line_args(argc, argv);
   optind = 0;
 }
+
+TEST(ConfigurationParser, timestamp_generator_from_file) {
+
+  SINQAmorSim::ConfigurationParser parser;
+  rapidjson::Document document;
+  document.Parse("{ \"timestamp_generator\" : \"none\" }");
+  parser.parse_configuration_file_impl(document);
+  EXPECT_EQ(parser.config.timestamp_generator, std::string("none"));
+
+  document.Parse("{ \"timestamp_generator\" : \"const_timestamp\" }");
+  parser.parse_configuration_file_impl(document);
+  EXPECT_EQ(parser.config.timestamp_generator, std::string("const_timestamp"));
+
+  document.Parse("{ \"timestamp_generator\" : \"random_timestamp\" }");
+  parser.parse_configuration_file_impl(document);
+  EXPECT_EQ(parser.config.timestamp_generator, std::string("random_timestamp"));
+
+  document.Parse("{ \"timestamp_generator\" : \"any_timestamp\" }");
+  parser.parse_configuration_file_impl(document);
+  EXPECT_EQ(parser.config.timestamp_generator, std::string("any_timestamp"));
+
+  auto filename = source_dir + "/valid_configuration.json";
+  parser.parse_configuration_file(filename);
+  EXPECT_EQ(parser.config.timestamp_generator, std::string("any_other_timestamp"));
+
+}
+
+
+TEST(ConfigurationParser, empty_timestamp_generator_in_command_line) {
+
+  SINQAmorSim::ConfigurationParser parser;
+
+  int argc = 11, count = 1;
+  char **argv = (char **)calloc(argc, sizeof(char *));
+  init_command_line_args(argc, argv);
+  
+  auto result = parser.parse_command_line(count,argv);
+  EXPECT_TRUE(result.timestamp_generator.empty());
+  
+  destroy_command_line_args(argc, argv);
+  optind = 0;
+}
+
+TEST(ConfigurationParser, timestamp_generator_from_command_line) {
+
+  SINQAmorSim::ConfigurationParser parser;
+
+  int argc = 11, count = 1;
+  char **argv = (char **)calloc(argc, sizeof(char *));
+  init_command_line_args(argc, argv);
+  
+  add_command_line_arg(&count, argv, "--timestamp-generator", "any_timestamp");
+  auto result = parser.parse_command_line(count,argv);
+  EXPECT_EQ(result.timestamp_generator,std::string("any_timestamp"));
+  
+  destroy_command_line_args(argc, argv);
+  optind = 0;
+}
+
+TEST(ConfigurationParser, command_line_timestamp_generator_override_file) {
+  SINQAmorSim::ConfigurationParser parser;
+  
+  int argc = 11, count = 1;
+  char **argv = (char **)calloc(argc, sizeof(char *));
+  init_command_line_args(argc, argv);
+  
+  auto filename = source_dir + "/valid_configuration.json";
+  add_command_line_arg(&count, argv, "--config-file", &filename[0]);
+  add_command_line_arg(&count, argv, "--timestamp-generator", "yet_another_timestamp");
+  
+  parser.parse_configuration(count,argv);
+  EXPECT_EQ(parser.config.timestamp_generator, std::string("yet_another_timestamp"));
+
+  destroy_command_line_args(argc, argv);
+  optind = 0;
+
+}

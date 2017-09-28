@@ -20,6 +20,10 @@ uint64_t timestamp_now() {
       .count();
 }
 
+
+  ////////////////
+  // Producer
+  
 template <class Serialiser> class KafkaTransmitter {
 
 public:
@@ -33,7 +37,10 @@ public:
 
     std::unique_ptr<RdKafka::Conf> conf{
         RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL)};
-
+    if(!conf) {
+      throw std::runtime_error("Unable to create RdKafka::Conf");
+    }
+    
     std::string errstr;
     std::string debug;
     conf->set("metadata.broker.list", brokers, errstr);
@@ -53,7 +60,7 @@ public:
     }
   }
 
-  template <typename T> int send(std::vector<T> &data, const int nev = -1) {
+  template <typename T> size_t send(std::vector<T> &data, const int nev = -1) {
     RdKafka::ErrorCode resp = producer->produce(
         topic_name, RdKafka::Topic::PARTITION_UA,
         RdKafka::Producer::RK_MSG_COPY, &data[0], data.size() * sizeof(T),
@@ -61,96 +68,41 @@ public:
     return int(producer->poll(10));
   }
 
-  template <typename T> void send(T *data, const int size, const int flag = 0) {
-    // RdKafka::ErrorCode resp = producer->produce(
-    //     topic, partition, RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
-    //     data, size * sizeof(T), NULL, NULL);
-    // if (resp != RdKafka::ERR_NO_ERROR)
-    //   std::cerr << "% Produce failed: " << RdKafka::err2str(resp) <<
-    //   std::endl;
-    // std::cerr << "% Produced message (" << sizeof(data) << " bytes)"
-    //           << std::endl;
-  }
-
   template <typename T>
-  void send(std::string h, T *data, int nev,
-            SINQAmorSim::NoSerialiser serialiser) {
-    // RdKafka::ErrorCode resp = producer->produce(
-    //     topic, partition, RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
-    //     (void *)h.c_str(), h.size(), NULL, NULL);
-    // if (resp != RdKafka::ERR_NO_ERROR)
-    //   std::cerr << "% Produce failed header: " << RdKafka::err2str(resp)
-    //             << std::endl;
-    // if (nev > 0) {
-    //   resp = producer->produce(
-    //       topic, partition, RdKafka::Producer::RK_MSG_COPY /* Copy payload
-    //       */, (void *)data, nev * sizeof(T), NULL, NULL);
-
-    //   if (resp != RdKafka::ERR_NO_ERROR)
-    //     std::cerr << "% Produce failed data: " << RdKafka::err2str(resp)
-    //               << std::endl;
-    // }
-
-    // std::cerr << "% Produced message (" << h.size() + sizeof(T) * nev
-    //           << " bytes)" << std::endl;
+  size_t send(const uint64_t &, const uint64_t &, std::vector<T> &,
+              const int = 1) {
+    return 0;
   }
 
-  template <typename T>
-  void send(std::string h, T *data, int nev,
-            SINQAmorSim::FlatBufferSerialiser serialiser) {
-    // serialiser.serialise(h,data,nev);
-    // RdKafka::ErrorCode resp =
-    //   producer->produce(topic, partition,
-    //                     RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
-    //                     //                          (void*)s(), s.size(),
-    //                     (void*)data, nev,
-    //                     NULL, NULL);
-    // if (resp != RdKafka::ERR_NO_ERROR)
-    //   std::cerr << "% Produce failed: " <<
-    //     RdKafka::err2str(resp) << std::endl;
-    // std::cerr << "% Produced message (" << h.size()+sizeof(T)*nev
-    //           << " bytes)"
-    //           << std::endl;
-  }
-
-  template <typename T>
-  void send(const uint64_t &pid, const uint64_t &timestamp, T *data, int nev,
-            SINQAmorSim::FlatBufferSerialiser serialiser) {
-    // serialiser.serialise(pid, timestamp, data, nev);
-
-    // RdKafka::ErrorCode resp = producer->produce(
-    //     topic, partition, RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
-    //     (void *)serialiser.get(), serialiser.size(), NULL, NULL);
-
-    // if (resp != RdKafka::ERR_NO_ERROR)
-    //   throw std::runtime_error("% Produce failed: " +
-    //   RdKafka::err2str(resp));
-  }
-
-  template <typename T>
-  void send(const uint64_t &pid, const uint64_t &timestamp, T *data, int nev,
-            SINQAmorSim::NoSerialiser) {
-    // std::string header = std::string("{pid:") + std::to_string(pid) + ",ts:"
-    // +
-    //                      std::to_string(timestamp) + " }";
-    // send(header, data, nev, SINQAmorSim::NoSerialiser<T>());
-  }
-
+  int poll() { return producer->poll(-1); }
+  
 private:
   Serialiser serialiser;
   std::string topic_name;
   std::unique_ptr<RdKafka::Producer> producer{nullptr};
 };
 
-
-  template<> template <typename T> int KafkaTransmitter<FlatBufferSerialiser>::send(std::vector<T> &data, const int nev) {
+template <>
+template <typename T>
+size_t KafkaTransmitter<FlatBufferSerialiser>::send(const uint64_t &pid,
+                                                    const uint64_t &timestamp,
+                                                    std::vector<T> &data,
+                                                    const int nev) {
+  if (nev) {
+    auto buffer = serialiser.serialise(pid, timestamp, data);
     RdKafka::ErrorCode resp = producer->produce(
         topic_name, RdKafka::Topic::PARTITION_UA,
-        RdKafka::Producer::RK_MSG_COPY, &data[0], data.size() * sizeof(T),
+        RdKafka::Producer::RK_MSG_COPY, &buffer[0], buffer.size() * sizeof(T),
         nullptr, 0, timestamp_now(), nullptr);
-    return int(producer->poll(10));
+    return buffer.size() * sizeof(T);
   }
+  return 0;
+}
 
+
+
+  ////////////////
+  // Consumer
   
 struct KafkaListener {
   static const int max_header_size = 10000;
@@ -223,7 +175,8 @@ struct KafkaListener {
       msg = consumer->consume(topic, partition, 1000);
       std::cout << RdKafka::err2str(msg->err()) << std::endl;
     } while (msg->err() != RdKafka::ERR_NO_ERROR);
-    result = consume_serialised<T>(msg, value, SINQAmorSim::FlatBufferSerialiser());
+    result =
+        consume_serialised<T>(msg, value, SINQAmorSim::FlatBufferSerialiser());
     h = std::string(static_cast<char *>(msg->payload()));
   }
 
@@ -301,4 +254,4 @@ private:
   }
 };
 
-} // namespace generator
+} // namespace SINQAmorSim

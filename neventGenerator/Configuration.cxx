@@ -110,6 +110,12 @@ int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl(
       }
       config.source = m.value.GetString();
     }
+    if (m.name.GetString() == std::string("timestamp_generator")) {
+      if (!m.value.IsString()) {
+        return ConfigurationError::error_parsing_json;
+      }
+      config.timestamp_generator = m.value.GetString();
+    }
   }
   return ConfigurationError::error_no_configuration_error;
 }
@@ -145,7 +151,8 @@ void usage(const std::string &executable);
 SINQAmorSim::Configuration
 SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
   SINQAmorSim::Configuration result;
-
+  result.timestamp_generator = "";
+  
   static struct option long_options[] = {
       {"help", no_argument, nullptr, 'h'},
       {"config-file", required_argument, nullptr, 0},
@@ -155,6 +162,7 @@ SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
       {"source", required_argument, nullptr, 0},
       {"multiplier", required_argument, nullptr, 0},
       {"rate", required_argument, nullptr, 0},
+      {"timestamp-generator", required_argument, nullptr, 0},      
       {nullptr, 0, nullptr, 0},
   };
   std::string cmd;
@@ -192,6 +200,9 @@ SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
         std::istringstream buffer(optarg);
         buffer >> result.rate;
       }
+      if (std::string("timestamp-generator") == lname) {
+        result.timestamp_generator = optarg;
+      }
       break;
     }
   }
@@ -224,6 +235,9 @@ void SINQAmorSim::ConfigurationParser::override_configuration_with(
   }
   if (other.rate > 0) {
     config.rate = other.rate;
+  }
+  if (!other.timestamp_generator.empty()) {
+    config.timestamp_generator = other.timestamp_generator;
   }
 }
 
