@@ -1,7 +1,7 @@
 {
-    "producer_broker" : "//localhost:9092/topic-name",
-    "multiplier" : 1,
-    "source" : "../files/amor2015n001774.hdf",
-    "rate" : 10,
-    "timestamp_generator" : "any_other_timestamp"
+  "producer_broker" : "//localhost:9092/topic-name",
+                      "multiplier" : 1,
+                      "source" : "../files/amor2015n001774.hdf",
+                                 "rate" : 10,
+                                 "timestamp_generator" : "any_other_timestamp"
 }

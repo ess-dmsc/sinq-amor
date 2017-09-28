@@ -80,7 +80,8 @@ template <int mode_selector> struct ZmqGen {
   }
 
   template <typename T>
-  void send(std::string h, T *data, int nev, SINQAmorSim::FlatBufSerialiser<T>) {
+  void send(std::string h, T *data, int nev,
+            SINQAmorSim::FlatBufSerialiser<T>) {
     // /*! @tparam T data type
     //  *  @param h data header
     //  *  @param data pointer to data array to be sent

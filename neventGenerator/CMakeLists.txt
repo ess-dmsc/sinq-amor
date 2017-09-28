@@ -68,7 +68,7 @@ Errors.cxx
 
 foreach(tgt AMORgenerator AMORreceiver)
   set(sources
-    ${tgt}.cpp
+    ${tgt}.cxx
     $<TARGET_OBJECTS:nevent-generator__objects>
     )
   add_executable(${tgt} ${sources})

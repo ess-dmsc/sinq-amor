@@ -52,6 +52,7 @@ template <typename Instrument, typename Format> struct NeXusSource {
 
   int count() const { return data.size(); }
   std::vector<value_type> get() { return data; }
+
 private:
   NXhandle handle;
   Instrument instrum;

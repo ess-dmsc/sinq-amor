@@ -7,11 +7,11 @@
 #include <string>
 #include <type_traits>
 
-#include "utils.hpp"
 #include "Errors.hpp"
 #include "schemas/ev42_events_generated.h"
+#include "utils.hpp"
 
-// WARNING: 
+// WARNING:
 // the schema has to match to the serialise template type
 // this must change
 
@@ -24,11 +24,11 @@ public:
   using is_serialised = std::true_type;
 
   // WARNING: template parameter has to match schema data type
-  template<class T>
+  template <class T>
   std::vector<uint8_t> &serialise(const int &message_id,
                                   const uint64_t &pulse_time,
-                                  const std::vector<T>& message={}) {
-    auto nev = message.size()/2;
+                                  const std::vector<T> &message = {}) {
+    auto nev = message.size() / 2;
     flatbuffers::FlatBufferBuilder builder;
     auto source_name = builder.CreateString("AMOR.event.stream");
     auto time_of_flight = builder.CreateVector(&message[0], nev);
@@ -37,42 +37,43 @@ public:
                                     pulse_time, time_of_flight, detector_id);
     FinishEventMessageBuffer(builder, event);
     buffer_.assign(builder.GetBufferPointer(),
-                  builder.GetBufferPointer() + builder.GetSize());
+                   builder.GetBufferPointer() + builder.GetSize());
     return buffer_;
   }
 
-  template<class T>
-  void extract(const std::vector<uint8_t>& message, std::vector<T> &data, uint64_t &pid,
-               uint64_t &timestamp) {
-    extract_impl<T>(static_cast<const void *>(&message[0]),data,pid,timestamp);
+  template <class T>
+  void extract(const std::vector<uint8_t> &message, std::vector<T> &data,
+               uint64_t &pid, uint64_t &timestamp) {
+    extract_impl<T>(static_cast<const void *>(&message[0]), data, pid,
+                    timestamp);
   }
 
-  template<class T>
+  template <class T>
   void extract(const char *msg, std::vector<T> &data, uint64_t &pid,
                uint64_t &timestamp) {
-    extract_impl<T>(static_cast<const void *>(msg),data,pid,timestamp);
+    extract_impl<T>(static_cast<const void *>(msg), data, pid, timestamp);
   }
 
   uint8_t *get() { return &buffer_[0]; }
   const int size() { return buffer_.size(); }
 
-  const std::vector<uint8_t>& buffer() { return buffer_; }
+  const std::vector<uint8_t> &buffer() { return buffer_; }
 
   bool verify() {
-    flatbuffers::Verifier verifier( const_cast<const uint8_t *>(&buffer_[0]),
-                                    buffer_.size());
+    flatbuffers::Verifier verifier(const_cast<const uint8_t *>(&buffer_[0]),
+                                   buffer_.size());
     return VerifyEventMessageBuffer(verifier);
   }
-  bool verify(const std::vector<uint8_t>& other) {
-    flatbuffers::Verifier verifier( const_cast<const uint8_t *>(&other[0]),
-                                    other.size());
+  bool verify(const std::vector<uint8_t> &other) {
+    flatbuffers::Verifier verifier(const_cast<const uint8_t *>(&other[0]),
+                                   other.size());
     return VerifyEventMessageBuffer(verifier);
   }
-  
-private:
 
-  template<class T>
-  void extract_impl(const void *msg, std::vector<T> &data, uint64_t &pid, uint64_t &timestamp) {
+private:
+  template <class T>
+  void extract_impl(const void *msg, std::vector<T> &data, uint64_t &pid,
+                    uint64_t &timestamp) {
     auto event = GetEventMessage(msg);
     data.resize(2 * event->time_of_flight()->size());
     std::copy(event->time_of_flight()->begin(), event->time_of_flight()->end(),
@@ -82,7 +83,7 @@ private:
     pid = event->message_id();
     timestamp = event->pulse_time();
   }
-  
+
   int _size = 0;
   std::vector<uint8_t> buffer_;
 };

@@ -16,7 +16,8 @@ std::string get_protocol(const std::string &s, const std::string &deft = "") {
   return std::move(deft);
 }
 
-std::string get_broker_topic(const std::string &s, const std::string &deft = "") {
+std::string get_broker_topic(const std::string &s,
+                             const std::string &deft = "") {
   std::smatch m;
   if (std::regex_search(s, m, std::regex("//[A-Za-z0-9.,:]+/"))) {
     auto result = std::string(m[0]).substr(2);
@@ -33,15 +34,14 @@ std::string get_topic(const std::string &s, const std::string &deft = "") {
   return std::move(deft);
 }
 
-bool broker_topic_is_valid(const std::string& broker, const std::string& topic) {
-  if(topic.empty() ||
-     broker.empty() ||
-     broker.front() == ':' ||
-     broker.back() == ':' ) {
+bool broker_topic_is_valid(const std::string &broker,
+                           const std::string &topic) {
+  if (topic.empty() || broker.empty() || broker.front() == ':' ||
+      broker.back() == ':') {
     return false;
   }
-  if(broker.find(":,") != std::string::npos  ||
-     broker.find(",:") != std::string::npos ) {
+  if (broker.find(":,") != std::string::npos ||
+      broker.find(",:") != std::string::npos) {
     return false;
   }
 
@@ -53,12 +53,12 @@ SINQAmorSim::ConfigurationParser::parse_string_uri(const std::string &uri,
                                                    const bool use_defaults) {
   KafkaConfiguration configuration;
   if (use_defaults) {
-    configuration.broker = get_broker_topic(uri,"localhost:9092");
+    configuration.broker = get_broker_topic(uri, "localhost:9092");
     configuration.topic = get_topic(uri, "empty-topic");
   } else {
     configuration.broker = get_broker_topic(uri);
     configuration.topic = get_topic(uri);
-    if(!broker_topic_is_valid(configuration.broker,configuration.topic) ) {
+    if (!broker_topic_is_valid(configuration.broker, configuration.topic)) {
       throw ConfigurationParsingException();
     }
   }
@@ -134,10 +134,10 @@ int SINQAmorSim::ConfigurationParser::parse_configuration(int argc,
     } else {
       error = parse_configuration_file(command_line_config.configuration_file);
     }
-  } catch (const ConfigurationParsingException& e) {
+  } catch (const ConfigurationParsingException &e) {
     std::cout << e.what() << "\n";
   }
-  
+
   if (error == ConfigurationError::error_no_configuration_error) {
     override_configuration_with(command_line_config);
     return validate();
@@ -152,7 +152,7 @@ SINQAmorSim::Configuration
 SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
   SINQAmorSim::Configuration result;
   result.timestamp_generator = "";
-  
+
   static struct option long_options[] = {
       {"help", no_argument, nullptr, 'h'},
       {"config-file", required_argument, nullptr, 0},
@@ -162,7 +162,7 @@ SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
       {"source", required_argument, nullptr, 0},
       {"multiplier", required_argument, nullptr, 0},
       {"rate", required_argument, nullptr, 0},
-      {"timestamp-generator", required_argument, nullptr, 0},      
+      {"timestamp-generator", required_argument, nullptr, 0},
       {nullptr, 0, nullptr, 0},
   };
   std::string cmd;
@@ -187,7 +187,7 @@ SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
         result.configuration_file = optarg;
       }
       if (std::string("producer-uri") == lname) {
-        result.producer = parse_string_uri(optarg,true);
+        result.producer = parse_string_uri(optarg, true);
       }
       if (std::string("source") == lname) {
         result.source = optarg;

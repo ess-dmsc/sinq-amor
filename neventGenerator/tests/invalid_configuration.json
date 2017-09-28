@@ -1,4 +1,1 @@
-{
-    "producer_broker" : "//:/",
-    "topic" :
-}
+{ "producer_broker" : "//:/", "topic": }

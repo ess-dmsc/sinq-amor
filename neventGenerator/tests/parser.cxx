@@ -16,18 +16,20 @@ TEST(ConfigurationParser, use_default_if_wrong_syntax) {
 
 TEST(ConfigurationParser, leave_empty_if_wrong_syntax) {
   SINQAmorSim::ConfigurationParser parser;
-  
+
   EXPECT_ANY_THROW(parser.parse_string_uri("hello", false));
   EXPECT_ANY_THROW(parser.parse_string_uri("//localhost:9092/", false));
   EXPECT_ANY_THROW(parser.parse_string_uri("//localhost:/my-topic", false));
   EXPECT_ANY_THROW(parser.parse_string_uri("//:9092/my-topic", false));
   EXPECT_ANY_THROW(parser.parse_string_uri("//:/my-topic", false));
-  EXPECT_ANY_THROW(parser.parse_string_uri("//localhost:9092,:9093/my-topic", false));
-  EXPECT_ANY_THROW(parser.parse_string_uri("//localhost:9092,localhost:/my-topic", false));
+  EXPECT_ANY_THROW(
+      parser.parse_string_uri("//localhost:9092,:9093/my-topic", false));
+  EXPECT_ANY_THROW(
+      parser.parse_string_uri("//localhost:9092,localhost:/my-topic", false));
 
   EXPECT_NO_THROW(parser.parse_string_uri("//localhost:9092/my-topic", false));
-  EXPECT_NO_THROW(parser.parse_string_uri("//localhost:9092,localhost:9093/my-topic", false));
-  
+  EXPECT_NO_THROW(parser.parse_string_uri(
+      "//localhost:9092,localhost:9093/my-topic", false));
 }
 
 TEST(ConfigurationParser, parse_broker_port_topic) {
@@ -114,16 +116,18 @@ TEST(ConfigurationParser, verify_json) {
 
 TEST(ConfigurationParser, parse_multiple_brokers) {
   SINQAmorSim::ConfigurationParser parser;
-  //pc12206:,pc12207:9092/topic-name
-  //pc12206:,pc12207:/topic-name
-  //pc12206:9092,pc12206:9093/topic-name
-  EXPECT_ANY_THROW(parser.parse_string_uri("//localhost:,localhost:9093/my-topic"));
-  EXPECT_EQ(parser.parse_string_uri("//localhost:9092,localhost:9093/my-topic").broker,
+  // pc12206:,pc12207:9092/topic-name
+  // pc12206:,pc12207:/topic-name
+  // pc12206:9092,pc12206:9093/topic-name
+  EXPECT_ANY_THROW(
+      parser.parse_string_uri("//localhost:,localhost:9093/my-topic"));
+  EXPECT_EQ(parser.parse_string_uri("//localhost:9092,localhost:9093/my-topic")
+                .broker,
             "localhost:9092,localhost:9093");
-  EXPECT_EQ(parser.parse_string_uri("//localhost:9092,localhost:9093/my-topic").topic,
-            "my-topic");
+  EXPECT_EQ(
+      parser.parse_string_uri("//localhost:9092,localhost:9093/my-topic").topic,
+      "my-topic");
 }
-
 
 void init_command_line_args(const int c, char **v) {
   for (int i = 0; i < c; ++i) {
@@ -316,10 +320,9 @@ TEST(ConfigurationParser, timestamp_generator_from_file) {
 
   auto filename = source_dir + "/valid_configuration.json";
   parser.parse_configuration_file(filename);
-  EXPECT_EQ(parser.config.timestamp_generator, std::string("any_other_timestamp"));
-
+  EXPECT_EQ(parser.config.timestamp_generator,
+            std::string("any_other_timestamp"));
 }
-
 
 TEST(ConfigurationParser, empty_timestamp_generator_in_command_line) {
 
@@ -328,10 +331,10 @@ TEST(ConfigurationParser, empty_timestamp_generator_in_command_line) {
   int argc = 11, count = 1;
   char **argv = (char **)calloc(argc, sizeof(char *));
   init_command_line_args(argc, argv);
-  
-  auto result = parser.parse_command_line(count,argv);
+
+  auto result = parser.parse_command_line(count, argv);
   EXPECT_TRUE(result.timestamp_generator.empty());
-  
+
   destroy_command_line_args(argc, argv);
   optind = 0;
 }
@@ -343,30 +346,31 @@ TEST(ConfigurationParser, timestamp_generator_from_command_line) {
   int argc = 11, count = 1;
   char **argv = (char **)calloc(argc, sizeof(char *));
   init_command_line_args(argc, argv);
-  
+
   add_command_line_arg(&count, argv, "--timestamp-generator", "any_timestamp");
-  auto result = parser.parse_command_line(count,argv);
-  EXPECT_EQ(result.timestamp_generator,std::string("any_timestamp"));
-  
+  auto result = parser.parse_command_line(count, argv);
+  EXPECT_EQ(result.timestamp_generator, std::string("any_timestamp"));
+
   destroy_command_line_args(argc, argv);
   optind = 0;
 }
 
 TEST(ConfigurationParser, command_line_timestamp_generator_override_file) {
   SINQAmorSim::ConfigurationParser parser;
-  
+
   int argc = 11, count = 1;
   char **argv = (char **)calloc(argc, sizeof(char *));
   init_command_line_args(argc, argv);
-  
+
   auto filename = source_dir + "/valid_configuration.json";
   add_command_line_arg(&count, argv, "--config-file", &filename[0]);
-  add_command_line_arg(&count, argv, "--timestamp-generator", "yet_another_timestamp");
-  
-  parser.parse_configuration(count,argv);
-  EXPECT_EQ(parser.config.timestamp_generator, std::string("yet_another_timestamp"));
+  add_command_line_arg(&count, argv, "--timestamp-generator",
+                       "yet_another_timestamp");
+
+  parser.parse_configuration(count, argv);
+  EXPECT_EQ(parser.config.timestamp_generator,
+            std::string("yet_another_timestamp"));
 
   destroy_command_line_args(argc, argv);
   optind = 0;
-
 }

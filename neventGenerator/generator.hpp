@@ -51,16 +51,18 @@ class Generator {
   typedef Generator<Streamer, Control, Serialiser> self_t;
 
 public:
-  Generator(const SINQAmorSim::Configuration& configuration)
-    : config(configuration), streamer(config.producer.broker, config.producer.broker), control{new Control()} {}
+  Generator(const SINQAmorSim::Configuration &configuration)
+      : config(configuration),
+        streamer(config.producer.broker, config.producer.broker),
+        control{new Control()} {}
 
-  template <class T> void run(std::vector<T>& stream) {
+  template <class T> void run(std::vector<T> &stream) {
     std::thread ts(&self_t::run_impl<T>, this, std::ref(stream));
     control->update();
     ts.join();
   }
 
-  template <class T> void listen(std::vector<T>& stream) {
+  template <class T> void listen(std::vector<T> &stream) {
     std::thread tr(&self_t::listen_impl<T>, this, std::ref(stream));
     tr.join();
   }
@@ -71,8 +73,8 @@ private:
   Serialiser serialiser;
   bool initial_status;
   SINQAmorSim::Configuration config;
-  
-  template <class T> void run_impl(std::vector<T>& stream) {
+
+  template <class T> void run_impl(std::vector<T> &stream) {
     using namespace std::chrono;
     int nev = stream.size();
     uint64_t pulseID = 0;
@@ -88,7 +90,8 @@ private:
       nanoseconds ns =
           duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
       auto timestamp = ns.count();
-      generate_timestamp(stream, control->rate(), timestamp,config.timestamp_generator);
+      generate_timestamp(stream, control->rate(), timestamp,
+                         config.timestamp_generator);
 
       if (control->run()) {
         streamer.send(pulseID, timestamp, stream);
@@ -116,7 +119,7 @@ private:
     }
   }
 
-  template <class T> void listen_impl(std::vector<T>& stream) {
+  template <class T> void listen_impl(std::vector<T> &stream) {
 
     int pulseID = -1, missed = -1;
     uint64_t pid;
