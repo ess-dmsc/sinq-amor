@@ -8,6 +8,7 @@ set(sources
   errors.cxx
   kafka_generator.cxx
   serialiser.cxx
+  nexus.cxx
   $<TARGET_OBJECTS:nevent-generator__objects>
   )
 include_directories(

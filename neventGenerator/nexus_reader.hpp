@@ -15,6 +15,7 @@
 #include <stdlib.h>
 
 #include <nexus/napi.h>
+#include <nexus/NeXusFile.hpp>
 
 #include "uparam.hpp"
 #include "utils.hpp"
@@ -33,10 +34,6 @@ template <typename Instrument, typename Format> struct NeXusSource {
   iterator end() { return data.end(); }
   const_iterator begin() const { return data.begin(); }
   const_iterator end() const { return data.end(); }
-
-  NeXusSource(uparam::Param p, const int multiplier = 1) {
-    NeXusSource(p["filename"], multiplier);
-  }
 
   NeXusSource(const std::string &filename, const int multiplier = 1) {
     if (NXopen(filename.c_str(), NXACC_READ, &handle) != NX_OK) {
