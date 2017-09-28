@@ -54,14 +54,14 @@ public:
   Generator(const SINQAmorSim::Configuration& configuration)
     : config(configuration), streamer(config.producer.broker, config.producer.broker), control{new Control()} {}
 
-  template <class T, class Type> void run(T *stream, int nev = 0) {
-    std::thread ts(&self_t::run_impl<T,Type>, this, stream, nev);
+  template <class T> void run(std::vector<T>& stream) {
+    std::thread ts(&self_t::run_impl<T>, this, std::ref(stream));
     control->update();
     ts.join();
   }
 
-  template <class T> void listen(std::vector<T> stream, int nev = 0) {
-    std::thread tr(&self_t::listen_impl<T>, this, stream);
+  template <class T> void listen(std::vector<T>& stream) {
+    std::thread tr(&self_t::listen_impl<T>, this, std::ref(stream));
     tr.join();
   }
 
@@ -72,8 +72,9 @@ private:
   bool initial_status;
   SINQAmorSim::Configuration config;
   
-  template <class T, class Type> void run_impl(T *stream, int nev = 0) {
+  template <class T> void run_impl(std::vector<T>& stream) {
     using namespace std::chrono;
+    int nev = stream.size();
     uint64_t pulseID = 0;
     int count = 0;
     control->start(initial_status);
@@ -87,13 +88,13 @@ private:
       nanoseconds ns =
           duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
       auto timestamp = ns.count();
-      generate_timestamp(stream, stream + nev, control->rate(), timestamp,Type());
+      generate_timestamp(stream, control->rate(), timestamp,config.timestamp_generator);
 
       if (control->run()) {
-        streamer.send(pulseID, timestamp, stream, nev, serialiser);
+        streamer.send(pulseID, timestamp, stream);
         ++count;
       } else {
-        streamer.send(pulseID, timestamp, stream, 0, serialiser);
+        streamer.send(pulseID, timestamp, stream, 0);
       }
       ++pulseID;
       if (pulseID % control->rate() == 0) {
@@ -105,6 +106,7 @@ private:
       if (std::chrono::duration_cast<std::chrono::seconds>(system_clock::now() -
                                                            start)
               .count() > 10) {
+        //        streamer.poll();
         std::cout << "Sent " << count << " packets @ "
                   << count * nev * sizeof(T) / (10 * 1e6) << "MB/s"
                   << "\t(timestamp : " << timestamp << ")" << std::endl;
@@ -114,7 +116,7 @@ private:
     }
   }
 
-  template <class T> void listen_impl(std::vector<T> stream) {
+  template <class T> void listen_impl(std::vector<T>& stream) {
 
     int pulseID = -1, missed = -1;
     uint64_t pid;

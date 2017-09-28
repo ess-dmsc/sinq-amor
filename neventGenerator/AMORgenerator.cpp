@@ -9,9 +9,8 @@ using StreamFormat = SINQAmorSim::ESSformat;
 using Instrument = SINQAmorSim::Amor;
 using Source = SINQAmorSim::NeXusSource<Instrument, StreamFormat>;
 using Control = control::CommandlineControl;
-using Serialiser = SINQAmorSim::FlatBufferSerialiser;
-using TimeStamp = ConstTimestamp;
 
+using Serialiser = SINQAmorSim::FlatBufferSerialiser;
 using Communication = SINQAmorSim::KafkaTransmitter<Serialiser>;
 
 ///////////////////////////////////////////////
@@ -33,10 +32,10 @@ int main(int argc, char **argv) {
   auto &config = parser.config;
 
   Source stream(config.source, config.multiplier);
+  auto data = stream.get();
+
   Generator<Communication, Control, Serialiser> g(config);
-  
-  int n_events = stream.count() / 2;
-  g.run<StreamFormat::value_type,TimeStamp>(&(stream.begin()[0]), n_events);
+  g.run<StreamFormat::value_type>(data);
   
   return 0;
 }

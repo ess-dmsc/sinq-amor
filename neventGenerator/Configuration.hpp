@@ -21,6 +21,7 @@ public:
   //  std::string protocol{""};
   std::string configuration_file{""};
   std::string source{""};
+  std::string timestamp_generator{"none"};
   int multiplier{0};
   int rate{0};
   bool valid{true};
