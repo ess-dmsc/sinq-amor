@@ -27,6 +27,7 @@ find_package(Flatbuffers REQUIRED)
 find_package(HDF5_SIMPLE REQUIRED)
 find_package(Nexus REQUIRED)
 find_package(StreamingDataTypes REQUIRED)
+find_package(Googletest)
 
 option(HAVE_ZMQ "Enable 0MQ" FALSE)
 if(${HAVE_ZMQ})
@@ -34,8 +35,6 @@ find_package(ZMQ REQUIRED)
 else()
   message(STATUS "Build without 0MQ support")
 endif()
-
-find_package(Googletest)
 
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
@@ -89,8 +88,6 @@ else()
   install(FILES files/amor2015n001774.hdf DESTINATION ${CMAKE_INSTALL_PREFIX}/files)
 endif()
 
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${PROJECT_SOURCE_DIR}/cmake")
-find_package(Googletest)
 if (have_gtest)
 add_subdirectory(tests)
 endif()
