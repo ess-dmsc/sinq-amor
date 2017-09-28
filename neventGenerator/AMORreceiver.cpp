@@ -5,19 +5,16 @@
 #include "mcstas_reader.hpp"
 #include "nexus_reader.hpp"
 
-typedef nexus::Amor Instrument;
-typedef nexus::NeXusSource<Instrument, nexus::PSIformat> Source;
-
-typedef control::NoControl Control;
-
-typedef serialiser::FlatBufSerialiser<uint64_t> Serialiser;
-// typedef serialiser::NoSerialiser<uint64_t> Serialiser;
+using Instrument = SINQAmorSim::Amor;
+using Source = SINQAmorSim::NeXusSource<Instrument, SINQAmorSim::PSIformat>;
+using Control = control::NoControl;
+using Serialiser = SINQAmorSim::FlatBufferSerialiser;
 
 ///////////////////////
 // In the end we want to use kafka, I will use 0MQ for development purposes
 // typedef ZmqRecv Transport;
 // typedef generator::ZmqGen<generator::receiver> Transport;
-typedef generator::KafkaListener<generator::receiver> Transport;
+typedef SINQAmorSim::KafkaListener Transport;
 // typedef FileWriterGen Transport
 
 int main(int argc, char **argv) {

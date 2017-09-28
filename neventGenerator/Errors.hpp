@@ -16,7 +16,6 @@ enum ConfigurationError {
   error_configuration_invalid = -13
 };
 
-
   class ConfigurationParsingException: public std::exception {
   public:
     virtual const char* what() const throw() {
@@ -24,5 +23,4 @@ enum ConfigurationError {
     }
   };
   
-
 }

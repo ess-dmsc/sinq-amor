@@ -4,15 +4,15 @@
 #include "mcstas_reader.hpp"
 #include "nexus_reader.hpp"
 
-using StreamFormat = nexus::ESSformat;
+using StreamFormat = SINQAmorSim::ESSformat;
 
-using Instrument = nexus::Amor;
-using Source = nexus::NeXusSource<Instrument, StreamFormat>;
+using Instrument = SINQAmorSim::Amor;
+using Source = SINQAmorSim::NeXusSource<Instrument, StreamFormat>;
 using Control = control::CommandlineControl;
-using Serialiser = serialiser::FlatBufSerialiser<StreamFormat::value_type>;
+using Serialiser = SINQAmorSim::FlatBufferSerialiser;
 using TimeStamp = ConstTimestamp;
 
-using Communication = generator::KafkaGen<generator::transmitter>;
+using Communication = SINQAmorSim::KafkaTransmitter<Serialiser>;
 
 ///////////////////////////////////////////////
 ///

@@ -6,6 +6,8 @@ set(sources
   tests.cxx
   parser.cxx
   errors.cxx
+  kafka_generator.cxx
+  serialiser.cxx
   $<TARGET_OBJECTS:nevent-generator__objects>
   )
 include_directories(
