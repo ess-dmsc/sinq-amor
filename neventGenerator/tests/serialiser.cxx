@@ -27,12 +27,12 @@ TEST(flatbuffer_serialiser,serialise_and_unserialise_ess_format) {
 
   uint64_t packet_id,timestamp;
   serialiser.extract(buffer,output,packet_id,timestamp);
-  EXPECT_EQ(input,output);
+  EXPECT_TRUE(input == output);
   EXPECT_EQ(packet_id,11);
   EXPECT_EQ(timestamp,37);
 
   input[10] = -1;
-  EXPECT_NE(input,output);
+  EXPECT_FALSE(input==output);
   EXPECT_NE(packet_id,13);
   EXPECT_NE(timestamp,91);
 }
