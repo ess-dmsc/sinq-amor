@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include <chrono>
 
 #include <librdkafka/rdkafkacpp.h>
 
