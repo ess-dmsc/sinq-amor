@@ -6,6 +6,8 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#pragma once
+
 #include <vector>
 
 #include <cstring>
@@ -15,13 +17,9 @@
 #include <nexus/napi.h>
 
 #include "uparam.hpp"
+#include "utils.hpp"
 
-namespace nexus {
-
-template <typename T> struct StreamFormat { typedef T value_type; };
-
-using PSIformat = StreamFormat<uint64_t>;
-using ESSformat = StreamFormat<uint32_t>;
+namespace SINQAmorSim {
 
 ///  \author Michele Brambilla <mib.mic@gmail.com>
 ///  \date Wed Jun 08 16:49:17 2016

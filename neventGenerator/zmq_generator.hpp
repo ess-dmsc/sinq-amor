@@ -59,7 +59,7 @@ template <int mode_selector> struct ZmqGen {
   }
 
   template <typename T>
-  void send(std::string h, T *data, int nev, serialiser::NoSerialiser<T>) {
+  void send(std::string h, T *data, int nev, SINQAmorSim::NoSerialiser<T>) {
     /*! @tparam T data type
      *  @param h data header
      *  @param data pointer to data array to be sent
@@ -80,13 +80,13 @@ template <int mode_selector> struct ZmqGen {
   }
 
   template <typename T>
-  void send(std::string h, T *data, int nev, serialiser::FlatBufSerialiser<T>) {
+  void send(std::string h, T *data, int nev, SINQAmorSim::FlatBufSerialiser<T>) {
     // /*! @tparam T data type
     //  *  @param h data header
     //  *  @param data pointer to data array to be sent
     //  *  @param nev number of elements in data array */
     // /*! Serialises the message using FlatBuffers and sends it */
-    // serialiser::FlatBufSerialiser<T> s;
+    // SINQAmorSim::FlatBufSerialiser<T> s;
     // s(h.c_str(),data,nev);
     // zmq_send(socket,(char*)s(),s.size(),0);
     // // std::cout << "->" << h
@@ -100,7 +100,7 @@ template <int mode_selector> struct ZmqGen {
   }
 
   template <typename T>
-  int recv(std::string &h, std::vector<T> &data, serialiser::NoSerialiser<T>) {
+  int recv(std::string &h, std::vector<T> &data, SINQAmorSim::NoSerialiser<T>) {
     /*! @tparam T data type
      *  @param h string containing received data header
      *  @param data vector containing received event data
@@ -133,7 +133,7 @@ template <int mode_selector> struct ZmqGen {
 
   template <typename T>
   int recv(std::string &h, std::vector<T> &data,
-           serialiser::FlatBufSerialiser<T>) {
+           SINQAmorSim::FlatBufSerialiser<T>) {
     /*! @tparam T data type
      *  @param h string containing received data header
      *  @param data vector containing received event data
@@ -141,7 +141,7 @@ template <int mode_selector> struct ZmqGen {
     /*! Receives the serialised message and unserialise it. */
 
     // zmq_msg_t msg;
-    // serialiser::FlatBufSerialiser<T> s;
+    // SINQAmorSim::FlatBufSerialiser<T> s;
 
     // int rc = zmq_msg_init (&msg);
     // assert (rc == 0);

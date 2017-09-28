@@ -47,9 +47,10 @@ using nanoseconds = std::chrono::nanoseconds;
  *  \author Michele Brambilla <mib.mic@gmail.com>
  *  \date Wed Jun 08 15:19:52 2016 */
 template <typename Streamer, typename Control, typename Serialiser>
-struct Generator {
+class Generator {
   typedef Generator<Streamer, Control, Serialiser> self_t;
 
+public:
   Generator(const SINQAmorSim::Configuration& configuration)
     : config(configuration), streamer(config.producer.broker, config.producer.broker), control{new Control()} {}
 
@@ -62,7 +63,6 @@ struct Generator {
   template <class T> void listen(std::vector<T> stream, int nev = 0) {
     std::thread tr(&self_t::listen_impl<T>, this, stream);
     tr.join();
-    listen_impl<T>(stream);
   }
 
 private:
