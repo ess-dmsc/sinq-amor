@@ -16,6 +16,7 @@
 
 #include <nexus/napi.h>
 #include <nexus/NeXusFile.hpp>
+#include "H5Cpp.h"
 
 #include "uparam.hpp"
 #include "utils.hpp"
@@ -35,16 +36,26 @@ template <typename Instrument, typename Format> struct NeXusSource {
   const_iterator begin() const { return data.begin(); }
   const_iterator end() const { return data.end(); }
 
+  // NeXusSource(const std::string &filename, const int multiplier = 1) {
+  //   if (NXopen(filename.c_str(), NXACC_READ, &handle) != NX_OK) {
+  //     throw std::runtime_error("Failed to open NeXus file " + filename);
+  //   }
+  //   read();
+  //   if (multiplier > 1) {
+  //     int nelem = data.size();
+  //     for (int m = 1; m < multiplier; ++m)
+  //       data.insert(data.end(), data.begin(), data.begin() + nelem);
+  //   }
+  // }
+
   NeXusSource(const std::string &filename, const int multiplier = 1) {
-    if (NXopen(filename.c_str(), NXACC_READ, &handle) != NX_OK) {
-      throw std::runtime_error("Failed to open NeXus file " + filename);
-    }
-    read();
-    if (multiplier > 1) {
-      int nelem = data.size();
-      for (int m = 1; m < multiplier; ++m)
-        data.insert(data.end(), data.begin(), data.begin() + nelem);
-    }
+    H5::H5File file(filename, H5F_ACC_RDONLY);
+    read(file);
+    // if (multiplier > 1) {
+    //   int nelem = data.size();
+    //   for (int m = 1; m < multiplier; ++m)
+    //     data.insert(data.end(), data.begin(), data.begin() + nelem);
+    // }
   }
 
   int count() const { return data.size(); }
@@ -55,10 +66,10 @@ private:
   Instrument instrum;
   std::vector<value_type> data;
 
-  void read() {
-    instrum(handle, data);
-    NXclose(&handle);
+  void read(H5::H5File& file) {
+    instrum(file, data);
   }
+
 };
 
 ///  \author Michele Brambilla <mib.mic@gmail.com>
@@ -77,33 +88,51 @@ struct Rita2 {
     path.push_back("random");
   }
 
+  // template <typename T>
+  // void operator()(const NXhandle &handle, std::vector<T> &stream) {
+  //   int rank, type; //, size;
+
+  //   if (NXopenpath(handle, path[0].c_str()) != NX_OK) {
+  //     throw std::runtime_error("Error reading NeXus data");
+  //   }
+  //   NXgetinfo(handle, &rank, dim, &type);
+
+  //   size = dim[0];
+  //   for (int i = 1; i < rank; i++)
+  //     size *= dim[i];
+  //   dim[rank] = dim[rank - 1];
+
+  //   data = new int32_t[size];
+
+  //   NXgetdata(handle, data);
+  //   toEventFmt<T>(stream);
+  // }
+
+
   template <typename T>
-  void operator()(const NXhandle &handle, std::vector<T> &stream) {
-    int rank, type; //, size;
+  void operator()(const H5::H5File &file, std::vector<T> &stream) {
 
-    if (NXopenpath(handle, path[0].c_str()) != NX_OK) {
-      throw std::runtime_error("Error reading NeXus data");
-    }
-    NXgetinfo(handle, &rank, dim, &type);
+    H5::DataSet dataset = file.openDataSet(path[0]);
 
-    size = dim[0];
-    for (int i = 1; i < rank; i++)
-      size *= dim[i];
-    dim[rank] = dim[rank - 1];
+    H5::DataSpace dataspace = dataset.getSpace();
+    int rank = dataspace.getSimpleExtentNdims();
+    dim.resize(rank);
+    int ndims = dataspace.getSimpleExtentDims( &dim[0], nullptr);
 
-    data = new int32_t[size];
+    H5::DataSpace memspace( rank, &dim[0] );
+    data.resize(memspace.getSelectNpoints());
 
-    NXgetdata(handle, data);
+    dataset.read( &data[0], H5::PredType::NATIVE_INT, memspace, dataspace);
+
     toEventFmt<T>(stream);
   }
 
   std::vector<std::string> path;
 
 private:
-  int32_t *data = NULL;
-  int32_t dim[3 + 1];
-  int size;
-
+  std::vector<int32_t> data;
+  std::vector<hsize_t> dim;
+  
   template <typename T> void toEventFmt(std::vector<T> &signal) {
     int offset, nCount;
     union {
@@ -147,38 +176,71 @@ struct Amor {
     path.push_back("/entry1/AMOR/area_detector/time_binning");
   }
 
+  // template <typename T>
+  // void operator()(const NXhandle &handle, std::vector<T> &stream) {
+  //   int rank, type; //, size;
+
+  //   if (NXopenpath(handle, path[0].c_str()) != NX_OK) {
+  //     throw std::runtime_error("Error reading NeXus data");
+  //   }
+  //   NXgetinfo(handle, &rank, dim, &type);
+
+  //   size = dim[0];
+  //   for (int i = 1; i < rank; i++)
+  //     size *= dim[i];
+  //   dim[rank] = dim[rank - 1];
+  //   data = new int32_t[size];
+  //   NXgetdata(handle, data);
+
+  //   tof = new float[dim[2]];
+  //   if (NXopenpath(handle, path[1].c_str()) != NX_OK) {
+  //     throw std::runtime_error("Error reading NeXus data");
+  //   }
+  //   NXgetdata(handle, tof);
+  //   NXclose((void **)&handle);
+
+  //   toEventFmt<T>(stream);
+  // }
+
   template <typename T>
-  void operator()(const NXhandle &handle, std::vector<T> &stream) {
-    int rank, type; //, size;
+  void operator()(const H5::H5File &file, std::vector<T> &stream) {
 
-    if (NXopenpath(handle, path[0].c_str()) != NX_OK) {
-      throw std::runtime_error("Error reading NeXus data");
+    {
+      H5::DataSet dataset = file.openDataSet(path[0]);
+      H5::DataSpace dataspace = dataset.getSpace();
+      int rank = dataspace.getSimpleExtentNdims();
+      dim.resize(rank);
+      int ndims = dataspace.getSimpleExtentDims( &dim[0], nullptr);
+      H5::DataSpace memspace( rank, &dim[0] );
+      data.resize(memspace.getSelectNpoints());
+      dataset.read( &data[0], H5::PredType::NATIVE_INT, memspace, dataspace);
     }
-    NXgetinfo(handle, &rank, dim, &type);
+    {
+      H5::DataSet dataset = file.openDataSet(path[1]);
+      H5::DataSpace dataspace = dataset.getSpace();
+      int rank = dataspace.getSimpleExtentNdims();
+      hsize_t tof_dim{0};
+      int ndims = dataspace.getSimpleExtentDims( &tof_dim, nullptr);
+      if(tof_dim != dim[2]) {
+        throw std::runtime_error("Time extent in histogram differs from ToF length");
+      }
+      dim.push_back(tof_dim);
 
-    size = dim[0];
-    for (int i = 1; i < rank; i++)
-      size *= dim[i];
-    dim[rank] = dim[rank - 1];
-    data = new int32_t[size];
-    NXgetdata(handle, data);
-
-    tof = new float[dim[2]];
-    if (NXopenpath(handle, path[1].c_str()) != NX_OK) {
-      throw std::runtime_error("Error reading NeXus data");
+      H5::DataSpace memspace( rank, &tof_dim );
+      tof.resize(memspace.getSelectNpoints());
+      dataset.read( &tof[0], H5::PredType::NATIVE_FLOAT, memspace, dataspace);
     }
-    NXgetdata(handle, tof);
-    NXclose((void **)&handle);
-
+    
     toEventFmt<T>(stream);
   }
 
+  
   std::vector<std::string> path;
 
 private:
-  int32_t *data = NULL;
-  float *tof = NULL;
-  int32_t dim[3 + 1];
+  std::vector<int32_t> data;
+  std::vector<float> tof;
+  std::vector<hsize_t> dim;
   uint32_t size;
 
   template <typename T> void toEventFmt(std::vector<T> &signal) {
@@ -189,7 +251,7 @@ private:
 template <>
 void Amor::toEventFmt<PSIformat::value_type>(
     std::vector<PSIformat::value_type> &signal) {
-  unsigned long nEvents = std::accumulate(data, data + size, 0);
+  unsigned long nEvents = std::accumulate(data.begin(), data.end(), 0);
   int offset, nCount;
   int detID = 0;
 
@@ -220,7 +282,7 @@ void Amor::toEventFmt<PSIformat::value_type>(
 template <>
 void Amor::toEventFmt<ESSformat::value_type>(
     std::vector<ESSformat::value_type> &signal) {
-  unsigned long nEvents = std::accumulate(data, data + size, 0);
+  unsigned long nEvents = std::accumulate(data.begin(), data.end(), 0);
   uint32_t detID = 0;
   int offset, nCount;
   int counter = 0;
@@ -233,11 +295,11 @@ void Amor::toEventFmt<ESSformat::value_type>(
       offset = dim[2] * (j + dim[1] * i);
       for (int k = 0; k < dim[2]; ++k) {
         nCount = data[offset + k];
-        for (int l = 0; l < nCount; ++l) {
-          signal[counter] = std::round(tof[k] / 10.);
-          signal[counter + nEvents] = detID;
-          counter++;
-        }
+              for (int l = 0; l < nCount; ++l) {
+                signal[counter] = std::round(tof[k] / 10.);
+                signal[counter + nEvents] = detID;
+                counter++;
+              }
       }
     }
     detID++;
