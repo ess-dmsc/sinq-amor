@@ -11,16 +11,15 @@ set(sources
   nexus.cxx
   $<TARGET_OBJECTS:nevent-generator__objects>
   )
-include_directories(
-  ${RDKAFKA_INCLUDE_DIR}
-  ${FLATBUFFERS_INCLUDE_DIR}
-  ${RAPIDJSON_INCLUDE_DIR}
-  ${HDF5_INCLUDE_DIR}
-  ${NEXUS_INCLUDE_DIR}
-  ${ZMQ_INCLUDE_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}
-  )
-
+#include_directories(
+#  ${RDKAFKA_INCLUDE_DIR}
+#  ${FLATBUFFERS_INCLUDE_DIR}
+#  ${RAPIDJSON_INCLUDE_DIR}
+#  ${HDF5_INCLUDE_DIR}
+#  ${ZMQ_INCLUDE_DIR}
+#  ${CMAKE_CURRENT_BINARY_DIR}
+#  )
+#
 set(tgt "tests")
 
 add_executable(${tgt} ${sources})

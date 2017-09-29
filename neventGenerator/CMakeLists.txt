@@ -24,8 +24,7 @@ add_custom_target(
 find_package(Rapidjson REQUIRED)
 find_package(RdKafka REQUIRED)
 find_package(Flatbuffers REQUIRED)
-find_package(HDF5_SIMPLE REQUIRED)
-find_package(Nexus REQUIRED)
+find_package(HDF5 REQUIRED)
 find_package(StreamingDataTypes REQUIRED)
 find_package(Googletest)
 
@@ -43,16 +42,13 @@ include_directories(
   ${FLATBUFFERS_INCLUDE_DIR}
   ${RAPIDJSON_INCLUDE_DIR}
   ${HDF5_INCLUDE_DIR}
-  ${NEXUS_INCLUDE_DIR}
   ${ZMQ_INCLUDE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
   )
 
 set(libraries_common
 ${RDKAFKA_LIBRARIES}
-${HDF5_C_LIBRARIES}
-${HDF5_CXX_LIBRARIES} 
-${NEXUS_LIBRARIES}
+${HDF5_LIBRARIES}
 ${ZMQ_LIBRARIES}
 ${CURL_LIBRARIES}
 pthread
