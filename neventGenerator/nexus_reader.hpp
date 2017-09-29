@@ -50,7 +50,6 @@ public:
   std::vector<value_type> get() { return data; }
 
 private:
-  NXhandle handle;
   Instrument instrum;
   std::vector<value_type> data;
 
@@ -224,7 +223,7 @@ void Amor::toEventFmt<ESSformat::value_type>(
   int offset, nCount;
   int counter = 0;
 
-  std::cout << "ESSformat : " << nEvents << std::endl;
+  std::cout << "ESSformat : " << nEvents << " events\n";
 
   signal.resize(2 * nEvents);
   for (int i = 0; i < dim[0]; ++i) {
