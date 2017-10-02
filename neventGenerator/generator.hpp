@@ -101,7 +101,7 @@ private:
                          config.timestamp_generator);
 
       if (control->run()) {
-        streamer->send(pulseID, timestamp, stream);
+        streamer->send(pulseID, timestamp, stream, stream.size());
         ++count;
       } else {
         streamer->send(pulseID, timestamp, stream, 0);
@@ -111,7 +111,7 @@ private:
         ++timeout->tm_sec;
         std::this_thread::sleep_until(
             system_clock::from_time_t(mktime(timeout)));
-        // streamer->poll();
+        streamer->poll();
       }
 
       if (std::chrono::duration_cast<std::chrono::seconds>(system_clock::now() -
