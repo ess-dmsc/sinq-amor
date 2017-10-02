@@ -3,10 +3,10 @@
 #include <cctype>
 #include <chrono>
 #include <chrono>
+#include <chrono>
 #include <sstream>
 #include <string>
 #include <utility>
-#include <chrono>
 
 #include <librdkafka/rdkafkacpp.h>
 
@@ -23,15 +23,25 @@ uint64_t timestamp_now() {
       .count();
 }
 
+class ExampleDeliveryReportCb : public RdKafka::DeliveryReportCb {
+public:
+  void dr_cb(RdKafka::Message &message) {
+    std::cout << "Message delivery for (" << message.len()
+              << " bytes): " << message.errstr() << std::endl;
+    if (message.key())
+      std::cout << "Key: " << *(message.key()) << ";" << std::endl;
+  }
+};
+
 ////////////////
 // Producer
 
 template <class Serialiser> class KafkaTransmitter {
 
 public:
-  KafkaTransmitter(const std::string &brokers, const std::string &topic,
+  KafkaTransmitter(const std::string &brokers, const std::string &topic_str,
                    const GeneratorOptions &options = {})
-      : topic_name{topic} {
+      : topic_name{topic_str} {
     if (brokers.empty() || topic_name.empty()) {
       throw std::runtime_error("Broker and/or topic not set");
     }
@@ -50,7 +60,7 @@ public:
         throw std::runtime_error(errstr);
       }
     }
-    conf->set("message.max.bytes", "23100100", errstr);
+    conf->set("message.max.bytes", "131001000", errstr);
     if (!errstr.empty()) {
       std::cerr << errstr << std::endl;
     }
@@ -58,11 +68,19 @@ public:
     if (!errstr.empty()) {
       std::cerr << errstr << std::endl;
     }
+    // conf->set("dr_cb", &ex_dr_cb, errstr);
 
     producer.reset(RdKafka::Producer::create(conf.get(), errstr));
     if (!producer) {
       throw std::runtime_error("Failed to create producer: " + errstr);
     }
+
+    RdKafka::Metadata *md;
+    auto err = producer->metadata(1, nullptr, &md, 1000);
+    if (err == RdKafka::ERR__TIMED_OUT) {
+      throw std::runtime_error("Failed to retrieve metadata: " + errstr);
+    }
+    metadata.reset(md);
   }
 
   template <typename T> size_t send(std::vector<T> &data, const int nev = -1) {
@@ -82,9 +100,12 @@ public:
   int poll() { return producer->poll(-1); }
 
 private:
-  Serialiser serialiser;
-  std::string topic_name;
+  std::unique_ptr<RdKafka::Metadata> metadata{nullptr};
   std::unique_ptr<RdKafka::Producer> producer{nullptr};
+  std::string topic_name;
+
+  // ExampleDeliveryReportCb ex_dr_cb;
+  Serialiser serialiser;
 };
 
 template <typename T> class TD;
@@ -95,7 +116,6 @@ size_t KafkaTransmitter<FlatBufferSerialiser>::send(const uint64_t &pid,
                                                     const uint64_t &timestamp,
                                                     std::vector<T> &data,
                                                     const int nev) {
-  std::cout << "nev : " << nev << "\t";
   if (nev) {
     auto buffer = serialiser.serialise(pid, timestamp, data);
     std::cout << "size : " << serialiser.size() << "\n";
@@ -104,8 +124,6 @@ size_t KafkaTransmitter<FlatBufferSerialiser>::send(const uint64_t &pid,
         RdKafka::Producer::RK_MSG_COPY,
         reinterpret_cast<void *>(serialiser.get()), serialiser.size(), nullptr,
         0, timestamp_now(), nullptr);
-    producer->poll(10);
-    std::cout << "ErrorCode: " << RdKafka::err2str(resp) << "\n";
   }
   return 0;
 }
