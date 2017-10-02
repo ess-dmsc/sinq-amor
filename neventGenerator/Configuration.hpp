@@ -18,7 +18,6 @@ class Configuration {
 
 public:
   KafkaConfiguration producer;
-  //  std::string protocol{""};
   std::string configuration_file{""};
   std::string source{""};
   std::string timestamp_generator{"none"};
