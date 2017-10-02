@@ -2,10 +2,10 @@
 
 #include <cctype>
 #include <chrono>
+#include <chrono>
 #include <sstream>
 #include <string>
 #include <utility>
-#include <chrono>
 
 #include <librdkafka/rdkafkacpp.h>
 
@@ -28,12 +28,11 @@ uint64_t timestamp_now() {
 template <class Serialiser> class KafkaTransmitter {
 
 public:
-  KafkaTransmitter(const std::string &brokers, const std::string &topic_,
+  KafkaTransmitter(const std::string &brokers, const std::string &topic,
                    const GeneratorOptions &options = {})
-      : topic_name(topic_) {
-
+      : topic_name{topic} {
     if (brokers.empty() || topic_name.empty()) {
-      throw std::runtime_error("Broker and topic not set");
+      throw std::runtime_error("Broker and/or topic not set");
     }
 
     std::unique_ptr<RdKafka::Conf> conf{
@@ -51,9 +50,13 @@ public:
       }
     }
     conf->set("message.max.bytes", "23100100", errstr);
-    std::cerr << errstr << std::endl;
+    if (!errstr.empty()) {
+      std::cerr << errstr << std::endl;
+    }
     conf->set("api.version.request", "true", errstr);
-    std::cerr << errstr << std::endl;
+    if (!errstr.empty()) {
+      std::cerr << errstr << std::endl;
+    }
 
     producer.reset(RdKafka::Producer::create(conf.get(), errstr));
     if (!producer) {
@@ -83,19 +86,25 @@ private:
   std::unique_ptr<RdKafka::Producer> producer{nullptr};
 };
 
+template <typename T> class TD;
+
 template <>
 template <typename T>
 size_t KafkaTransmitter<FlatBufferSerialiser>::send(const uint64_t &pid,
                                                     const uint64_t &timestamp,
                                                     std::vector<T> &data,
                                                     const int nev) {
+  std::cout << "nev : " << nev << "\t";
   if (nev) {
     auto buffer = serialiser.serialise(pid, timestamp, data);
+    std::cout << "size : " << serialiser.size() << "\n";
     RdKafka::ErrorCode resp = producer->produce(
         topic_name, RdKafka::Topic::PARTITION_UA,
-        RdKafka::Producer::RK_MSG_COPY, &buffer[0], buffer.size() * sizeof(T),
-        nullptr, 0, timestamp_now(), nullptr);
-    return buffer.size() * sizeof(T);
+        RdKafka::Producer::RK_MSG_COPY,
+        reinterpret_cast<void *>(serialiser.get()), serialiser.size(), nullptr,
+        0, timestamp_now(), nullptr);
+    producer->poll(10);
+    std::cout << "ErrorCode: " << RdKafka::err2str(resp) << "\n";
   }
   return 0;
 }

@@ -25,9 +25,9 @@ public:
 
   // WARNING: template parameter has to match schema data type
   template <class T>
-  std::vector<uint8_t> &serialise(const int &message_id,
-                                  const uint64_t &pulse_time,
-                                  const std::vector<T> &message = {}) {
+  std::vector<char> &serialise(const int &message_id,
+                               const uint64_t &pulse_time,
+                               const std::vector<T> &message = {}) {
     auto nev = message.size() / 2;
     flatbuffers::FlatBufferBuilder builder;
     auto source_name = builder.CreateString("AMOR.event.stream");
@@ -36,13 +36,14 @@ public:
     auto event = CreateEventMessage(builder, source_name, message_id,
                                     pulse_time, time_of_flight, detector_id);
     FinishEventMessageBuffer(builder, event);
+    buffer_.resize(builder.GetSize());
     buffer_.assign(builder.GetBufferPointer(),
                    builder.GetBufferPointer() + builder.GetSize());
     return buffer_;
   }
 
   template <class T>
-  void extract(const std::vector<uint8_t> &message, std::vector<T> &data,
+  void extract(const std::vector<char> &message, std::vector<T> &data,
                uint64_t &pid, uint64_t &timestamp) {
     extract_impl<T>(static_cast<const void *>(&message[0]), data, pid,
                     timestamp);
@@ -54,19 +55,21 @@ public:
     extract_impl<T>(static_cast<const void *>(msg), data, pid, timestamp);
   }
 
-  uint8_t *get() { return &buffer_[0]; }
+  char *get() { return &buffer_[0]; }
   const int size() { return buffer_.size(); }
 
-  const std::vector<uint8_t> &buffer() { return buffer_; }
+  const std::vector<char> &buffer() { return buffer_; }
 
   bool verify() {
-    flatbuffers::Verifier verifier(const_cast<const uint8_t *>(&buffer_[0]),
+    auto p = const_cast<const char *>(&buffer_[0]);
+    flatbuffers::Verifier verifier(reinterpret_cast<const unsigned char *>(p),
                                    buffer_.size());
     return VerifyEventMessageBuffer(verifier);
   }
-  bool verify(const std::vector<uint8_t> &other) {
-    flatbuffers::Verifier verifier(const_cast<const uint8_t *>(&other[0]),
-                                   other.size());
+  bool verify(const std::vector<char> &other) {
+    auto p = const_cast<const char *>(&other[0]);
+    flatbuffers::Verifier verifier(reinterpret_cast<const unsigned char *>(p),
+                                   buffer_.size());
     return VerifyEventMessageBuffer(verifier);
   }
 
@@ -85,7 +88,7 @@ private:
   }
 
   int _size = 0;
-  std::vector<uint8_t> buffer_;
+  std::vector<char> buffer_;
 };
 
 ///  \author Michele Brambilla <mib.mic@gmail.com>

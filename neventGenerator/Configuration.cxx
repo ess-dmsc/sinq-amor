@@ -257,19 +257,18 @@ void SINQAmorSim::ConfigurationParser::print() {
             << "source: " << config.source << "\n"
             << "multiplier: " << config.multiplier << "\n"
             << "rate: " << config.rate << "\n"
+            << "timestamp_generator: " << config.timestamp_generator << "\n"
             << "\n";
 }
 
 void usage(const std::string &exe) {
-  std::cout << "Usage: " << exe << " [OPTIONS]\n";
-  std::cout << "\t--config-file: "
+  std::cout << "Usage: " << exe << " [OPTIONS]\n"
+            << "\t--config-file:\n"
+            << "\t--producer-uri:\n"
+            << "\t--source:\n"
+            << "\t--multiplier:\n"
+            << "\t--rate:\n"
+            << "\t--timestamp-generator\n"
             << "\n";
-  std::cout << "\t--producer-uri: "
-            << "\n";
-  std::cout << "\t--source: "
-            << "\n";
-  std::cout << "\t--multiplier: "
-            << "\n";
-  std::cout << "\t--rate: "
-            << "\n";
+  exit(0);
 }
