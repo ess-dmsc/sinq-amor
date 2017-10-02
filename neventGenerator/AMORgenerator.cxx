@@ -8,7 +8,7 @@ using StreamFormat = SINQAmorSim::ESSformat;
 
 using Instrument = SINQAmorSim::Amor;
 using Source = SINQAmorSim::NeXusSource<Instrument, StreamFormat>;
-using Control = control::CommandlineControl;
+using Control = SINQAmorSim::CommandlineControl;
 
 using Serialiser = SINQAmorSim::FlatBufferSerialiser;
 using Communication = SINQAmorSim::KafkaTransmitter<Serialiser>;

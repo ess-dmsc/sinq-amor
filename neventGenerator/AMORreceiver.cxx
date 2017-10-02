@@ -7,15 +7,9 @@
 
 using Instrument = SINQAmorSim::Amor;
 using Source = SINQAmorSim::NeXusSource<Instrument, SINQAmorSim::PSIformat>;
-using Control = control::NoControl;
+using Control = SINQAmorSim::NoControl;
 using Serialiser = SINQAmorSim::FlatBufferSerialiser;
-
-///////////////////////
-// In the end we want to use kafka, I will use 0MQ for development purposes
-// typedef ZmqRecv Transport;
-// typedef generator::ZmqGen<generator::receiver> Transport;
-typedef SINQAmorSim::KafkaListener Transport;
-// typedef FileWriterGen Transport
+using Communication = SINQAmorSim::KafkaListener;
 
 int main(int argc, char **argv) {
 
@@ -29,7 +23,7 @@ int main(int argc, char **argv) {
   }
   auto &config = parser.config;
 
-  Generator<Transport, Control, Serialiser> g(config);
+  Generator<Communication, Control, Serialiser> g(config);
 
   std::vector<Source::value_type> stream;
   g.listen(stream);

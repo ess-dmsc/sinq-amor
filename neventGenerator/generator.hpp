@@ -1,5 +1,4 @@
-#ifndef _GENERATOR_H
-#define _GENERATOR_H
+#pragma once
 
 #include <chrono>
 #include <ctime>
@@ -51,10 +50,19 @@ class Generator {
   typedef Generator<Streamer, Control, Serialiser> self_t;
 
 public:
-  Generator(const SINQAmorSim::Configuration &configuration)
+  Generator(SINQAmorSim::Configuration &configuration)
       : config(configuration),
-        streamer(config.producer.broker, config.producer.broker),
-        control{new Control()} {}
+        streamer{new Streamer(configuration.producer.broker,
+                              configuration.producer.topic)},
+        control{new Control(configuration)} {
+
+    if (!streamer) {
+      throw std::runtime_error("Error creating the streamer instance");
+    }
+    if (!control) {
+      throw std::runtime_error("Error creating the control instance");
+    }
+  }
 
   template <class T> void run(std::vector<T> &stream) {
     std::thread ts(&self_t::run_impl<T>, this, std::ref(stream));
@@ -68,9 +76,8 @@ public:
   }
 
 private:
-  Streamer streamer;
-  std::unique_ptr<Control> control;
-  Serialiser serialiser;
+  std::unique_ptr<Streamer> streamer{nullptr};
+  std::unique_ptr<Control> control{nullptr};
   bool initial_status;
   SINQAmorSim::Configuration config;
 
@@ -90,26 +97,26 @@ private:
       nanoseconds ns =
           duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
       auto timestamp = ns.count();
-      generate_timestamp(stream, control->rate(), timestamp,
+      generate_timestamp(stream, config.rate, timestamp,
                          config.timestamp_generator);
 
       if (control->run()) {
-        streamer.send(pulseID, timestamp, stream);
+        streamer->send(pulseID, timestamp, stream);
         ++count;
       } else {
-        streamer.send(pulseID, timestamp, stream, 0);
+        streamer->send(pulseID, timestamp, stream, 0);
       }
       ++pulseID;
-      if (pulseID % control->rate() == 0) {
+      if (pulseID % config.rate == 0) {
         ++timeout->tm_sec;
         std::this_thread::sleep_until(
             system_clock::from_time_t(mktime(timeout)));
+        // streamer->poll();
       }
 
       if (std::chrono::duration_cast<std::chrono::seconds>(system_clock::now() -
                                                            start)
               .count() > 10) {
-        //        streamer.poll();
         std::cout << "Sent " << count << " packets @ "
                   << count * nev * sizeof(T) / (10 * 1e6) << "MB/s"
                   << "\t(timestamp : " << timestamp << ")" << std::endl;
@@ -133,7 +140,7 @@ private:
 
     while (1) {
 
-      auto msg = streamer.recv(stream, Serialiser());
+      auto msg = streamer->recv(stream, Serialiser());
       pid = msg.first;
       if (pid - pulseID != 0) {
         pulseID = pid;
@@ -157,5 +164,3 @@ private:
     }
   }
 };
-
-#endif // GENERATOR_H
