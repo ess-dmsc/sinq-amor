@@ -117,9 +117,11 @@ private:
       if (std::chrono::duration_cast<std::chrono::seconds>(system_clock::now() -
                                                            start)
               .count() > 10) {
-        std::cout << "Sent " << count << " packets @ "
-                  << count * nev * sizeof(T) / (10 * 1e6) << "MB/s"
+        std::cout << "Sent " << streamer->messages() << " packets @ "
+                  << streamer->bytes() / (10 * 1e6) << "MB/s"
                   << "\t(timestamp : " << timestamp << ")" << std::endl;
+        streamer->messages() = 0;
+        streamer->bytes() = 0;
         count = 0;
         start = system_clock::now();
       }
