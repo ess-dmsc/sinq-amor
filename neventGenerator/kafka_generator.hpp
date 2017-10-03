@@ -24,23 +24,23 @@ uint64_t timestamp_now() {
 }
 
 struct KafkaGeneratorInfo {
-  double bytes{0};
+  double Mbytes{0};
   double messages{0};
 };
 
 class DeliveryReport : public RdKafka::DeliveryReportCb {
 public:
   void dr_cb(RdKafka::Message &message) {
-    if (message.errstr().empty()) {
+    if (message.errstr() == "Success") {
       info.messages++;
-      info.bytes += message.len();
+      info.Mbytes += message.len() * 1e-6;
+    } else {
+      std::cout << message.errstr() << std::endl;
     }
-    std::cout << "Message delivery for (" << message.len()
-              << " bytes): " << message.errstr() << std::endl;
   }
 
   double &messages() { return info.messages; }
-  double &bytes() { return info.bytes; }
+  double &Mbytes() { return info.Mbytes; }
 
 private:
   KafkaGeneratorInfo info;
@@ -110,10 +110,10 @@ public:
     return 0;
   }
 
-  int poll() { return producer->poll(-1); }
+  int poll(const int &seconds = -1) { return producer->poll(seconds); }
 
   double &messages() { return dr_cb.messages(); }
-  double &bytes() { return dr_cb.bytes(); }
+  double &Mbytes() { return dr_cb.Mbytes(); }
 
 private:
   std::unique_ptr<RdKafka::Metadata> metadata{nullptr};

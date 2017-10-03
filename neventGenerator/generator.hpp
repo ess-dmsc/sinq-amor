@@ -107,21 +107,26 @@ private:
         streamer->send(pulseID, timestamp, stream, 0);
       }
       ++pulseID;
-      if (pulseID % config.rate == 0) {
+      if (pulseID % control->rate() == 0) {
         ++timeout->tm_sec;
         std::this_thread::sleep_until(
             system_clock::from_time_t(mktime(timeout)));
-        streamer->poll();
+        streamer->poll(1);
       }
 
-      if (std::chrono::duration_cast<std::chrono::seconds>(system_clock::now() -
-                                                           start)
-              .count() > 10) {
-        std::cout << "Sent " << streamer->messages() << " packets @ "
-                  << streamer->bytes() / (10 * 1e6) << "MB/s"
+      auto from_start = system_clock::now() - start;
+      if (std::chrono::duration_cast<std::chrono::seconds>(from_start).count() >
+          10) {
+        std::cout << "Sent " << streamer->messages() << "/" << control->rate()
+                  << " packets @ "
+                  << 1e3 * streamer->Mbytes() /
+                         std::chrono::duration_cast<std::chrono::milliseconds>(
+                             from_start)
+                             .count()
+                  << "MB/s"
                   << "\t(timestamp : " << timestamp << ")" << std::endl;
         streamer->messages() = 0;
-        streamer->bytes() = 0;
+        streamer->Mbytes() = 0;
         count = 0;
         start = system_clock::now();
       }
