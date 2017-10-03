@@ -47,6 +47,7 @@ struct CommandlineControl {
   bool run() const { return status == int(RunStatus::run); }
   bool stop() const { return status == int(RunStatus::stop); }
   bool pause() const { return status == int(RunStatus::pause); }
+  int rate() const { return config.rate; }
 
 private:
   std::atomic<int> status;
@@ -71,7 +72,6 @@ private:
         std::cout << "Insert the new transmission rate:" << std::endl;
         std::cin >> value;
         config.rate = std::stoi(value);
-        std::cout << value << std::endl;
       }
     }
     std::cout << "status : " << status << "\t"
