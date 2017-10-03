@@ -23,14 +23,27 @@ uint64_t timestamp_now() {
       .count();
 }
 
-class ExampleDeliveryReportCb : public RdKafka::DeliveryReportCb {
+struct KafkaGeneratorInfo {
+  double bytes{0};
+  double messages{0};
+};
+
+class DeliveryReport : public RdKafka::DeliveryReportCb {
 public:
   void dr_cb(RdKafka::Message &message) {
+    if (message.errstr().empty()) {
+      info.messages++;
+      info.bytes += message.len();
+    }
     std::cout << "Message delivery for (" << message.len()
               << " bytes): " << message.errstr() << std::endl;
-    if (message.key())
-      std::cout << "Key: " << *(message.key()) << ";" << std::endl;
   }
+
+  double &messages() { return info.messages; }
+  double &bytes() { return info.bytes; }
+
+private:
+  KafkaGeneratorInfo info;
 };
 
 ////////////////
@@ -68,7 +81,7 @@ public:
     if (!errstr.empty()) {
       std::cerr << errstr << std::endl;
     }
-    // conf->set("dr_cb", &ex_dr_cb, errstr);
+    conf->set("dr_cb", &dr_cb, errstr);
 
     producer.reset(RdKafka::Producer::create(conf.get(), errstr));
     if (!producer) {
@@ -99,12 +112,15 @@ public:
 
   int poll() { return producer->poll(-1); }
 
+  double &messages() { return dr_cb.messages(); }
+  double &bytes() { return dr_cb.bytes(); }
+
 private:
   std::unique_ptr<RdKafka::Metadata> metadata{nullptr};
   std::unique_ptr<RdKafka::Producer> producer{nullptr};
   std::string topic_name;
 
-  // ExampleDeliveryReportCb ex_dr_cb;
+  DeliveryReport dr_cb;
   Serialiser serialiser;
 };
 
@@ -118,7 +134,6 @@ size_t KafkaTransmitter<FlatBufferSerialiser>::send(const uint64_t &pid,
                                                     const int nev) {
   if (nev) {
     auto buffer = serialiser.serialise(pid, timestamp, data);
-    std::cout << "size : " << serialiser.size() << "\n";
     RdKafka::ErrorCode resp = producer->produce(
         topic_name, RdKafka::Topic::PARTITION_UA,
         RdKafka::Producer::RK_MSG_COPY,
