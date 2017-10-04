@@ -9,7 +9,7 @@ using Instrument = SINQAmorSim::Amor;
 using Source = SINQAmorSim::NeXusSource<Instrument, SINQAmorSim::PSIformat>;
 using Control = SINQAmorSim::NoControl;
 using Serialiser = SINQAmorSim::FlatBufferSerialiser;
-using Communication = SINQAmorSim::KafkaListener;
+using Communication = SINQAmorSim::KafkaListener<Serialiser>;
 
 int main(int argc, char **argv) {
 
@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
   }
   auto &config = parser.config;
 
-  Generator<Communication, Control, Serialiser> g(config);
+  Generator<Communication, Control> g(config);
 
   std::vector<Source::value_type> stream;
   g.listen(stream);

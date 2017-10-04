@@ -25,21 +25,20 @@ public:
 
   // WARNING: template parameter has to match schema data type
   template <class T>
-  std::vector<char> &serialise(const int &message_id,
-                               const uint64_t &pulse_time,
-                               const std::vector<T> &message = {}) {
+  const size_t &serialise(const int &message_id, const uint64_t &pulse_time,
+                          const std::vector<T> &message = {}) {
     auto nev = message.size() / 2;
-    flatbuffers::FlatBufferBuilder builder;
+    builder.Clear();
     auto source_name = builder.CreateString("AMOR.event.stream");
     auto time_of_flight = builder.CreateVector(&message[0], nev);
     auto detector_id = builder.CreateVector(&message[nev], nev);
     auto event = CreateEventMessage(builder, source_name, message_id,
                                     pulse_time, time_of_flight, detector_id);
     FinishEventMessageBuffer(builder, event);
-    buffer_.resize(builder.GetSize());
-    buffer_.assign(builder.GetBufferPointer(),
-                   builder.GetBufferPointer() + builder.GetSize());
-    return buffer_;
+    // buffer_.resize(builder.GetSize());
+    // buffer_.assign(builder.GetBufferPointer(),
+    //                builder.GetBufferPointer() + builder.GetSize());
+    return (size_ = builder.GetSize());
   }
 
   template <class T>
@@ -55,25 +54,27 @@ public:
     extract_impl<T>(static_cast<const void *>(msg), data, pid, timestamp);
   }
 
-  char *get() { return &buffer_[0]; }
-  const int size() { return buffer_.size(); }
-
-  const std::vector<char> &buffer() { return buffer_; }
+  unsigned char *get() { return builder.GetBufferPointer(); }
+  const size_t size() { return builder.GetSize(); }
 
   bool verify() {
-    auto p = const_cast<const char *>(&buffer_[0]);
-    flatbuffers::Verifier verifier(reinterpret_cast<const unsigned char *>(p),
-                                   buffer_.size());
-    return VerifyEventMessageBuffer(verifier);
+    if (builder.GetSize() > 0) {
+      flatbuffers::Verifier verifier(builder.GetBufferPointer(),
+                                     builder.GetSize());
+      return VerifyEventMessageBuffer(verifier);
+    }
+    return false;
   }
   bool verify(const std::vector<char> &other) {
     auto p = const_cast<const char *>(&other[0]);
     flatbuffers::Verifier verifier(reinterpret_cast<const unsigned char *>(p),
-                                   buffer_.size());
+                                   other.size());
     return VerifyEventMessageBuffer(verifier);
   }
 
 private:
+  flatbuffers::FlatBufferBuilder builder;
+
   template <class T>
   void extract_impl(const void *msg, std::vector<T> &data, uint64_t &pid,
                     uint64_t &timestamp) {
@@ -87,8 +88,7 @@ private:
     timestamp = event->pulse_time();
   }
 
-  int _size = 0;
-  std::vector<char> buffer_;
+  size_t size_{0};
 };
 
 ///  \author Michele Brambilla <mib.mic@gmail.com>
@@ -107,4 +107,4 @@ private:
   const uint8_t *buf;
 };
 
-} // serialiser
+} // namespace SINQAmorSim

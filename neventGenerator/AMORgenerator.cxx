@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
   Source stream(config.source, config.multiplier);
   auto data = stream.get();
 
-  Generator<Communication, Control, Serialiser> g(config);
+  Generator<Communication, Control> g(config);
   g.run<StreamFormat::value_type>(data);
 
   return 0;

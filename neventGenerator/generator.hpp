@@ -45,15 +45,14 @@ using nanoseconds = std::chrono::nanoseconds;
  *
  *  \author Michele Brambilla <mib.mic@gmail.com>
  *  \date Wed Jun 08 15:19:52 2016 */
-template <typename Streamer, typename Control, typename Serialiser>
-class Generator {
-  typedef Generator<Streamer, Control, Serialiser> self_t;
+template <typename Streamer, typename Control> class Generator {
+  typedef Generator<Streamer, Control> self_t;
 
 public:
   Generator(SINQAmorSim::Configuration &configuration)
-      : config(configuration),
-        streamer{new Streamer(configuration.producer.broker,
-                              configuration.producer.topic)},
+      : config(configuration), streamer{new Streamer(
+                                   configuration.producer.broker,
+                                   configuration.producer.topic)},
         control{new Control(configuration)} {
 
     if (!streamer) {
@@ -147,7 +146,7 @@ private:
 
     while (1) {
 
-      auto msg = streamer->recv(stream, Serialiser());
+      auto msg = streamer->recv(stream);
       pid = msg.first;
       if (pid - pulseID != 0) {
         pulseID = pid;

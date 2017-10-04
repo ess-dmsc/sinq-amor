@@ -8,9 +8,9 @@ TEST(flatbuffer_serialiser, serialise_ess_format) {
   SINQAmorSim::FlatBufferSerialiser serialiser;
   std::vector<SINQAmorSim::ESSformat::value_type> data;
   data.resize(data_size);
-  auto buffer = serialiser.serialise(1, 1, data);
-  EXPECT_TRUE(buffer.size() > 0);
-  EXPECT_TRUE(EventMessageBufferHasIdentifier(&buffer[0]));
+  auto buffer_size = serialiser.serialise(1, 1, data);
+  EXPECT_TRUE(buffer_size > 0);
+  EXPECT_TRUE(EventMessageBufferHasIdentifier(serialiser.get()));
   EXPECT_TRUE(serialiser.verify());
 }
 
@@ -20,13 +20,11 @@ TEST(flatbuffer_serialiser, serialise_and_unserialise_ess_format) {
   for (int i = 0; i < data_size; ++i) {
     input.push_back(i);
   }
-  auto buffer = serialiser.serialise(11, 37, input);
-  EXPECT_TRUE(buffer.size() > 0);
-  EXPECT_TRUE(EventMessageBufferHasIdentifier(&buffer[0]));
-  // EXPECT_TRUE(serialiser.verify(buffer));
+  auto buffer_size = serialiser.serialise(11, 37, input);
 
   uint64_t packet_id, timestamp;
-  serialiser.extract(buffer, output, packet_id, timestamp);
+  serialiser.extract(reinterpret_cast<const char *>(serialiser.get()), output,
+                     packet_id, timestamp);
   EXPECT_TRUE(input == output);
   EXPECT_EQ(packet_id, 11);
   EXPECT_EQ(timestamp, 37);
@@ -39,9 +37,10 @@ TEST(flatbuffer_serialiser, serialise_and_unserialise_ess_format) {
 
 TEST(flatbuffer_serialiser, serialise_empty_array_ess_format) {
   SINQAmorSim::FlatBufferSerialiser serialiser;
-  auto buffer = serialiser.serialise<SINQAmorSim::ESSformat::value_type>(1, 1);
-  EXPECT_TRUE(buffer.size() > 0);
-  EXPECT_TRUE(EventMessageBufferHasIdentifier(&buffer[0]));
+  auto buffer_size =
+      serialiser.serialise<SINQAmorSim::ESSformat::value_type>(1, 1);
+  EXPECT_TRUE(buffer_size > 0);
+  EXPECT_TRUE(EventMessageBufferHasIdentifier(serialiser.get()));
 }
 
 // TEST(flatbuffer_serialiser,serialise_empty_array_psi_format) {

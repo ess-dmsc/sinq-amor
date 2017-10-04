@@ -2,8 +2,6 @@
 
 #include <cctype>
 #include <chrono>
-#include <chrono>
-#include <chrono>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -146,7 +144,7 @@ size_t KafkaTransmitter<FlatBufferSerialiser>::send(const uint64_t &pid,
 ////////////////
 // Consumer
 
-struct KafkaListener {
+template <class Serialiser> struct KafkaListener {
   static const int max_header_size = 10000;
 
   KafkaListener(const std::string &broker_, const std::string &topic_)
@@ -236,6 +234,31 @@ struct KafkaListener {
     RdKafka::Message *msg = nullptr;
     auto rcv_stat = RdKafka::ERR_NO_ERROR;
     SINQAmorSim::FlatBufferSerialiser s;
+
+    do {
+      msg = consumer->consume(topic, partition, 1000);
+      rcv_stat = msg->err();
+      if ((rcv_stat != RdKafka::ERR_NO_ERROR) &&
+          (rcv_stat != RdKafka::ERR__TIMED_OUT) &&
+          (rcv_stat != RdKafka::ERR__PARTITION_EOF)) {
+        std::cerr << "message error: " << RdKafka::err2str(msg->err())
+                  << std::endl;
+      }
+    } while (msg->err() != RdKafka::ERR_NO_ERROR);
+
+    uint64_t pid = -1, timestamp = -1;
+    s.extract(reinterpret_cast<const char *>(msg->payload()), data, pid,
+              timestamp);
+    return std::pair<uint64_t, uint64_t>(pid, msg->len());
+  }
+
+  template <typename T>
+  std::pair<uint64_t, uint64_t> recv(std::vector<T> &data) {
+
+    std::pair<int, int> result;
+    RdKafka::Message *msg = nullptr;
+    auto rcv_stat = RdKafka::ERR_NO_ERROR;
+    Serialiser s;
 
     do {
       msg = consumer->consume(topic, partition, 1000);
