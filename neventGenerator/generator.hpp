@@ -116,7 +116,7 @@ private:
       auto from_start = system_clock::now() - start;
       if (std::chrono::duration_cast<std::chrono::seconds>(from_start).count() >
           10) {
-        std::cout << "Sent " << streamer->messages() << "/" << control->rate()
+        std::cout << "Sent " << streamer->messages() << "/" << 10*control->rate()
                   << " packets @ "
                   << 1e3 * streamer->Mbytes() /
                          std::chrono::duration_cast<std::chrono::milliseconds>(
