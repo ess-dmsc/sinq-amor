@@ -188,71 +188,10 @@ template <class Serialiser> struct KafkaListener {
   }
 
   template <typename T>
-  int recv(std::string &h, std::vector<T> &data, SINQAmorSim::NoSerialiser) {
-    void *value;
-    std::pair<int, int> result;
-    RdKafka::Message *msg = nullptr;
-    do {
-      msg = consumer->consume(topic, partition, 1000);
-    } while (msg->err() != RdKafka::ERR_NO_ERROR);
-    result = consume_header(msg, static_cast<void *>(&h[0]));
-    h = std::string(static_cast<char *>(msg->payload()));
-    if (result.second > 0) {
-      msg = consumer->consume(topic, partition, 10000);
-      if (msg->err() != RdKafka::ERR_NO_ERROR)
-        std::cerr << "expected event data" << std::endl;
-      consume_data<T>(msg, value);
-    }
-    delete msg;
-    return result.first;
+  std::pair<uint64_t, uint64_t> recv(std::vector<T> &data) {
+    return std::pair<uint64_t, uint64_t>{0, 0};
   }
 
-  template <typename T>
-  int recv(std::string &h, std::vector<T> &data,
-           SINQAmorSim::FlatBufferSerialiser) {
-    void *value;
-    std::pair<int, int> result;
-    RdKafka::Message *msg = nullptr;
-    do {
-      msg = consumer->consume(topic, partition, 1000);
-      std::cout << RdKafka::err2str(msg->err()) << std::endl;
-    } while (msg->err() != RdKafka::ERR_NO_ERROR);
-    result =
-        consume_serialised<T>(msg, value, SINQAmorSim::FlatBufferSerialiser());
-    h = std::string(static_cast<char *>(msg->payload()));
-  }
-
-  template <typename T>
-  std::pair<uint64_t, uint64_t> recv(std::vector<T> &data,
-                                     SINQAmorSim::NoSerialiser) {
-    return std::pair<uint64_t, uint64_t>(0, 0);
-  }
-
-  template <typename T>
-  std::pair<uint64_t, uint64_t> recv(std::vector<T> &data,
-                                     SINQAmorSim::FlatBufferSerialiser) {
-
-    std::pair<int, int> result;
-    RdKafka::Message *msg = nullptr;
-    auto rcv_stat = RdKafka::ERR_NO_ERROR;
-    SINQAmorSim::FlatBufferSerialiser s;
-
-    do {
-      msg = consumer->consume(topic, partition, 1000);
-      rcv_stat = msg->err();
-      if ((rcv_stat != RdKafka::ERR_NO_ERROR) &&
-          (rcv_stat != RdKafka::ERR__TIMED_OUT) &&
-          (rcv_stat != RdKafka::ERR__PARTITION_EOF)) {
-        std::cerr << "message error: " << RdKafka::err2str(msg->err())
-                  << std::endl;
-      }
-    } while (msg->err() != RdKafka::ERR_NO_ERROR);
-
-    uint64_t pid = -1, timestamp = -1;
-    s.extract(reinterpret_cast<const char *>(msg->payload()), data, pid,
-              timestamp);
-    return std::pair<uint64_t, uint64_t>(pid, msg->len());
-  }
 
 private:
   std::string brokers;
@@ -295,5 +234,33 @@ private:
     return result;
   }
 };
+
+
+template <>
+template <typename T>
+std::pair<uint64_t, uint64_t>
+  KafkaListener<FlatBufferSerialiser>::recv(std::vector<T> &data) {
+
+  std::pair<int, int> result;
+  RdKafka::Message *msg = nullptr;
+  auto rcv_stat = RdKafka::ERR_NO_ERROR;
+  FlatBufferSerialiser s;
+
+  do {
+    msg = consumer->consume(topic, partition, 1000);
+    rcv_stat = msg->err();
+    if ((rcv_stat != RdKafka::ERR_NO_ERROR) &&
+        (rcv_stat != RdKafka::ERR__TIMED_OUT) &&
+        (rcv_stat != RdKafka::ERR__PARTITION_EOF)) {
+      std::cerr << "message error: " << RdKafka::err2str(msg->err())
+                << std::endl;
+    }
+  } while (msg->err() != RdKafka::ERR_NO_ERROR);
+
+  uint64_t pid = -1, timestamp = -1;
+  s.extract(reinterpret_cast<const char *>(msg->payload()), data, pid,
+            timestamp);
+  return std::pair<uint64_t, uint64_t>(pid, msg->len());
+}
 
 } // namespace SINQAmorSim

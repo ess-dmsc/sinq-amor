@@ -147,7 +147,7 @@ private:
 
     while (1) {
 
-      auto msg = streamer->recv(stream, Serialiser());
+      auto msg = streamer->recv(stream);
       pid = msg.first;
       if (pid - pulseID != 0) {
         pulseID = pid;
