@@ -166,6 +166,7 @@ SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
       {"status-uri", required_argument, nullptr, 0},
       {"use-signal-handler", required_argument, nullptr, 0},
       {"source", required_argument, nullptr, 0},
+      {"source-name", required_argument, nullptr, 0},
       {"multiplier", required_argument, nullptr, 0},
       {"rate", required_argument, nullptr, 0},
       {"timestamp-generator", required_argument, nullptr, 0},
@@ -197,6 +198,9 @@ SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
       }
       if (std::string("source") == lname) {
         result.source = optarg;
+      }
+      if (std::string("source-name") == lname) {
+        result.source_name = optarg;
       }
       if (std::string("multiplier") == lname) {
         std::istringstream buffer(optarg);
@@ -236,6 +240,9 @@ void SINQAmorSim::ConfigurationParser::override_configuration_with(
   if (!other.source.empty()) {
     config.source = other.source;
   }
+  if (!other.source_name.empty()) {
+    config.source_name = other.source_name;
+  }
   if (other.multiplier > 0) {
     config.multiplier = other.multiplier;
   }
@@ -249,7 +256,8 @@ void SINQAmorSim::ConfigurationParser::override_configuration_with(
 
 int SINQAmorSim::ConfigurationParser::validate() {
   if (config.producer.broker.empty() || config.producer.topic.empty() ||
-      config.source.empty() || config.multiplier <= 0 || config.rate <= 0) {
+      config.source.empty() || config.multiplier <= 0 || config.rate <= 0 ||
+      config.source_name.empty() ) {
     return ConfigurationError::error_configuration_invalid;
   } else {
     return ConfigurationError::error_no_configuration_error;
@@ -273,6 +281,7 @@ void usage(const std::string &exe) {
             << "\t--config-file:\n"
             << "\t--producer-uri:\n"
             << "\t--source:\n"
+            << "\t--source-name:\n"
             << "\t--multiplier:\n"
             << "\t--rate:\n"
             << "\t--timestamp-generator\n"
