@@ -20,6 +20,7 @@ public:
   KafkaConfiguration producer;
   std::string configuration_file{""};
   std::string source{""};
+  std::string source_name{"AMOR.area.detector"};
   std::string timestamp_generator{"none"};
   int multiplier{0};
   int rate{0};

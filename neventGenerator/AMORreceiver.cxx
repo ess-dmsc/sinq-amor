@@ -9,7 +9,7 @@ using Instrument = SINQAmorSim::Amor;
 using Source = SINQAmorSim::NeXusSource<Instrument, SINQAmorSim::PSIformat>;
 using Control = SINQAmorSim::NoControl;
 using Serialiser = SINQAmorSim::FlatBufferSerialiser;
-using Communication = SINQAmorSim::KafkaListener;
+using Communication = SINQAmorSim::KafkaListener<Serialiser>;
 
 int main(int argc, char **argv) {
 

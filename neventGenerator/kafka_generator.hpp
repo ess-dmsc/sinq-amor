@@ -146,7 +146,7 @@ size_t KafkaTransmitter<FlatBufferSerialiser>::send(const uint64_t &pid,
 ////////////////
 // Consumer
 
-struct KafkaListener {
+template <class Serialiser> struct KafkaListener {
   static const int max_header_size = 10000;
 
   KafkaListener(const std::string &broker_, const std::string &topic_)

@@ -110,6 +110,12 @@ int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl(
       }
       config.source = m.value.GetString();
     }
+    if (m.name.GetString() == std::string("source_name")) {
+      if (!m.value.IsString()) {
+        return ConfigurationError::error_parsing_json;
+      }
+      config.source_name = m.value.GetString();
+    }
     if (m.name.GetString() == std::string("timestamp_generator")) {
       if (!m.value.IsString()) {
         return ConfigurationError::error_parsing_json;
@@ -255,6 +261,7 @@ void SINQAmorSim::ConfigurationParser::print() {
             << "\tbroker: " << config.producer.broker << "\n"
             << "\ttopic: " << config.producer.topic << "\n"
             << "source: " << config.source << "\n"
+            << "source_name: " << config.source_name << "\n"
             << "multiplier: " << config.multiplier << "\n"
             << "rate: " << config.rate << "\n"
             << "timestamp_generator: " << config.timestamp_generator << "\n"
