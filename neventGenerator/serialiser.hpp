@@ -21,7 +21,11 @@ namespace SINQAmorSim {
 ///  \date Thu Jul 28 14:32:29 2016
 class FlatBufferSerialiser {
 public:
-  using is_serialised = std::true_type;
+  FlatBufferSerialiser(const std::string& source_name = "") : source{source_name} {}
+  FlatBufferSerialiser(const FlatBufferSerialiser& other) = default;
+  FlatBufferSerialiser(FlatBufferSerialiser&& other) = default;
+  ~FlatBufferSerialiser() = default;
+
 
   // WARNING: template parameter has to match schema data type
   template <class T>
@@ -30,7 +34,7 @@ public:
                                const std::vector<T> &message = {}) {
     auto nev = message.size() / 2;
     flatbuffers::FlatBufferBuilder builder;
-    auto source_name = builder.CreateString("AMOR.event.stream");
+    auto source_name = builder.CreateString(source);
     auto time_of_flight = builder.CreateVector(&message[0], nev);
     auto detector_id = builder.CreateVector(&message[nev], nev);
     auto event = CreateEventMessage(builder, source_name, message_id,
@@ -89,13 +93,17 @@ private:
 
   int _size = 0;
   std::vector<char> buffer_;
+  std::string source;
 };
 
 ///  \author Michele Brambilla <mib.mic@gmail.com>
 ///  \date Fri Jun 17 12:22:01 2016
 class NoSerialiser {
 public:
-  typedef std::false_type is_serialised;
+  NoSerialiser(const std::string& = "") {}
+  NoSerialiser(const NoSerialiser& other) = default;
+  NoSerialiser(NoSerialiser&& other) = default;
+  ~NoSerialiser() = default;
 
   NoSerialiser() : buf(nullptr){};
   char *get() { return nullptr; }
