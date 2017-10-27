@@ -1,0 +1,2 @@
+essiip_fakesinqhw_src: https://github.com/ess-dmsc/essiip-fakesinqhw.git
+forward_epics_to_kafka_src: https://github.com/ess-dmsc/forward-epics-to-kafka.git

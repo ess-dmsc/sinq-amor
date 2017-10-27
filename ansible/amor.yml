@@ -9,13 +9,13 @@
     - simulation
   roles:
     - common
-    - playbook_local_deps
+#    - playbook_local_deps
     - motors
     - magnet 
     - sps
     - dimetix
     - epics
-    - chopper_dornier
+#    - chopper_dornier
 #    - forward-epics-to-kafka
     - generator
   vars:
