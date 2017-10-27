@@ -1,4 +1,4 @@
-set(REQUIRE_GTEST TRUE CACHE BOOL "Require Google Test")
+set(REQUIRE_GTEST FALSE CACHE BOOL "Require Google Test")
 if (REQUIRE_GTEST)
 	find_path(path_googletest_repository NAMES "googletest/include/gtest/gtest.h" HINTS "${GOOGLETEST_REPOSITORY_DIR}" )
 	if (path_googletest_repository)

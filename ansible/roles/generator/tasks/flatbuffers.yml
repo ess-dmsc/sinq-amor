@@ -6,13 +6,16 @@
     dest: "{{sources}}/flatbuffers-{{flatbuffers_version}}"
     version: "{{flatbuffers_version}}"
 
+- debug:
+     msg: "NeXus status: {{sources}}/flatbuffers-{{flatbuffers_version}}"
+
 - name: Create build folder
   file:
     path: "{{builds}}/flatbuffers-{{flatbuffers_version}}"
     state: directory
 
 - name: Configure flatbuffers
-  command: "cmake -DCMAKE_INSTALL_PREFIX={{flatbuffers}} {{sources}}/flatbuffers-{{flatbuffers_version}}"
+  command: "{{scl}} cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX={{flatbuffers}} {{sources}}/flatbuffers-{{flatbuffers_version}}"
   args:
     chdir: "{{builds}}/flatbuffers-{{flatbuffers_version}}"
 

@@ -1,5 +1,0 @@
-[simulation]
-127.0.0.1 ansible_connection=local
-
-[kafka_server]
-127.0.0.1 ansible_connection=local
