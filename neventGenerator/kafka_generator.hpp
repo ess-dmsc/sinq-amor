@@ -140,7 +140,7 @@ size_t KafkaTransmitter<FlatBufferSerialiser>::send(const uint64_t &pid,
                                                     std::vector<T> &data,
                                                     const int nev) {
   if (nev) {
-    auto buffer = serialiser->serialise(pid, timestamp, data);
+    serialiser->serialise(pid, timestamp, data);
     RdKafka::ErrorCode resp = producer->produce(
         topic_name, RdKafka::Topic::PARTITION_UA,
         RdKafka::Producer::RK_MSG_COPY,
