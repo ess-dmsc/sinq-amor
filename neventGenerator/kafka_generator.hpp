@@ -12,7 +12,7 @@
 #include "serialiser.hpp"
 
 namespace SINQAmorSim {
-
+  
 using GeneratorOptions = std::vector<std::pair<std::string, std::string>>;
 
 uint64_t timestamp_now() {
@@ -52,7 +52,7 @@ template <class Serialiser> class KafkaTransmitter {
 public:
   KafkaTransmitter(const std::string &brokers, const std::string &topic_str,
                    const GeneratorOptions &options = {})
-      : topic_name{topic_str} {
+    : topic_name{topic_str} {
     if (brokers.empty() || topic_name.empty()) {
       throw std::runtime_error("Broker and/or topic not set");
     }
@@ -81,6 +81,12 @@ public:
     }
     conf->set("dr_cb", &dr_cb, errstr);
 
+    for(auto& opt : options) {
+      if(opt.first == "source_name") {
+	source_name = opt.second;
+      }
+    }
+
     producer.reset(RdKafka::Producer::create(conf.get(), errstr));
     if (!producer) {
       throw std::runtime_error("Failed to create producer: " + errstr);
@@ -92,6 +98,8 @@ public:
       throw std::runtime_error("Failed to retrieve metadata: " + errstr);
     }
     metadata.reset(md);
+
+    serialiser.reset(new Serialiser{source_name});
   }
 
   template <typename T> size_t send(std::vector<T> &data, const int nev = -1) {
@@ -117,9 +125,10 @@ private:
   std::unique_ptr<RdKafka::Metadata> metadata{nullptr};
   std::unique_ptr<RdKafka::Producer> producer{nullptr};
   std::string topic_name;
+  std::string source_name{"AMOR.event.stream"};
 
   DeliveryReport dr_cb;
-  Serialiser serialiser;
+  std::unique_ptr<Serialiser> serialiser{nullptr};
 };
 
 template <typename T> class TD;
@@ -131,11 +140,11 @@ size_t KafkaTransmitter<FlatBufferSerialiser>::send(const uint64_t &pid,
                                                     std::vector<T> &data,
                                                     const int nev) {
   if (nev) {
-    auto buffer = serialiser.serialise(pid, timestamp, data);
+    auto buffer = serialiser->serialise(pid, timestamp, data);
     RdKafka::ErrorCode resp = producer->produce(
         topic_name, RdKafka::Topic::PARTITION_UA,
         RdKafka::Producer::RK_MSG_COPY,
-        reinterpret_cast<void *>(serialiser.get()), serialiser.size(), nullptr,
+        reinterpret_cast<void *>(serialiser->get()), serialiser->size(), nullptr,
         0, timestamp_now(), nullptr);
   }
   return 0;
@@ -198,7 +207,7 @@ template <class Serialiser> struct KafkaListener {
   }
 
 private:
-  int32_t partition = RdKafka::Topic::PARTITION_UA;
+  int32_t partition = 0;
   int64_t start_offset = RdKafka::Topic::OFFSET_BEGINNING;
 
   std::unique_ptr<RdKafka::Consumer> consumer{nullptr};
