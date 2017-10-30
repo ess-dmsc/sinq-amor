@@ -4,5 +4,6 @@
     "multiplier" : 1,
     "rate" : 10,
     "source_name": "AMOR.event.stream",
-    "timestamp_generator" : "const_timestamp"
+    "timestamp_generator" : "const_timestamp",
+    "report_time" : 1
 }

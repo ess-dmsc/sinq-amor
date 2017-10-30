@@ -24,6 +24,7 @@ public:
   std::string timestamp_generator{"none"};
   int multiplier{0};
   int rate{0};
+  int report_time{10};
   bool valid{true};
 };
 

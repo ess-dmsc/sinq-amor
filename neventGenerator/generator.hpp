@@ -57,7 +57,7 @@ public:
     options.push_back(SINQAmorSim::GeneratorOptions::value_type{
         "source_name", configuration.source_name});
     streamer.reset(new Streamer{configuration.producer.broker,
-	  configuration.producer.topic, options});
+                                configuration.producer.topic, options});
     if (!streamer) {
       throw std::runtime_error("Error creating the streamer instance");
     }
@@ -118,9 +118,9 @@ private:
 
       auto from_start = system_clock::now() - start;
       if (std::chrono::duration_cast<std::chrono::seconds>(from_start).count() >
-          10) {
-        std::cout << "Sent " << streamer->messages() << "/" << control->rate()
-                  << " packets @ "
+          config.report_time) {
+        std::cout << "Sent " << streamer->messages() << "/"
+                  << control->rate() * config.report_time << " packets @ "
                   << 1e3 * streamer->Mbytes() /
                          std::chrono::duration_cast<std::chrono::milliseconds>(
                              from_start)
@@ -160,7 +160,7 @@ private:
       }
       if (std::chrono::duration_cast<std::chrono::seconds>(system_clock::now() -
                                                            start)
-              .count() > 10) {
+              .count() > config.report_time) {
         std::cout << "Missed " << missed << " packets" << std::endl;
         std::cout << "Received " << count << "packets"
                   << " @ " << size * 1e-1 * 1e-6 << "MB/s" << std::endl;

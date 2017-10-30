@@ -122,6 +122,12 @@ int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl(
       }
       config.timestamp_generator = m.value.GetString();
     }
+    if (m.name.GetString() == std::string("report_time")) {
+      if (!m.value.IsInt()) {
+        return ConfigurationError::error_parsing_json;
+      }
+      config.report_time = m.value.GetInt();
+    }
   }
   return ConfigurationError::error_no_configuration_error;
 }
