@@ -21,7 +21,7 @@ namespace SINQAmorSim {
 ///  \date Thu Jul 28 14:32:29 2016
 class FlatBufferSerialiser {
 public:
-  FlatBufferSerialiser(const std::string& source_name = "") : source{source_name} {}
+  FlatBufferSerialiser(const std::string& source_name = "AMOR.event.stream") : source{source_name} {}
   FlatBufferSerialiser(const FlatBufferSerialiser& other) = default;
   FlatBufferSerialiser(FlatBufferSerialiser&& other) = default;
   ~FlatBufferSerialiser() = default;

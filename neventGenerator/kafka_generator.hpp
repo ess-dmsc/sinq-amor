@@ -2,8 +2,6 @@
 
 #include <cctype>
 #include <chrono>
-#include <chrono>
-#include <chrono>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -149,37 +147,44 @@ size_t KafkaTransmitter<FlatBufferSerialiser>::send(const uint64_t &pid,
 template <class Serialiser> struct KafkaListener {
   static const int max_header_size = 10000;
 
-  KafkaListener(const std::string &broker_, const std::string &topic_)
-      : brokers(broker_), topic_str(topic_) {
-    conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
-    tconf = RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC);
+  KafkaListener(const std::string &brokers, const std::string &topic_str) {
+    std::unique_ptr<RdKafka::Conf> conf{
+        RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL)};
+    std::unique_ptr<RdKafka::Conf> tconf{
+        RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC)};
+
+    std::string errstr;
     conf->set("metadata.broker.list", brokers, errstr);
-    if (!debug.empty()) {
-      if (conf->set("debug", debug, errstr) != RdKafka::Conf::CONF_OK) {
-        std::cerr << errstr << std::endl;
-        exit(1);
-      }
+    if (!errstr.empty()) {
+      std::cerr << errstr << std::endl;
     }
     conf->set("fetch.message.max.bytes", "23100100", errstr);
+    if (!errstr.empty()) {
+      std::cerr << errstr << std::endl;
+    }
     conf->set("receive.message.max.bytes", "23100100", errstr);
-    std::cerr << errstr << std::endl;
+    if (!errstr.empty()) {
+      std::cerr << errstr << std::endl;
+    }
 
     if (topic_str.empty()) {
       std::cerr << "Topic required." << std::endl;
       exit(1);
     }
-    consumer = RdKafka::Consumer::create(conf, errstr);
+    consumer.reset(RdKafka::Consumer::create(conf.get(), errstr));
     if (!consumer) {
       std::cerr << "Failed to create consumer: " << errstr << std::endl;
       exit(1);
     }
-    topic = RdKafka::Topic::create(consumer, topic_str, tconf, errstr);
+    topic.reset(
+        RdKafka::Topic::create(consumer.get(), topic_str, tconf.get(), errstr));
     if (!topic) {
       std::cerr << "Failed to create topic: " << errstr << std::endl;
       exit(1);
     }
 
-    RdKafka::ErrorCode resp = consumer->start(topic, partition, start_offset);
+    RdKafka::ErrorCode resp =
+        consumer->start(topic.get(), partition, start_offset);
     if (resp != RdKafka::ERR_NO_ERROR) {
       std::cerr << "Failed to start consumer: " << RdKafka::err2str(resp)
                 << std::endl;
@@ -192,62 +197,26 @@ template <class Serialiser> struct KafkaListener {
     return std::pair<uint64_t, uint64_t>{0, 0};
   }
 
-
 private:
-  std::string brokers;
-  std::string topic_str;
-  std::string errstr;
-  std::string debug;
-
-  int32_t partition = 0; // RdKafka::Topic::PARTITION_UA;
+  int32_t partition = RdKafka::Topic::PARTITION_UA;
   int64_t start_offset = RdKafka::Topic::OFFSET_BEGINNING;
 
-  RdKafka::Conf *conf;
-  RdKafka::Conf *tconf;
-  RdKafka::Consumer *consumer;
-  RdKafka::Topic *topic;
-
-  std::pair<int, int> consume_header(RdKafka::Message *message, void *opaque) {
-    opaque = message->payload();
-    std::copy(static_cast<char *>(message->payload()),
-              static_cast<char *>(message->payload()) + message->len(),
-              static_cast<char *>(opaque));
-    return parse_header(std::string(static_cast<char *>(message->payload())));
-  }
-
-  template <typename T>
-  void consume_data(RdKafka::Message *message, void *opaque) {
-    return;
-  }
-
-  template <typename T>
-  std::pair<int, int> consume_serialised(RdKafka::Message *message,
-                                         void *opaque,
-                                         SINQAmorSim::FlatBufferSerialiser) {
-    std::pair<int, int> result;
-    SINQAmorSim::FlatBufferSerialiser s;
-    std::vector<T> data;
-    s.extract(reinterpret_cast<const char *>(message->payload()), result.first,
-              data);
-    std::copy(data.begin(), data.end(), reinterpret_cast<T *>(opaque));
-
-    return result;
-  }
+  std::unique_ptr<RdKafka::Consumer> consumer{nullptr};
+  std::unique_ptr<RdKafka::Topic> topic{nullptr};
 };
-
 
 template <>
 template <typename T>
 std::pair<uint64_t, uint64_t>
-  KafkaListener<FlatBufferSerialiser>::recv(std::vector<T> &data) {
+KafkaListener<FlatBufferSerialiser>::recv(std::vector<T> &data) {
 
   std::pair<int, int> result;
-  RdKafka::Message *msg = nullptr;
+  std::unique_ptr<RdKafka::Message> msg{nullptr};
   auto rcv_stat = RdKafka::ERR_NO_ERROR;
   FlatBufferSerialiser s;
 
   do {
-    msg = consumer->consume(topic, partition, 1000);
+    msg.reset(consumer->consume(topic.get(), partition, 1000));
     rcv_stat = msg->err();
     if ((rcv_stat != RdKafka::ERR_NO_ERROR) &&
         (rcv_stat != RdKafka::ERR__TIMED_OUT) &&
