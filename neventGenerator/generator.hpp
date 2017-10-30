@@ -47,15 +47,17 @@ using nanoseconds = std::chrono::nanoseconds;
  *  \date Wed Jun 08 15:19:52 2016 */
 template <typename Streamer, typename Control, typename Serialiser>
 class Generator {
-  typedef Generator<Streamer, Control, Serialiser> self_t;
+  using self_t = Generator<Streamer, Control, Serialiser>;
 
 public:
   Generator(SINQAmorSim::Configuration &configuration)
-      : config(configuration),
-        streamer{new Streamer(configuration.producer.broker,
-                              configuration.producer.topic)},
-        control{new Control(configuration)} {
+      : config(configuration), control{new Control(configuration)} {
 
+    SINQAmorSim::GeneratorOptions options;
+    options.push_back(SINQAmorSim::GeneratorOptions::value_type{
+        "source_name", configuration.source_name});
+    streamer.reset(new Streamer{configuration.producer.broker,
+	  configuration.producer.topic, options});
     if (!streamer) {
       throw std::runtime_error("Error creating the streamer instance");
     }

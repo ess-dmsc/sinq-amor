@@ -26,7 +26,8 @@ TEST(flatbuffer_serialiser, serialise_and_unserialise_ess_format) {
   // EXPECT_TRUE(serialiser.verify(buffer));
 
   uint64_t packet_id, timestamp;
-  serialiser.extract(buffer, output, packet_id, timestamp);
+  std::string source_name;
+  serialiser.extract(buffer, output, packet_id, timestamp,source_name);
   EXPECT_TRUE(input == output);
   EXPECT_EQ(packet_id, 11);
   EXPECT_EQ(timestamp, 37);

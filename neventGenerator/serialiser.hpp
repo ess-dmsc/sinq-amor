@@ -48,15 +48,15 @@ public:
 
   template <class T>
   void extract(const std::vector<char> &message, std::vector<T> &data,
-               uint64_t &pid, uint64_t &timestamp) {
+               uint64_t &pid, uint64_t &timestamp, std::string & source_name) {
     extract_impl<T>(static_cast<const void *>(&message[0]), data, pid,
-                    timestamp);
+                    timestamp,source_name);
   }
 
   template <class T>
   void extract(const char *msg, std::vector<T> &data, uint64_t &pid,
-               uint64_t &timestamp) {
-    extract_impl<T>(static_cast<const void *>(msg), data, pid, timestamp);
+               uint64_t &timestamp, std::string & source_name) {
+    extract_impl<T>(static_cast<const void *>(msg), data, pid, timestamp,source_name);
   }
 
   char *get() { return &buffer_[0]; }
@@ -80,7 +80,7 @@ public:
 private:
   template <class T>
   void extract_impl(const void *msg, std::vector<T> &data, uint64_t &pid,
-                    uint64_t &timestamp) {
+                    uint64_t &timestamp, std::string & source_name ) {
     auto event = GetEventMessage(msg);
     data.resize(2 * event->time_of_flight()->size());
     std::copy(event->time_of_flight()->begin(), event->time_of_flight()->end(),
@@ -89,6 +89,7 @@ private:
               data.begin() + event->time_of_flight()->size());
     pid = event->message_id();
     timestamp = event->pulse_time();
+    source_name = std::string{event->source_name()->c_str()};
   }
 
   int _size = 0;

@@ -156,7 +156,9 @@ size_t KafkaTransmitter<FlatBufferSerialiser>::send(const uint64_t &pid,
 template <class Serialiser> struct KafkaListener {
   static const int max_header_size = 10000;
 
-  KafkaListener(const std::string &brokers, const std::string &topic_str) {
+  KafkaListener(const std::string &brokers, 
+		const std::string &topic_str,
+		const GeneratorOptions& options) {
     std::unique_ptr<RdKafka::Conf> conf{
         RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL)};
     std::unique_ptr<RdKafka::Conf> tconf{
@@ -174,6 +176,12 @@ template <class Serialiser> struct KafkaListener {
     conf->set("receive.message.max.bytes", "23100100", errstr);
     if (!errstr.empty()) {
       std::cerr << errstr << std::endl;
+    }
+
+    for(auto& i : options) {
+      if( i.first == "source_name" ) {
+	source_name = i.second;
+      }
     }
 
     if (topic_str.empty()) {
@@ -208,7 +216,8 @@ template <class Serialiser> struct KafkaListener {
 
 private:
   int32_t partition = 0;
-  int64_t start_offset = RdKafka::Topic::OFFSET_BEGINNING;
+  int64_t start_offset = RdKafka::Topic::OFFSET_END;
+  std::string source_name{""};
 
   std::unique_ptr<RdKafka::Consumer> consumer{nullptr};
   std::unique_ptr<RdKafka::Topic> topic{nullptr};
@@ -236,9 +245,15 @@ KafkaListener<FlatBufferSerialiser>::recv(std::vector<T> &data) {
   } while (msg->err() != RdKafka::ERR_NO_ERROR);
 
   uint64_t pid = -1, timestamp = -1;
+  std::string source_nm;
   s.extract(reinterpret_cast<const char *>(msg->payload()), data, pid,
-            timestamp);
-  return std::pair<uint64_t, uint64_t>(pid, msg->len());
+            timestamp, source_nm);
+  if(!source_name.empty()) {
+    if( source_name != source_nm ) {
+      return std::pair<uint64_t, uint64_t>{0,0};
+    }
+  }
+  return std::pair<uint64_t, uint64_t>{pid, msg->len()};
 }
 
 } // namespace SINQAmorSim
