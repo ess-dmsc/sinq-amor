@@ -1,4 +1,4 @@
-kafkaGenerator                  {#mainpage}
+kafkaGenerator
 ==============
 
 A flexible event generator. It uses two main (template) classes: ``Source``

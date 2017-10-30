@@ -1,0 +1,9 @@
+{
+    "producer_broker" : "//129.129.188.59:9092/AMOR.area.detector",
+    "source" : "files/amor2015n001774.hdf",
+    "multiplier" : 1,
+    "rate" : 10,
+    "source_name": "AMOR.event.stream",
+    "timestamp_generator" : "const_timestamp",
+    "report_time" : 1
+}

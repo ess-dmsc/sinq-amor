@@ -7,7 +7,7 @@
     force: yes
     
 - name: Configure rdkafka
-  command: "./configure --prefix={{rdkafka}}"
+  command: "{{scl}} ./configure --prefix={{rdkafka}}"
   args:
     chdir: "{{sources}}/rdkafka-{{rdkafka_version}}"
 
