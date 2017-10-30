@@ -1,0 +1,4 @@
+#software_dest: brambilla_m/software
+generator_version: refactor_option_and_parsing
+
+scl: "scl enable devtoolset-6 -- "

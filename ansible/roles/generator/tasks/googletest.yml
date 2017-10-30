@@ -1,0 +1,6 @@
+- name: Download googletest
+  git:
+    repo: "{{googletest_src}}"
+    dest: "{{googletest}}"
+  env:
+    streaming_data_types_dir: "{{googletest}}"
