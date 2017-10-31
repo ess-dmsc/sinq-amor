@@ -25,8 +25,9 @@ Installation
 ---------
 
 ```shell
-cmake
-[-DCMAKE_CXX_COMPILER=<> -DCMAKE_INCLUDE_PATH=<> -DCMAKE_LIBRARY_PATH=<> -DCMAKE_PROGRAM_PATH=<path to flatc> -DGOOGLETEST_REPOSITORY_DIR=<path to googletest repo> <path to source>
+cmake [-DCMAKE_CXX_COMPILER=<> -DCMAKE_INCLUDE_PATH=<> \
+-DCMAKE_LIBRARY_PATH=<> -DCMAKE_PROGRAM_PATH=<path to flatc> \
+-DGOOGLETEST_REPOSITORY_DIR=<path to googletest repo>] <path to source>
 
 make
 ```
@@ -41,13 +42,14 @@ Usage
 For example:
 
 ```shell
-./AMORgenerator --config-file config.json --producer-uri //localhost:9092,localhost:9093/AMOR.area.detector
+./AMORgenerator --config-file config.json --producer-uri //localhost:9092/AMOR.area.detector
 ```
 
 Command line options are:
 
+
 | Option | Description | 
-| :---         | :    ---|
+| ---         |     ---|
 | `config-file`  | Name of the configuration file to use |
 |  `producer-uri`    | Name/address of the producer, port and topic in the form`//<broker>:<port>/<topic>` |
 | `source`   | NeXus file to convert into an event stream | 
@@ -81,7 +83,7 @@ The configuration file must be in JSON format. Here an example:
     "report_time" : 1
 }
 ```
-* ``report_time`` defines the time in [s] between log messages
+* ``report_time`` defines the time in seconds between log messages
 
 
 Run-time commands
@@ -98,23 +100,21 @@ Running in the counterbox
 
 The file ``el737counter.py`` is a simulation of the el737 counterbox. To run the
 generator as part of the el737 counterbox protocol:
-
 ```shell
 python el737counter.py [port (default is 62000)]
 ```
-
-in a different shell
-
+In a different shell
 ```shell
 telnet <host> <port>
 rmt 1
 echo 2 [optional parameters to the generator]
 ```
+where <host> and <port> must match those there the counterbox is running.
 
 Other useful commands to control the execution:
 
 | Option | Description | 
-| :---         | :    ---|
+| ---         |     ---|
 | **mp <number>** | start the counting/event generation |
 | **st** | stop the event generation (kill the process) |
 | **ps** | pause the generation |
