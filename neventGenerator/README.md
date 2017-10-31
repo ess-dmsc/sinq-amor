@@ -129,3 +129,16 @@ Other useful commands to control the execution:
 | **st** | stop the event generation (kill the process) |
 | **ps** | pause the generation |
 | **co** | un-pause the generation |
+
+## Issues
+
+A failure is reported with Conan trying to buld hdf5. This is connected with https://bugzilla.redhat.com/show_bug.cgi?format=multiple&id=1170339 . A workaround required to change the ``~/.conan/data/hdf5/1.10.1/ess-dmsc/testing/export/conanfile.py`` with the following
+
+```python
+        tools.download(
+            "https://www.hdfgroup.org/package/gzip/?wpdmdl=4301",
+            "hdf5-1.10.1.tar.gz",
+            verify=False
+        )
+```
+
