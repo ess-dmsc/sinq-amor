@@ -1,5 +1,5 @@
 #!/usr/bin/python -p
-# 
+#
 # fake SINQ EL737 counter box
 #
 # I am using 1000cts/sec for m1, 500 for m2, 300 for m3 and 2000 for m4
@@ -34,14 +34,14 @@ class EL737Controller(LineReceiver):
 
     def write(self, data):
         print "transmitted:", data
-        if self.transport is not None: 
+        if self.transport is not None:
             self.transport.write(data)
 
     def to_process(self, data):
         print "transmitted to process:", data
-        if self.transport is not None: 
+        if self.transport is not None:
             self.proc.transport.write(data)
-    
+
     def calculateCountStatus(self):
         if self.counting and not self.mypaused :
             runtime = time.time() - self.starttime - self.pausedTime
@@ -107,7 +107,7 @@ class EL737Controller(LineReceiver):
                self.write('\r')
                self.to_process('run\r')
                return
-               
+
            if data.startswith('tp'):
                l = data.split()
                self.mode = 'timer'
@@ -119,7 +119,7 @@ class EL737Controller(LineReceiver):
                self.write('\r')
                self.to_process('run\r')
                return
-               
+
            if data.startswith('st'):
                self.counting = False
                self.endtime = time.time()
@@ -216,6 +216,7 @@ class EL737Controller(LineReceiver):
            self.write('?2\r')
 
            def connectionLost(self, reason):
+               self.to_process('exit\r')
                print "Goodbye..."
                print reason
 
@@ -262,4 +263,3 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv)
-

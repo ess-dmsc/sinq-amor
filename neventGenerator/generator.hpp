@@ -40,7 +40,7 @@ using nanoseconds = std::chrono::nanoseconds;
  *
  * @tparam Streamer policy for stremer protocol (Kafka, 0MQ, ...)
  * @tparam Header policy for creating the header (jSON, ...)
- * @tparam Control policy to start, pause and stop the generator (plain text) -
+ * @tparam Control policy to start, pause, stop exit the generator (plain text) -
  *TODO
  *
  *  \author Michele Brambilla <mib.mic@gmail.com>
@@ -95,7 +95,11 @@ private:
     std::time_t to_time = system_clock::to_time_t(start);
     auto timeout = std::localtime(&to_time);
 
-    while (!control->stop()) {
+    while (!control->exit()) {
+      if(control->stop()) {
+        std::this_thread::sleep_for(milliseconds(100));
+        continue;
+      }
       nanoseconds ns =
           duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
       auto timestamp = ns.count();
