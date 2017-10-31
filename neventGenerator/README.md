@@ -1,8 +1,6 @@
-kafkaGenerator
-==============
+# kafkaGenerator
 
-Features:
---------
+## Features:
 
 * Convert a NeXus data file in an event stream
 * Serialise the event stream using FlatBuffers
@@ -10,8 +8,9 @@ Features:
 * Data size can be configured to be a multiple of the original data
 * Transmission rate can be adjusted in real time
 
-Requirements:
-------------
+## Installation
+
+### Requirements:
 
 * Rapidjson
 * RdKafka
@@ -21,8 +20,23 @@ Requirements:
 * Googletest [optional]
 * ZeroMQ [optional]
 
-Installation
----------
+### Conan repositories
+
+he following remote repositories are required to be configured:
+
+- https://api.bintray.com/conan/ess-dmsc/conan
+- https://api.bintray.com/conan/conan-community/conan
+
+You can add them by running
+
+```
+conan remote add <local-name> <remote-url>
+```
+
+where `<local-name>` must be substituted by a locally unique name. Configured
+remotes can be listed with `conan remote list`.
+
+### Build
 
 ```shell
 cmake [-DCMAKE_CXX_COMPILER=<> -DCMAKE_INCLUDE_PATH=<> \
@@ -32,8 +46,7 @@ cmake [-DCMAKE_CXX_COMPILER=<> -DCMAKE_INCLUDE_PATH=<> \
 make
 ```
 
-Usage
-------
+## Usage
 
 ```shell
 ./AMORgenerator -h
@@ -67,8 +80,7 @@ Notes
 * `timestamp-generator` must be one among
 ``"const_timestamp"``,``"random_timestamp"``, ``"none"``
 
-Configuration File
----------------
+### Configuration File
 
 The configuration file must be in JSON format. Here an example:
 
@@ -86,8 +98,7 @@ The configuration file must be in JSON format. Here an example:
 * ``report_time`` defines the time in seconds between log messages
 
 
-Run-time commands
-------------------
+### Run-time commands
 
 The following commands change the runtime behaviour:
 * ``run/pause/stop``: restore/pause/interrupt the simulation
@@ -95,8 +106,7 @@ The following commands change the runtime behaviour:
 
 
 
-Running in the counterbox
------------------------
+## Running in the counterbox
 
 The file ``el737counter.py`` is a simulation of the el737 counterbox. To run the
 generator as part of the el737 counterbox protocol:
