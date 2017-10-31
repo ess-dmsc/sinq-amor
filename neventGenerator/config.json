@@ -1,5 +1,5 @@
 {
-    "producer_broker" : "//129.129.188.59:9092/AMOR.area.detector",
+    "producer_uri" : "//129.129.188.59:9092/AMOR.area.detector",
     "source" : "files/amor2015n001774.hdf",
     "multiplier" : 1,
     "rate" : 10,

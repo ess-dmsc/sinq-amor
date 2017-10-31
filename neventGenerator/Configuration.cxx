@@ -86,7 +86,7 @@ int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl(
   assert(document.IsObject());
 
   for (auto &m : document.GetObject()) {
-    if (m.name.GetString() == std::string("producer_broker")) {
+    if (m.name.GetString() == std::string("producer_uri")) {
       if (!m.value.IsString()) {
         return ConfigurationError::error_parsing_json;
       }
