@@ -1,80 +1,121 @@
 kafkaGenerator
 ==============
 
-A flexible event generator. It uses two main (template) classes: ``Source``
-and ``Generator`` to read data from a file, convert to event format and stream
-it.
+Features:
+--------
 
-Source
-====
+* Convert a NeXus data file in an event stream
+* Serialise the event stream using FlatBuffers
+* Send the serialised event stream via Kafka
+* Data size can be configured to be a multiple of the original data
+* Transmission rate can be adjusted in real time
 
-The source can be either a NeXus file or a mcstas output. The former can be used
-via the ``NeXusSource`` structure, the latter via a ``McStasSource``. Both
-requires a *filename* field among the input parameter. Original data are
-converted into the stream structure and direct access is provided via the
-``data`` method.
+Requirements:
+------------
 
-Generator
-======
+* Rapidjson
+* RdKafka
+* Flatbuffers
+* HDF5
+* StreamingDataTypes
+* Googletest [optional]
+* ZeroMQ [optional]
 
-The generator can stream data either via 0MQ (``ZmqGen``) or Kafka
-(``KafkaGen``). ``ZmqGen`` requires the *port* number of the socket to open
-while ``KafkaGen`` the name of the *topic* and the *brokers*
-(e.g. "localhost"). Both requires the name of a *control* file that allow to
-start, pause or stop the generator.  The generator is started via the ``run``
-method, that requires a pointer to the data structure and the number of
-elements.
+Installation
+---------
 
+```shell
+cmake
+[-DCMAKE_CXX_COMPILER=<> -DCMAKE_INCLUDE_PATH=<> -DCMAKE_LIBRARY_PATH=<> -DCMAKE_PROGRAM_PATH=<path to flatc> -DGOOGLETEST_REPOSITORY_DIR=<path to googletest repo> <path to source>
 
-``` cpp
+make
+```
 
-//typedef ZmqGen generator_t;
-typedef KafkaGen generator_t;
+Usage
+------
 
-int main() {
+```shell
+./AMORgenerator -h
+```
 
-  uparam::Param input;
-  input["port"] = "1235";
-  input["control"] = "control.in";
-  input["topic"] = "test_0";
-  input["brokers"] = "localhost";
-  
-  input["filename"] = "../../neventGenerator/rita22012n006190.hdf";
+For example:
 
-  NeXusSource<Rita2,int64_t> stream(input);
+```shell
+./AMORgenerator --config-file config.json --producer-uri //localhost:9092,localhost:9093/AMOR.area.detector
+```
 
-  Generator<generator_t,HeaderJson> g(input);
+Command line options are:
 
-  uint64_t* d = new uint64_t[1024];
-  
-  for(int i =0;i<1024;++i)
-    d[i] = 2*i+1;
+| Option | Description | 
+| :---         | :    ---|
+| `config-file`  | Name of the configuration file to use |
+|  `producer-uri`    | Name/address of the producer, port and topic in the form`//<broker>:<port>/<topic>` |
+| `source`   | NeXus file to convert into an event stream | 
+| `source-name`   | String tagging the data source in the FlatBuffer buffer | 
+| `multiplier`  | number of repetition of the original data in the event stream  | 
+| `rate`   | Number of packets/second to transmit  | 
+| `timestamp-generator`   | Update policy for the timestamp of the events  | 
 
-  // read NeXus or mcstas
-  NeXusSource<Rita2,int64_t> stream(input);
-  
-  uint64_t* d = new uint64_t[1024];
-  for(int i =0;i<1024;++i)
-    d[i] = 2*i+1;
+Notes
+* Command line options override the corresponding configuration file option
+* `producer-uri` can consist a list of brokers comma separated:
+```
+//broker1:port1, broker2:port2, .../topic
+```
+* `timestamp-generator` must be one among
+``"const_timestamp"``,``"random_timestamp"``, ``"none"``
 
-  Generator<generator_t,HeaderJson> g(input);
+Configuration File
+---------------
 
-  g.run(d,1024);
+The configuration file must be in JSON format. Here an example:
 
-  return 0;
+```js
+{
+    "producer_uri" : "//129.129.188.59:9092/AMOR.area.detector",
+    "source" : "files/amor2015n001774.hdf",
+    "multiplier" : 1,
+    "rate" : 10,
+    "source_name": "AMOR.event.stream",
+    "timestamp_generator" : "const_timestamp",
+    "report_time" : 1
 }
 ```
+* ``report_time`` defines the time in [s] between log messages
 
-Execution
-======
 
-The generator can be executed manually from the command line e.g. :
+Run-time commands
+------------------
 
-```
-./AMORgenerator -t <topic> -b <kafka_broker> -f <NeXus source> -m <multiplier>
+The following commands change the runtime behaviour:
+* ``run/pause/stop``: restore/pause/interrupt the simulation
+* ``rate``: change the transmission rate
+
+
+
+Running in the counterbox
+-----------------------
+
+The file ``el737counter.py`` is a simulation of the el737 counterbox. To run the
+generator as part of the el737 counterbox protocol:
+
+```shell
+python el737counter.py [port (default is 62000)]
 ```
 
-(for more option ```-h```) or via the el737 counter box. As a default it is executed in the couterbox as a service called "generator", see:
+in a different shell
+
+```shell
+telnet <host> <port>
+rmt 1
+echo 2 [optional parameters to the generator]
 ```
-service generator status
-```
+
+Other useful commands to control the execution:
+
+| Option | Description | 
+| :---         | :    ---|
+| **mp <number>** | start the counting/event generation |
+| **st** | stop the event generation (kill the process) |
+| **ps** | pause the generation |
+| **co** | un-pause the generation |
