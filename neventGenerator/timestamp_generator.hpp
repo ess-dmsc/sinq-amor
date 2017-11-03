@@ -1,11 +1,14 @@
 #pragma once
 
+#include<chrono>
+
 template <class T>
 void generate_timestamp(std::vector<T> &output, const uint32_t &rate,
-                        const uint32_t &timestamp,
+                        const std::chrono::milliseconds &ms,
                         const std::string &generation_type) {
+  auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(ms);
   if (generation_type == "const_timestamp") {
-    std::fill(output.begin(), output.end(), timestamp);
+    std::fill(output.begin(), output.end(), ns.count());
     return;
   }
   if (generation_type == "random_timestamp") {

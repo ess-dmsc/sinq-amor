@@ -25,7 +25,7 @@
 #include "control.hpp"
 #include "timestamp_generator.hpp"
 
-using nanoseconds = std::chrono::nanoseconds;
+using milliseconds = std::chrono::milliseconds;
 
 /*! \struct Generator
  *
@@ -100,17 +100,16 @@ private:
         std::this_thread::sleep_for(milliseconds(100));
         continue;
       }
-      nanoseconds ns =
-          duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
-      auto timestamp = ns.count();
-      generate_timestamp(stream, config.rate, timestamp,
+      auto ms =
+	duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+      generate_timestamp(stream, config.rate, ms,
                          config.timestamp_generator);
 
       if (control->run()) {
-        streamer->send(pulseID, timestamp, stream, stream.size());
+        streamer->send(pulseID, ms, stream, stream.size());
         ++count;
       } else {
-        streamer->send(pulseID, timestamp, stream, 0);
+        streamer->send(pulseID, ms, stream, 0);
       }
       ++pulseID;
       if (pulseID % control->rate() == 0) {
@@ -130,7 +129,7 @@ private:
                              from_start)
                              .count()
                   << "MB/s"
-                  << "\t(timestamp : " << timestamp << ")" << std::endl;
+                  << "\t(timestamp : " << ms.count() << ")" << std::endl;
         streamer->messages() = 0;
         streamer->Mbytes() = 0;
         count = 0;
