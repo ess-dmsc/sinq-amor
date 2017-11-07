@@ -25,7 +25,7 @@
 #include "control.hpp"
 #include "timestamp_generator.hpp"
 
-using nanoseconds = std::chrono::nanoseconds;
+using milliseconds = std::chrono::milliseconds;
 
 /*! \struct Generator
  *
@@ -40,7 +40,7 @@ using nanoseconds = std::chrono::nanoseconds;
  *
  * @tparam Streamer policy for stremer protocol (Kafka, 0MQ, ...)
  * @tparam Header policy for creating the header (jSON, ...)
- * @tparam Control policy to start, pause and stop the generator (plain text) -
+ * @tparam Control policy to start, pause, stop exit the generator (plain text) -
  *TODO
  *
  *  \author Michele Brambilla <mib.mic@gmail.com>
@@ -95,18 +95,21 @@ private:
     std::time_t to_time = system_clock::to_time_t(start);
     auto timeout = std::localtime(&to_time);
 
-    while (!control->stop()) {
-      nanoseconds ns =
-          duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
-      auto timestamp = ns.count();
-      generate_timestamp(stream, config.rate, timestamp,
+    while (!control->exit()) {
+      if(control->stop()) {
+        std::this_thread::sleep_for(milliseconds(100));
+        continue;
+      }
+      auto ms =
+	duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+      generate_timestamp(stream, config.rate, ms,
                          config.timestamp_generator);
 
       if (control->run()) {
-        streamer->send(pulseID, timestamp, stream, stream.size());
+        streamer->send(pulseID, ms, stream, stream.size());
         ++count;
       } else {
-        streamer->send(pulseID, timestamp, stream, 0);
+        streamer->send(pulseID, ms, stream, 0);
       }
       ++pulseID;
       if (pulseID % control->rate() == 0) {
@@ -126,7 +129,7 @@ private:
                              from_start)
                              .count()
                   << "MB/s"
-                  << "\t(timestamp : " << timestamp << ")" << std::endl;
+                  << "\t(timestamp : " << ms.count() << ")" << std::endl;
         streamer->messages() = 0;
         streamer->Mbytes() = 0;
         count = 0;

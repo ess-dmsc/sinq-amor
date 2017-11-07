@@ -111,7 +111,7 @@ public:
   }
 
   template <typename T>
-  size_t send(const uint64_t &, const uint64_t &, std::vector<T> &,
+  size_t send(const uint64_t &, const std::chrono::milliseconds &, std::vector<T> &,
               const int = 1) {
     return 0;
   }
@@ -136,11 +136,11 @@ template <typename T> class TD;
 template <>
 template <typename T>
 size_t KafkaTransmitter<FlatBufferSerialiser>::send(const uint64_t &pid,
-                                                    const uint64_t &timestamp,
+                                                    const std::chrono::milliseconds &timestamp,
                                                     std::vector<T> &data,
                                                     const int nev) {
   if (nev) {
-    serialiser->serialise(pid, timestamp, data);
+    serialiser->serialise(pid, timestamp.count(), data);
     RdKafka::ErrorCode resp = producer->produce(
         topic_name, RdKafka::Topic::PARTITION_UA,
         RdKafka::Producer::RK_MSG_COPY,

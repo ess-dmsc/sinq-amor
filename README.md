@@ -163,3 +163,17 @@ In EPICS, the following PV are available for the dimetix:
 * *SQ:AMOR:DIMETIX:SimVal*  is a output value which allows to set the
   readback value for the simulation. This is only useful in the
   simulation, the real device will not honour this value.
+
+### Run Ansible
+
+The AMOR simulation can be installed using the ``amor.yml`` playbook.
+To run in the dm-dev-env virtual machine use:
+
+```shell
+ansible-playbook -i hosts --private-key <machine private key> amor.yml [-c paramiko] --extra-vars "repo_loc_essiip_fakesinqhw=$<local essiip-fakesinqhw folder> [generator_branch=<branch>]"
+```
+
+Note:
+* the ``-c paramiko`` option can be required to solve some connection issues
+* using ``generator_branch=<branch>`` one can specify a specific branch for the ``AMORgenerator``
+* see the different options for ``essiip_fakesinqhw``

@@ -1,18 +1,18 @@
 ---
 
-- name: Create generator_home folder
+- name: Create folder '{{generator_home}}'
   file: 
     path: "{{generator_home}}" 
     state: directory
   become: yes
 
-- name: Clone generator from repository
+- name: Clone branch '{{generator_branch}}' from '{{generator_src}}' 
   git: 
     repo: "{{generator_src}}" 
     dest: /tmp/sinq-amorsim 
     force: yes 
     accept_hostkey: yes 
-    version: "{{generator_version}}"
+    version: "{{generator_branch}}"
 
 - name: Remove any old build folder
   file: 
@@ -39,7 +39,7 @@
       NUM_THREADS: 4
   become: yes
 
-- name: delete sources and build
+- name: Delete sources and build
   file:
     path: /tmp/sinq-amorsim
     state: absent
