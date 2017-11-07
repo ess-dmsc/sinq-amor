@@ -104,7 +104,20 @@ The following commands change the runtime behaviour:
 * ``run/pause/stop``: restore/pause/interrupt the simulation
 * ``rate``: change the transmission rate
 
+### FlatBuffer format
 
+The messages are serialised according the schema "ev42":
+
+```shell
+{
+    source_name : string;    # producer type, for example detector type
+    message_id : ulong;      # sequential number of the message
+    pulse_time : ulong;      # time of source pulse, milliseconds since Unix epoch (1 Jan 1970)
+    time_of_flight : [uint]; # nanoseconds measured from pulse time
+    detector_id : [uint];    # detector id
+    facility_specific_data : FacilityData;  # not used
+}
+```
 
 ## Running in the counterbox
 
