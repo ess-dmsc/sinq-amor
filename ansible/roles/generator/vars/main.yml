@@ -1,0 +1,4 @@
+#software_dest: brambilla_m/software
+#generator_branch: master
+
+scl: "scl enable devtoolset-6 -- "

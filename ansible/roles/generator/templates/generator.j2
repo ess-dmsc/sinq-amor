@@ -4,6 +4,9 @@ After=rc-local.service
 
 [Service]
 ExecStart=/bin/python {{simfiles_dir}}/el737counter.py 62000 > /tmp/generator.log
+WorkingDirectory={{simfiles_dir}}
+StandardOutput=syslog+console
+StandardError=syslog+console
 
 [Install]
 WantedBy=multi-user.target

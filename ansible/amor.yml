@@ -1,3 +1,4 @@
+
 - hosts: 127.0.0.1
   connection: local
   tasks:
@@ -23,10 +24,10 @@
     repo_loc_essiip_fakesinqhw: "{{playbook_dir}}/../../essiip-fakesinqhw"
     repo_loc_forward_epics_to_kafka: "{{playbook_dir}}/../../forward-epics-to-kafka"
     use_zmq: false
-#  environment:
-#    path_include_epics_pvAccess: "{{ lookup('env', 'EPICS_MODULES_PATH') }}/pvAccessCPP/5.0.0/3.15.4/include"
-#    path_include_epics_pvData: "{{ lookup('env', 'EPICS_MODULES_PATH') }}/pvDataCPP/5.0.2/3.15.4/include"
-#    path_include_epics_pvDatabase: "{{ lookup('env', 'EPICS_MODULES_PATH') }}/pvDatabaseCPP/4.2.0/3.15.4/include"
+  environment:
+    path_include_epics_pvAccess: "{{ lookup('env', 'EPICS_MODULES_PATH') }}/pvAccessCPP/5.0.0/3.15.4/include"
+    path_include_epics_pvData: "{{ lookup('env', 'EPICS_MODULES_PATH') }}/pvDataCPP/5.0.2/3.15.4/include"
+    path_include_epics_pvDatabase: "{{ lookup('env', 'EPICS_MODULES_PATH') }}/pvDatabaseCPP/4.2.0/3.15.4/include"
 
 - hosts: kafka_server
   tags:

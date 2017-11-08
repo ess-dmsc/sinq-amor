@@ -1,0 +1,5 @@
+{
+  "producer_broker" : "//:/",
+                      "multiplier" : 1,
+                      "source" : "../files/amor2015n001774.hdf"
+}

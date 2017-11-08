@@ -1,8 +1,0 @@
-{
-    "port" : "9092",
-    "topic" : "AMOR.area.detector",
-    "brokers" : "129.129.188.59",
-    "filename" : "files/amor2015n001774.hdf",
-    "multiplier" : "1",
-    "rate" : "10"
-}

@@ -16,20 +16,25 @@ rapidjson_version: master
 rapidjson: "{{ software_dest }}/rapidjson-{{rapidjson_version}}"
 
 rdkafka_src: https://github.com/edenhill/librdkafka.git
-rdkafka_version: v0.9.5
+rdkafka_version: v0.11.1.x
 rdkafka: "{{ software_dest }}/rdkafka-{{rdkafka_version}}"
 
 streaming_data_types_src: https://github.com/ess-dmsc/streaming-data-types.git
 streaming_data_types_version: master
 streaming_data_types: "{{software_dest}}/streaming-data-types-{{streaming_data_types_version}}"
 
+googletest_src: https://github.com/google/googletest.git
+googletest_version: master
+googletest: "{{software_dest}}/googletest-{{googletest_version}}"
+
 generator_src: https://github.com/ess-dmsc/sinq-amorsim
 generator_home: "{{amor_dir}}/simfiles"
-generator_version: dev
+generator_branch: master
 
-generator_inc: '"{{nexus}}/include;{{flatbuffers}}/include;{{rapidjson}}/include;{{rdkafka}}/include;{{streaming_data_types}}"'
+generator_inc: '"{{nexus}}/include;{{flatbuffers}}/include;{{rapidjson}}/include;{{rdkafka}}/include;{{streaming_data_types}}:{{googletest}}"'
 generator_lib: '"{{nexus}}/lib;{{flatbuffers}}/lib;{{rapidjson}}/lib;{{rdkafka}}/lib"'
 generator_exe: "{{flatbuffers}}/bin"
 
 use_stow: false
 
+scl: ""

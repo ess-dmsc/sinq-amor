@@ -11,7 +11,7 @@
     state: directory
 
 - name: Configure rapidjson
-  command: "cmake -DCMAKE_INSTALL_PREFIX={{rapidjson}} {{sources}}/rapidjson-{{rapidjson_version}}"
+  command: "{{scl}} cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX={{rapidjson}} {{sources}}/rapidjson-{{rapidjson_version}}"
   args:
     chdir: "{{builds}}/rapidjson-{{rapidjson_version}}"
 

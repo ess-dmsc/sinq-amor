@@ -26,6 +26,6 @@ readonoff {
 }
 
 setpower {
-	 out "w \$1 %{on|off}";
+	 out "w \$1 %{off|on}";
 	 in "OK";
 }

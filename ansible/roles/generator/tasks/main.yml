@@ -1,11 +1,22 @@
 ---
-- name: make sure cmake is installed
+- name: make sure repositories are installed
   yum:
-    name: cmake
+    name: '{{item}}'
+  with_items:
+    - centos-release-scl
+    - epel-release
   become: yes
 
-- name: install required python modules
-  include: python_modules.yml
+- name: enable repositories
+  command: yum-config-manager --enable rhel-server-rhscl-7-rpms epel
+  become: yes
+
+- name: make sure requirements are installed
+  yum:
+    name: '{{item}}'
+  with_items:
+    - cmake
+    - devtoolset-6
   become: yes
 
 - name: install 0MQ
@@ -15,17 +26,11 @@
 - name: create software storage folder
   become: yes
   file:
-    path: "{{software_dest}}"
+    path: '{{software_dest}}'
     state: directory
 
 - name: checks for files
   include: check.yml
-
-- name: install NeXus
-  include: nexus.yml
-  when:
-    st_nexus.stat.exists == False
-  become: yes
 
 - name: install flatbuffers
   include: flatbuffers.yml
@@ -45,15 +50,19 @@
     st_rapidjson.stat.exists == False
   become: yes
 
-- name: install streaming-data-types
+- name: checkout streaming-data-types
   include: streaming_data_types.yml
   when:
     st_sdt.stat.exists == False
   become: yes
 
+- name: checkout googletest
+  include: googletest.yml
+  become: yes
+
 - name: install neventGenerator
   include: nevent_generator.yml 
-  become: yes
+#  become: yes
 
 - name: make sure generator service file is installed
   become: yes

@@ -1,18 +1,23 @@
 ---
 
-- name: Create generator_home folder
-  become_method: sudo
+- name: Create folder '{{generator_home}}'
   file: 
     path: "{{generator_home}}" 
     state: directory
+  become: yes
 
-- name: Clone generator from repository
+- name: Clone branch '{{generator_branch}}' from '{{generator_src}}' 
   git: 
     repo: "{{generator_src}}" 
     dest: /tmp/sinq-amorsim 
     force: yes 
     accept_hostkey: yes 
-    version: "{{generator_version}}"
+    version: "{{generator_branch}}"
+
+- name: Remove any old build folder
+  file: 
+    path: /tmp/sinq-amorsim/neventGenerator/build
+    state: absent
 
 - name: Create build folder
   file: 
@@ -20,7 +25,7 @@
     state: directory
 
 - name: Configure installation
-  command: 'cmake -DCMAKE_INSTALL_PREFIX={{generator_home}} -DCMAKE_INCLUDE_PATH={{generator_inc}} -DCMAKE_LIBRARY_PATH={{generator_lib}} -DCMAKE_PROGRAM_PATH={{flatbuffers}}/bin ../ '
+  command: '{{scl}} cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX={{generator_home}} -DCMAKE_INCLUDE_PATH={{generator_inc}} -DCMAKE_LIBRARY_PATH={{generator_lib}} -DCMAKE_PROGRAM_PATH={{flatbuffers}}/bin ../ '
   args:
     chdir: /tmp/sinq-amorsim/neventGenerator/build
   environment:
@@ -32,16 +37,18 @@
     chdir: /tmp/sinq-amorsim/neventGenerator/build
     params:
       NUM_THREADS: 4
+  become: yes
+
+- name: Delete sources and build
+  file:
+    path: /tmp/sinq-amorsim
+    state: absent
 
 - name: Make generator executable
   file: 
     path: "{{generator_home}}/AMORgenerator" 
     mode: "a+x"
-
-- name: delete sources and build
-  file:
-    path: /tmp/sinq-amorsim
-    state: absent
+  become: yes
 
 - name: be sure EL737 counterbox is installed
   copy:
@@ -50,3 +57,5 @@
   with_items:
     - el737counter.py
     - generator.py
+    - config.json
+  become: yes

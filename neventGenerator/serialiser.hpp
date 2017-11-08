@@ -1,65 +1,112 @@
 #pragma once
 
-#include <iostream>
 #include <fstream>
-#include <string>
 #include <inttypes.h>
-#include <type_traits>
+#include <iostream>
 #include <iterator>
+#include <string>
+#include <type_traits>
 
+#include "Errors.hpp"
 #include "schemas/ev42_events_generated.h"
+#include "utils.hpp"
 
-namespace serialiser {
+// WARNING:
+// the schema has to match to the serialise template type
+// this must change
+
+namespace SINQAmorSim {
 
 ///  \author Michele Brambilla <mib.mic@gmail.com>
 ///  \date Thu Jul 28 14:32:29 2016
-template <typename T> struct FlatBufSerialiser {
-  typedef std::true_type is_serialised;
-  FlatBufSerialiser() {}
+class FlatBufferSerialiser {
+public:
+  FlatBufferSerialiser(const std::string& source_name = "AMOR.event.stream") : source{source_name} {}
+  FlatBufferSerialiser(const FlatBufferSerialiser& other) = default;
+  FlatBufferSerialiser(FlatBufferSerialiser&& other) = default;
+  ~FlatBufferSerialiser() = default;
 
-  std::vector<char> &serialise(const int &message_id, const uint64_t &pulse_time,
-                               T *value = NULL, int nev = 0) {
 
+  // WARNING: template parameter has to match schema data type
+  template <class T>
+  std::vector<char> &serialise(const int &message_id,
+                               const uint64_t &pulse_time,
+                               const std::vector<T> &message = {}) {
+    auto nev = message.size() / 2;
     flatbuffers::FlatBufferBuilder builder;
-    auto source_name = builder.CreateString("AMOR.event.stream");
-    auto time_of_flight = builder.CreateVector(value, nev);
-    auto detector_id = builder.CreateVector(value + nev, nev);
+    auto source_name = builder.CreateString(source);
+    auto time_of_flight = builder.CreateVector(&message[0], nev);
+    auto detector_id = builder.CreateVector(&message[nev], nev);
     auto event = CreateEventMessage(builder, source_name, message_id,
                                     pulse_time, time_of_flight, detector_id);
     FinishEventMessageBuffer(builder, event);
-    buffer.assign(builder.GetBufferPointer(),
-                  builder.GetBufferPointer() + builder.GetSize());
-    return buffer;
+    buffer_.resize(builder.GetSize());
+    buffer_.assign(builder.GetBufferPointer(),
+                   builder.GetBufferPointer() + builder.GetSize());
+    return buffer_;
   }
 
-  char *get() { return &buffer[0]; }
-  const int size() { return buffer.size(); }
+  template <class T>
+  void extract(const std::vector<char> &message, std::vector<T> &data,
+               uint64_t &pid, uint64_t &timestamp, std::string & source_name) {
+    extract_impl<T>(static_cast<const void *>(&message[0]), data, pid,
+                    timestamp,source_name);
+  }
 
+  template <class T>
   void extract(const char *msg, std::vector<T> &data, uint64_t &pid,
-               uint64_t &timestamp) {
-    auto event = GetEventMessage(static_cast<const void *>(msg));
+               uint64_t &timestamp, std::string & source_name) {
+    extract_impl<T>(static_cast<const void *>(msg), data, pid, timestamp,source_name);
+  }
+
+  char *get() { return &buffer_[0]; }
+  const int size() { return buffer_.size(); }
+
+  const std::vector<char> &buffer() { return buffer_; }
+
+  bool verify() {
+    auto p = const_cast<const char *>(&buffer_[0]);
+    flatbuffers::Verifier verifier(reinterpret_cast<const unsigned char *>(p),
+                                   buffer_.size());
+    return VerifyEventMessageBuffer(verifier);
+  }
+  bool verify(const std::vector<char> &other) {
+    auto p = const_cast<const char *>(&other[0]);
+    flatbuffers::Verifier verifier(reinterpret_cast<const unsigned char *>(p),
+                                   buffer_.size());
+    return VerifyEventMessageBuffer(verifier);
+  }
+
+private:
+  template <class T>
+  void extract_impl(const void *msg, std::vector<T> &data, uint64_t &pid,
+                    uint64_t &timestamp, std::string & source_name ) {
+    auto event = GetEventMessage(msg);
     data.resize(2 * event->time_of_flight()->size());
     std::copy(event->time_of_flight()->begin(), event->time_of_flight()->end(),
               data.begin());
     std::copy(event->detector_id()->begin(), event->detector_id()->end(),
               data.begin() + event->time_of_flight()->size());
-
     pid = event->message_id();
     timestamp = event->pulse_time();
-    return;
+    source_name = std::string{event->source_name()->c_str()};
   }
 
-private:
   int _size = 0;
-  std::vector<char> buffer;
+  std::vector<char> buffer_;
+  std::string source;
 };
 
 ///  \author Michele Brambilla <mib.mic@gmail.com>
 ///  \date Fri Jun 17 12:22:01 2016
-template <typename T> struct NoSerialiser {
-  typedef std::false_type is_serialised;
+class NoSerialiser {
+public:
+  NoSerialiser(const std::string& = "") {}
+  NoSerialiser(const NoSerialiser& other) = default;
+  NoSerialiser(NoSerialiser&& other) = default;
+  ~NoSerialiser() = default;
 
-  NoSerialiser() : buf(nullptr) {};
+  NoSerialiser() : buf(nullptr){};
   char *get() { return nullptr; }
 
   const int size() { return _size; }
