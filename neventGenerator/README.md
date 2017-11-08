@@ -92,7 +92,11 @@ The configuration file must be in JSON format. Here an example:
     "rate" : 10,
     "source_name": "AMOR.event.stream",
     "timestamp_generator" : "const_timestamp",
-    "report_time" : 1
+    "report_time" : 1,
+	"kafka_options" : {
+		"any-valid-rdkafka-option" : "string-value",
+		"further-valid-rdkafka-option" : "string-value"
+	}
 }
 ```
 * ``report_time`` defines the time in seconds between log messages
