@@ -1,10 +1,9 @@
 #pragma once
 
 #include "Errors.hpp"
+#include "utils.hpp"
 
 #include "rapidjson/document.h"
-
-#include <string>
 
 namespace SINQAmorSim {
 
@@ -26,6 +25,7 @@ public:
   int rate{0};
   int report_time{10};
   bool valid{true};
+  KafkaOptions options;
 };
 
 class ConfigurationParser {
@@ -40,7 +40,7 @@ public:
   int validate();
   void print();
 
-  int parse_configuration_file_impl(rapidjson::Document &d);
+  int parse_configuration_file_impl(rapidjson::Document &&d);
   Configuration parse_command_line(int argc, char **argv);
 
   KafkaConfiguration parse_string_uri(const std::string &uri,
@@ -48,4 +48,4 @@ public:
 
   Configuration config;
 };
-}
+} // namespace SINQAmorSim
