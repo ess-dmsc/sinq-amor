@@ -83,9 +83,13 @@ int SINQAmorSim::ConfigurationParser::parse_configuration_file(
 
 int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl(
     rapidjson::Document &&document) {
-  assert(document.IsObject());
-
+  if (!document.IsObject()) {
+    return ConfigurationError::error_parsing_json;
+  }
   for (auto &m : document.GetObject()) {
+    if (!m.name.IsString()) {
+      continue;
+    }
     if (m.name.GetString() == std::string("producer_uri")) {
       if (!m.value.IsString()) {
         return ConfigurationError::error_parsing_json;
