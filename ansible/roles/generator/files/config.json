@@ -4,5 +4,12 @@
     "multiplier" : 1,
     "rate" : 10,
     "source_name": "AMOR.event.stream",
-    "timestamp_generator" : "const_timestamp"
+    "timestamp_generator" : "const_timestamp",
+    "report_time" : 1,
+    "kafka_options" : {
+	"api.version.request": "true",
+	"message.max.bytes": "131001000",
+	"fetch.message.max.bytes": "23100100",
+	"receive.message.max.bytes": "23100100"
+    }
 }
