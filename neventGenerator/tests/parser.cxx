@@ -63,12 +63,12 @@ TEST(ConfigurationParser, read_json_configuration) {
 TEST(ConfigurationParser, parse_json_invalid_string) {
   SINQAmorSim::ConfigurationParser parser;
   rapidjson::Document document;
-  document.Parse("{ \"producer_broker\" : 1 }");
+  document.Parse("{ \"producer_uri\" : 1 }");
 
-  auto result = parser.parse_configuration_file_impl(document);
+  auto result = parser.parse_configuration_file_impl(std::move(document));
   EXPECT_EQ(result, SINQAmorSim::ConfigurationError::error_parsing_json);
   document.Parse("{ \"source\" : 1 }");
-  result = parser.parse_configuration_file_impl(document);
+  result = parser.parse_configuration_file_impl(std::move(document));
   EXPECT_EQ(result, SINQAmorSim::ConfigurationError::error_parsing_json);
 }
 
@@ -76,10 +76,10 @@ TEST(ConfigurationParser, parse_json_invalid_int) {
   SINQAmorSim::ConfigurationParser parser;
   rapidjson::Document document;
   document.Parse("{ \"multiplier\" : \"1\" }");
-  auto result = parser.parse_configuration_file_impl(document);
+  auto result = parser.parse_configuration_file_impl(std::move(document));
   EXPECT_EQ(result, SINQAmorSim::ConfigurationError::error_parsing_json);
   document.Parse("{ \"rate\" : \"1\" }");
-  result = parser.parse_configuration_file_impl(document);
+  result = parser.parse_configuration_file_impl(std::move(document));
   EXPECT_EQ(result, SINQAmorSim::ConfigurationError::error_parsing_json);
 }
 
@@ -89,8 +89,8 @@ TEST(ConfigurationParser, parse_valid_json) {
   document.Parse("{ \"multiplier\" : 1,"
                  "\"rate\" : 2,"
                  "\"source\" : \"file.h5\","
-                 "\"producer_broker\" : \"//localhost:9092/my-topic\"}");
-  auto result = parser.parse_configuration_file_impl(document);
+                 "\"producer_uri\" : \"//localhost:9092/my-topic\"}");
+  auto result = parser.parse_configuration_file_impl(std::move(document));
   EXPECT_EQ(result, configuration_OK);
   EXPECT_EQ(parser.config.producer.broker, std::string("localhost:9092"));
   EXPECT_EQ(parser.config.producer.topic, std::string("my-topic"));
@@ -105,8 +105,8 @@ TEST(ConfigurationParser, verify_json) {
   document.Parse("{ \"multiplier\" : 1,"
                  "\"rate\" : 2,"
                  "\"source\" : \"file.h5\","
-                 "\"producer_broker\" : \"//localhost:9092/my-topic\"}");
-  auto result = parser.parse_configuration_file_impl(document);
+                 "\"producer_uri\" : \"//localhost:9092/my-topic\"}");
+  auto result = parser.parse_configuration_file_impl(std::move(document));
   EXPECT_EQ(parser.config.producer.broker, std::string("localhost:9092"));
   EXPECT_EQ(parser.config.producer.topic, std::string("my-topic"));
   EXPECT_EQ(parser.config.source, std::string("file.h5"));
@@ -303,19 +303,19 @@ TEST(ConfigurationParser, timestamp_generator_from_file) {
   SINQAmorSim::ConfigurationParser parser;
   rapidjson::Document document;
   document.Parse("{ \"timestamp_generator\" : \"none\" }");
-  parser.parse_configuration_file_impl(document);
+  parser.parse_configuration_file_impl(std::move(document));
   EXPECT_EQ(parser.config.timestamp_generator, std::string("none"));
 
   document.Parse("{ \"timestamp_generator\" : \"const_timestamp\" }");
-  parser.parse_configuration_file_impl(document);
+  parser.parse_configuration_file_impl(std::move(document));
   EXPECT_EQ(parser.config.timestamp_generator, std::string("const_timestamp"));
 
   document.Parse("{ \"timestamp_generator\" : \"random_timestamp\" }");
-  parser.parse_configuration_file_impl(document);
+  parser.parse_configuration_file_impl(std::move(document));
   EXPECT_EQ(parser.config.timestamp_generator, std::string("random_timestamp"));
 
   document.Parse("{ \"timestamp_generator\" : \"any_timestamp\" }");
-  parser.parse_configuration_file_impl(document);
+  parser.parse_configuration_file_impl(std::move(document));
   EXPECT_EQ(parser.config.timestamp_generator, std::string("any_timestamp"));
 
   auto filename = source_dir + "/valid_configuration.json";
@@ -373,4 +373,40 @@ TEST(ConfigurationParser, command_line_timestamp_generator_override_file) {
 
   destroy_command_line_args(argc, argv);
   optind = 0;
+}
+
+TEST(ConfigurationParser, kafka_options) {
+
+  {
+    std::string opt = {"{\"some_other_parameter\": \"none\",\"kafka_options\": "
+                       "{\"message.max.bytes\":\"1024\" }}"};
+    rapidjson::StringStream stream(opt.c_str());
+    rapidjson::Document d;
+    d.ParseStream(stream);
+
+    SINQAmorSim::ConfigurationParser parser;
+    parser.parse_configuration_file_impl(std::move(d));
+
+    ASSERT_EQ(parser.config.options.size(), 1);
+    EXPECT_EQ(parser.config.options[0].first, "message.max.bytes");
+    EXPECT_EQ(parser.config.options[0].second, "1024");
+  }
+  {
+   std::string opt = {"{\"x\": \"none\",\"kafka_options\": "
+                       "{\"a\":\"1\",\"b\":\"2\",\"c\":\"3\"  }}"};
+    rapidjson::StringStream stream(opt.c_str());
+    rapidjson::Document d;
+    d.ParseStream(stream);
+
+    SINQAmorSim::ConfigurationParser parser;
+    parser.parse_configuration_file_impl(std::move(d));
+
+    ASSERT_EQ(parser.config.options.size(), 3);
+    EXPECT_EQ(parser.config.options[0].first, "a");
+    EXPECT_EQ(parser.config.options[0].second, "1");
+    EXPECT_EQ(parser.config.options[1].first, "b");
+    EXPECT_EQ(parser.config.options[1].second, "2");
+    EXPECT_EQ(parser.config.options[2].first, "c");
+    EXPECT_EQ(parser.config.options[2].second, "3");
+   }
 }

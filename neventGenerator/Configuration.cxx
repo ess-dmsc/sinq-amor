@@ -78,14 +78,18 @@ int SINQAmorSim::ConfigurationParser::parse_configuration_file(
     return d.GetParseError();
   }
 
-  return parse_configuration_file_impl(d);
+  return parse_configuration_file_impl(std::move(d));
 }
 
 int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl(
-    rapidjson::Document &document) {
-  assert(document.IsObject());
-
+    rapidjson::Document &&document) {
+  if (!document.IsObject()) {
+    return ConfigurationError::error_parsing_json;
+  }
   for (auto &m : document.GetObject()) {
+    if (!m.name.IsString()) {
+      continue;
+    }
     if (m.name.GetString() == std::string("producer_uri")) {
       if (!m.value.IsString()) {
         return ConfigurationError::error_parsing_json;
@@ -128,7 +132,18 @@ int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl(
       }
       config.report_time = m.value.GetInt();
     }
+    if (m.name.GetString() == std::string("kafka_options")) {
+      if (!m.value.IsObject()) {
+        return ConfigurationError::error_parsing_json;
+      }
+      for (auto &m1 : m.value.GetObject()) {
+        if (m1.name.IsString() && m1.value.IsString()) {
+          config.options.push_back({m1.name.GetString(), m1.value.GetString()});
+        }
+      }
+    }
   }
+
   return ConfigurationError::error_no_configuration_error;
 }
 
@@ -263,7 +278,7 @@ void SINQAmorSim::ConfigurationParser::override_configuration_with(
 int SINQAmorSim::ConfigurationParser::validate() {
   if (config.producer.broker.empty() || config.producer.topic.empty() ||
       config.source.empty() || config.multiplier <= 0 || config.rate <= 0 ||
-      config.source_name.empty() ) {
+      config.source_name.empty()) {
     return ConfigurationError::error_configuration_invalid;
   } else {
     return ConfigurationError::error_no_configuration_error;
@@ -273,13 +288,17 @@ int SINQAmorSim::ConfigurationParser::validate() {
 void SINQAmorSim::ConfigurationParser::print() {
   std::cout << "producer:\n"
             << "\tbroker: " << config.producer.broker << "\n"
-            << "\ttopic: " << config.producer.topic << "\n"
-            << "source: " << config.source << "\n"
+            << "\ttopic: " << config.producer.topic << "\n";
+  std::cout << "source: " << config.source << "\n"
             << "source_name: " << config.source_name << "\n"
             << "multiplier: " << config.multiplier << "\n"
             << "rate: " << config.rate << "\n"
-            << "timestamp_generator: " << config.timestamp_generator << "\n"
-            << "\n";
+            << "timestamp_generator: " << config.timestamp_generator << "\n";
+  std::cout << "kafka_options:\n";
+  for (auto &o : config.options) {
+    std::cout << "\t" << o.first << ": " << o.second << "\n";
+  }
+  std::cout << "\n";
 }
 
 void usage(const std::string &exe) {

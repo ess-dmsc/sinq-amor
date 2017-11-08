@@ -27,22 +27,7 @@
 
 using milliseconds = std::chrono::milliseconds;
 
-/*! \struct Generator
- *
- * The ``Generator`` send an event stream via the network using a templated
- * protocol. The constructor receives a set of key-values and (optionally) a
- * multiplier factor (unuseful so far). A header template is read from
- * "header.in" and regularly modified to account for any change (number of
- * events, hw status,...). To start the streaming use the method ``run``. It
- * keeps sending data at a fixed frequency until a *pause* or *stop* control
- * command is sent. Every 10s returns statistics and check for control
- * parameters.
- *
- * @tparam Streamer policy for stremer protocol (Kafka, 0MQ, ...)
- * @tparam Header policy for creating the header (jSON, ...)
- * @tparam Control policy to start, pause, stop exit the generator (plain text) -
- *TODO
- *
+/*! \class Generator
  *  \author Michele Brambilla <mib.mic@gmail.com>
  *  \date Wed Jun 08 15:19:52 2016 */
 template <typename Streamer, typename Control, typename Serialiser>
@@ -53,11 +38,10 @@ public:
   Generator(SINQAmorSim::Configuration &configuration)
       : config(configuration), control{new Control(configuration)} {
 
-    SINQAmorSim::GeneratorOptions options;
-    options.push_back(SINQAmorSim::GeneratorOptions::value_type{
-        "source_name", configuration.source_name});
-    streamer.reset(new Streamer{configuration.producer.broker,
-                                configuration.producer.topic, options});
+    SINQAmorSim::KafkaOptions options;
+    streamer.reset(new Streamer{
+        configuration.producer.broker, configuration.producer.topic,
+        configuration.source_name, configuration.options});
     if (!streamer) {
       throw std::runtime_error("Error creating the streamer instance");
     }
@@ -96,14 +80,13 @@ private:
     auto timeout = std::localtime(&to_time);
 
     while (!control->exit()) {
-      if(control->stop()) {
+      if (control->stop()) {
         std::this_thread::sleep_for(milliseconds(100));
         continue;
       }
       auto ms =
-	duration_cast<milliseconds>(system_clock::now().time_since_epoch());
-      generate_timestamp(stream, config.rate, ms,
-                         config.timestamp_generator);
+          duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+      generate_timestamp(stream, config.rate, ms, config.timestamp_generator);
 
       if (control->run()) {
         streamer->send(pulseID, ms, stream, stream.size());

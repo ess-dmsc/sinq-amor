@@ -10,10 +10,9 @@
 
 #include "header.hpp"
 #include "serialiser.hpp"
+#include "utils.hpp"
 
 namespace SINQAmorSim {
-  
-using GeneratorOptions = std::vector<std::pair<std::string, std::string>>;
 
 uint64_t timestamp_now() {
   return std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -51,8 +50,9 @@ template <class Serialiser> class KafkaTransmitter {
 
 public:
   KafkaTransmitter(const std::string &brokers, const std::string &topic_str,
-                   const GeneratorOptions &options = {})
-    : topic_name{topic_str} {
+                   const std::string &src_name,
+                   const KafkaOptions &options = {})
+      : topic_name{topic_str}, source_name{src_name} {
     if (brokers.empty() || topic_name.empty()) {
       throw std::runtime_error("Broker and/or topic not set");
     }
@@ -66,12 +66,9 @@ public:
     std::string errstr;
     std::string debug;
     conf->set("metadata.broker.list", brokers, errstr);
-    if (!debug.empty()) {
-      if (conf->set("debug", debug, errstr) != RdKafka::Conf::CONF_OK) {
-        throw std::runtime_error(errstr);
-      }
+    if (!errstr.empty()) {
+      std::cerr << errstr << std::endl;
     }
-    conf->set("message.max.bytes", "131001000", errstr);
     if (!errstr.empty()) {
       std::cerr << errstr << std::endl;
     }
@@ -80,10 +77,13 @@ public:
       std::cerr << errstr << std::endl;
     }
     conf->set("dr_cb", &dr_cb, errstr);
-
-    for(auto& opt : options) {
-      if(opt.first == "source_name") {
-	source_name = opt.second;
+    if (!errstr.empty()) {
+      std::cerr << errstr << std::endl;
+    }
+    for (auto &o : options) {
+      conf->set(o.first, o.second, errstr);
+      if (!errstr.empty()) {
+        std::cerr << errstr << std::endl;
       }
     }
 
@@ -111,8 +111,8 @@ public:
   }
 
   template <typename T>
-  size_t send(const uint64_t &, const std::chrono::milliseconds &, std::vector<T> &,
-              const int = 1) {
+  size_t send(const uint64_t &, const std::chrono::milliseconds &,
+              std::vector<T> &, const int = 1) {
     return 0;
   }
 
@@ -125,7 +125,7 @@ private:
   std::unique_ptr<RdKafka::Metadata> metadata{nullptr};
   std::unique_ptr<RdKafka::Producer> producer{nullptr};
   std::string topic_name;
-  std::string source_name{"AMOR.event.stream"};
+  std::string source_name;
 
   DeliveryReport dr_cb;
   std::unique_ptr<Serialiser> serialiser{nullptr};
@@ -135,17 +135,16 @@ template <typename T> class TD;
 
 template <>
 template <typename T>
-size_t KafkaTransmitter<FlatBufferSerialiser>::send(const uint64_t &pid,
-                                                    const std::chrono::milliseconds &timestamp,
-                                                    std::vector<T> &data,
-                                                    const int nev) {
+size_t KafkaTransmitter<FlatBufferSerialiser>::send(
+    const uint64_t &pid, const std::chrono::milliseconds &timestamp,
+    std::vector<T> &data, const int nev) {
   if (nev) {
     serialiser->serialise(pid, timestamp.count(), data);
     RdKafka::ErrorCode resp = producer->produce(
         topic_name, RdKafka::Topic::PARTITION_UA,
         RdKafka::Producer::RK_MSG_COPY,
-        reinterpret_cast<void *>(serialiser->get()), serialiser->size(), nullptr,
-        0, timestamp_now(), nullptr);
+        reinterpret_cast<void *>(serialiser->get()), serialiser->size(),
+        nullptr, 0, timestamp_now(), nullptr);
   }
   return 0;
 }
@@ -156,9 +155,9 @@ size_t KafkaTransmitter<FlatBufferSerialiser>::send(const uint64_t &pid,
 template <class Serialiser> struct KafkaListener {
   static const int max_header_size = 10000;
 
-  KafkaListener(const std::string &brokers, 
-		const std::string &topic_str,
-		const GeneratorOptions& options) {
+  KafkaListener(const std::string &brokers, const std::string &topic_str,
+                const std::string &src_name, const KafkaOptions &options)
+      : source_name{src_name} {
     std::unique_ptr<RdKafka::Conf> conf{
         RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL)};
     std::unique_ptr<RdKafka::Conf> tconf{
@@ -169,18 +168,10 @@ template <class Serialiser> struct KafkaListener {
     if (!errstr.empty()) {
       std::cerr << errstr << std::endl;
     }
-    conf->set("fetch.message.max.bytes", "23100100", errstr);
-    if (!errstr.empty()) {
-      std::cerr << errstr << std::endl;
-    }
-    conf->set("receive.message.max.bytes", "23100100", errstr);
-    if (!errstr.empty()) {
-      std::cerr << errstr << std::endl;
-    }
-
-    for(auto& i : options) {
-      if( i.first == "source_name" ) {
-	source_name = i.second;
+    for (auto &o : options) {
+      conf->set(o.first, o.second, errstr);
+      if (!errstr.empty()) {
+        std::cerr << errstr << std::endl;
       }
     }
 
@@ -217,7 +208,7 @@ template <class Serialiser> struct KafkaListener {
 private:
   int32_t partition = 0;
   int64_t start_offset = RdKafka::Topic::OFFSET_END;
-  std::string source_name{""};
+  std::string source_name;
 
   std::unique_ptr<RdKafka::Consumer> consumer{nullptr};
   std::unique_ptr<RdKafka::Topic> topic{nullptr};
@@ -248,9 +239,9 @@ KafkaListener<FlatBufferSerialiser>::recv(std::vector<T> &data) {
   std::string source_nm;
   s.extract(reinterpret_cast<const char *>(msg->payload()), data, pid,
             timestamp, source_nm);
-  if(!source_name.empty()) {
-    if( source_name != source_nm ) {
-      return std::pair<uint64_t, uint64_t>{0,0};
+  if (!source_name.empty()) {
+    if (source_name != source_nm) {
+      return std::pair<uint64_t, uint64_t>{0, 0};
     }
   }
   return std::pair<uint64_t, uint64_t>{pid, msg->len()};
