@@ -6,7 +6,21 @@
 
 namespace SINQAmorSim {
 
-  enum class RunStatus { run, pause, stop, exit };
+enum class RunStatus { run, pause, stop, exit };
+static std::string Status2Str(const int value) {
+  switch (value) {
+  case int(RunStatus::run):
+    return "run";
+  case int(RunStatus::pause):
+    return "pause";
+  case int(RunStatus::stop):
+    return "stop";
+  case int(RunStatus::exit):
+    return "exit";
+  default:
+    return "unknown status";
+  }
+}
 
 struct NoControl {
   NoControl() {}
@@ -27,7 +41,7 @@ struct NoControl {
 
 struct CommandlineControl {
   CommandlineControl(Configuration &configuration) : config{configuration} {
-    status.store(int(RunStatus::run));
+    status.store(int(RunStatus::stop));
   }
   CommandlineControl(const CommandlineControl &other) = default;
 
@@ -39,9 +53,9 @@ struct CommandlineControl {
 
   int update() { return update_impl(); }
 
-  int start(int value) {
-    if (value >= 0 && value < 3) {
-      status.store(value);
+  int start(RunStatus value = RunStatus::run) {
+    if (int(value) >= 0 && int(value) < 3) {
+      status.store(int(value));
     }
     return run();
   }
@@ -56,10 +70,10 @@ private:
   SINQAmorSim::Configuration &config;
 
   int &&update_impl() {
-    std::cout << "run_status : " << status << "\t"
-              << "transmission_rate : " << std::to_string(config.rate) << "\n";
+    std::cout << "status : " << Status2Str(status) << "\t"
+              << "tr : " << std::to_string(config.rate) << "\n";
     std::string value;
-    while (status != int(RunStatus::stop)) {
+    while (status != int(RunStatus::exit)) {
       std::cin >> value;
       if (std::string(value) == "run" || std::string(value) == "ru") {
         status.store(int(RunStatus::run));
@@ -78,11 +92,11 @@ private:
         std::cin >> value;
         config.rate = std::stoi(value);
       }
+      std::cout << "status : " << Status2Str(status) << "\t"
+                << "tr : " << std::to_string(config.rate) << "\n";
     }
-    std::cout << "status : " << status << "\t"
-              << "tr : " << std::to_string(config.rate) << "\n";
     return std::move(status.load());
   }
 };
 
-} // namespace control
+} // namespace SINQAmorSim

@@ -30,6 +30,7 @@ class EL737Controller(LineReceiver):
         self.pausedTime = 0.
         self.threshold = 0
         self.thresholdcounter = 1
+        self.proc = MyPIPE()
         self.generator = generator.Generator()
 
     def write(self, data):
@@ -74,7 +75,6 @@ class EL737Controller(LineReceiver):
 
         if self.remotestate == 1:
             if data.startswith('echo 2'):
-                self.proc = MyPIPE()
 
                 g.find('./build')
                 print orig.split()[2:]
@@ -98,6 +98,9 @@ class EL737Controller(LineReceiver):
 
            if data.startswith('mp'):
                l = data.split()
+               if len(l) < 2:
+                   self.write("argument required\r")
+                   return
                self.mode = 'monitor'
                self.preset = float(l[1])
                self.starttime = time.time()
@@ -110,6 +113,9 @@ class EL737Controller(LineReceiver):
 
            if data.startswith('tp'):
                l = data.split()
+               if len(l) < 2:
+                   self.write("argument required\r")
+                   return
                self.mode = 'timer'
                self.preset = float(l[1])
                self.starttime = time.time()
@@ -125,7 +131,6 @@ class EL737Controller(LineReceiver):
                self.endtime = time.time()
                self.write('\r')
                self.to_process('stop\r')
-               self.remotestate = 1
                return
 
            if data.startswith('ps'):
@@ -138,6 +143,9 @@ class EL737Controller(LineReceiver):
 
            if data.startswith('rt'):
                l = data.split()
+               if len(l) < 2:
+                   self.write("argument required\r")
+                   return
                self.to_process('rate\r')
                self.to_process(l[1])
                return
@@ -154,6 +162,9 @@ class EL737Controller(LineReceiver):
 
            if data.startswith('dl'):
                l = data.split()
+               if len(l) < 2:
+                   self.write("argument required\r")
+                   return
                if len(l) >= 3:
                    self.threshold = float(l[2])
                    self.write('\r')
@@ -215,10 +226,12 @@ class EL737Controller(LineReceiver):
 
            self.write('?2\r')
 
-           def connectionLost(self, reason):
-               self.to_process('exit\r')
-               print "Goodbye..."
-               print reason
+    def connectionLost(self, reason):
+        self.to_process('exit\r')
+        time.sleep(1)
+        self.proc.transport.signalProcess('KILL')
+        print "Goodbye..."
+        print reason
 
 
 class MyPIPE(protocol.ProcessProtocol):

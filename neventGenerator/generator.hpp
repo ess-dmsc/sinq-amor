@@ -64,7 +64,6 @@ public:
 private:
   std::unique_ptr<Streamer> streamer{nullptr};
   std::unique_ptr<Control> control{nullptr};
-  bool initial_status;
   SINQAmorSim::Configuration config;
 
   template <class T> void run_impl(std::vector<T> &stream) {
@@ -72,7 +71,6 @@ private:
     int nev = stream.size();
     uint64_t pulseID = 0;
     int count = 0;
-    control->start(initial_status);
 
     using std::chrono::system_clock;
     auto start = system_clock::now();
