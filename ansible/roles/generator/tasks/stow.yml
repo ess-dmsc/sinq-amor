@@ -1,5 +1,0 @@
----
-- name: Install stow
-  become: yes
-  become_method: sudo
-  yum: name=stow

@@ -19,7 +19,7 @@
     - devtoolset-6
   become: yes
 
-- name: create software storage folder
+- name: create folder {{software_dest}}
   become: yes
   file:
     path: '{{software_dest}}'

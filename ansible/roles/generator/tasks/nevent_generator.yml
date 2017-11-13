@@ -14,7 +14,7 @@
     accept_hostkey: yes 
     version: "{{generator_branch}}"
 
-- name: Remove any old build folder
+- name: Remove old build folder
   file: 
     path: /tmp/sinq-amorsim/neventGenerator/build
     state: absent
