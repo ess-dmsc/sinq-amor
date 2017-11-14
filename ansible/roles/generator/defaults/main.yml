@@ -35,6 +35,4 @@ generator_inc: '"{{nexus}}/include;{{flatbuffers}}/include;{{rapidjson}}/include
 generator_lib: '"{{nexus}}/lib;{{flatbuffers}}/lib;{{rapidjson}}/lib;{{rdkafka}}/lib"'
 generator_exe: "{{flatbuffers}}/bin"
 
-use_stow: false
-
 scl: ""

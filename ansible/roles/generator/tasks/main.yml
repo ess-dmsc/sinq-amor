@@ -19,11 +19,7 @@
     - devtoolset-6
   become: yes
 
-- name: install 0MQ
-  include: zmq.yml
-  when: use_zmq
-
-- name: create software storage folder
+- name: create folder {{software_dest}}
   become: yes
   file:
     path: '{{software_dest}}'
@@ -62,7 +58,6 @@
 
 - name: install neventGenerator
   include: nevent_generator.yml 
-#  become: yes
 
 - name: make sure generator service file is installed
   become: yes
