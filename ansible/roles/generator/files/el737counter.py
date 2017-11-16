@@ -55,6 +55,7 @@ class EL737Controller(LineReceiver):
                     self.counting = False
                     self.endtime = self.starttime + self.preset
                     self.pausedTime = 0
+                    self.to_process('stop\r')
                 elif self.runFailure and not self.recover and runtime >= self.preset*0.2:
                     self.atRunFailure = True
 
@@ -62,6 +63,7 @@ class EL737Controller(LineReceiver):
                 if runtime*1000 >= self.preset:
                     self.counting = False
                     self.endtime = self.starttime + self.preset/1000
+                    self.to_process('stop\r')
                 elif self.runFailure and not self.recover and runtime*1000 >= self.preset*0.2:
                     self.atRunFailure = True
 
