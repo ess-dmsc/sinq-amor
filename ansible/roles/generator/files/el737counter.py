@@ -35,15 +35,14 @@ class EL737Controller(LineReceiver):
         self.atRunFailure = False
         self.readFailure = False
         self.recover = False
+        self.proc = MyPIPE()
         self.generator = generator.Generator()
 
     def write(self, data):
-#        print "transmitted:", data
         if self.transport is not None:
             self.transport.write(data)
 
     def to_process(self, data):
-#        print "transmitted to process:", data
         if self.transport is not None:
             self.proc.transport.write(data)
 
@@ -56,6 +55,7 @@ class EL737Controller(LineReceiver):
                     self.counting = False
                     self.endtime = self.starttime + self.preset
                     self.pausedTime = 0
+                    self.to_process('stop\r')
                 elif self.runFailure and not self.recover and runtime >= self.preset*0.2:
                     self.atRunFailure = True
 
@@ -63,6 +63,7 @@ class EL737Controller(LineReceiver):
                 if runtime*1000 >= self.preset:
                     self.counting = False
                     self.endtime = self.starttime + self.preset/1000
+                    self.to_process('stop\r')
                 elif self.runFailure and not self.recover and runtime*1000 >= self.preset*0.2:
                     self.atRunFailure = True
 
@@ -93,8 +94,6 @@ class EL737Controller(LineReceiver):
             return False
 
     def lineReceived(self, data):
-#        print "lineReceived:", data
-
         orig = data.strip()
         data = data.lower().strip()
         g = self.generator
@@ -109,16 +108,8 @@ class EL737Controller(LineReceiver):
 
         if self.remotestate == 1:
             if data.startswith('echo 2'):
-                self.proc = MyPIPE()
-
                 g.find('./build')
-#                print orig.split()[2:]
-#                if not g.validate(orig.split()[2:]):
-#                    self.remotestate = 1
-#                    return
-
                 reactor.spawnProcess(self.proc,g.exe[0],args=orig.split()[2:],env=os.environ)
-
                 self.remotestate = 2
                 self.write("\r")
             else:
@@ -138,6 +129,9 @@ class EL737Controller(LineReceiver):
                    return
 
                l = data.split()
+               if len(l) < 2:
+                   self.write("argument required\r\n")
+                   return
                self.mode = 'monitor'
                self.preset = float(l[1])
                self.starttime = time.time()
@@ -156,6 +150,9 @@ class EL737Controller(LineReceiver):
 
                l = data.split()
                self.mode = 'timer'
+               if len(l) < 2:
+                   self.write("argument required\r\n")
+                   return
                self.preset = float(l[1])
                self.starttime = time.time()
                self.mypaused = False
@@ -183,6 +180,9 @@ class EL737Controller(LineReceiver):
 
            if data.startswith('rt'):
                l = data.split()
+               if len(l) < 2:
+                   self.write("argument required\r\n")
+                   return
                self.to_process('rate\r')
                self.to_process(l[1])
                return
@@ -286,6 +286,8 @@ class EL737Controller(LineReceiver):
 
     def connectionLost(self, reason):
         self.to_process('exit\r')
+        time.sleep(1)
+        self.proc.transport.signalProcess('KILL')
         print "Goodbye..."
         print reason
 

@@ -27,8 +27,6 @@
       essiip-fakesinqhw does not exist.  Solution:  Please make sure that the repository `essiip-fakesinqhw` is cloned in the same directory as this `sinq-amorsim` repository.  Or pass --extra-vars "auto_fetch_deps=true.    Or pass --extra-vars "repo_loc_essiip_fakesinqhw=<directory>"
   when: st.stat.exists!=true or st.stat.isdir != true
 
-
-
 - name: Check existence of forward-epics-to-kafka in {{repo_loc_forward_epics_to_kafka}}
   connection: local
   stat: path={{repo_loc_forward_epics_to_kafka}}

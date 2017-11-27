@@ -239,10 +239,10 @@ class ChopperDisc(object):
                 'value': 1,
                 'description': 'Ratio | Ratio between the speed of master and slave disc | - | Read'
             },
-            'LostCurr': {
+            'LossCurr': {
                 'type': 'float',
                 'unit': 'A',
-                'description': 'LostCurr | Lost Current | A | Read',
+                'description': 'LossCurr | Loss Current | A | Read',
             },
             'Vibration': {
                 'type': 'float',
@@ -349,12 +349,12 @@ class ChopperDisc(object):
         self.driver.updatePVs()
 
     @property
-    def LostCurr(self):
-        return self._get_param('LostCurr')
+    def LossCurr(self):
+        return self._get_param('LossCurr')
 
-    @LostCurr.setter
-    def LostCurr(self, val):
-        self._set_param('LostCurr', val)
+    @LossCurr.setter
+    def LossCurr(self, val):
+        self._set_param('LossCurr', val)
         self.driver.updatePVs()
 
     @property
@@ -557,7 +557,7 @@ class DornierProtocol(twisted.internet.protocol.Protocol):
                 self.chopper.discs[d].State = 0 if state == 'async' else 1
                 self.chopper.discs[d].ActSpd = float(matched[d].group(5))
                 self.chopper.discs[d].ActPhs = float(matched[d].group(7))
-                self.chopper.discs[d].LostCurr = float(matched[d].group(8))
+                self.chopper.discs[d].LossCurr = float(matched[d].group(8))
                 self.chopper.discs[d].Vibration = float(matched[d].group(13))
                 self.chopper.discs[d].Temp = float(matched[d].group(14))
                 self.chopper.discs[d].WaterFlow = float(matched[d].group(15))

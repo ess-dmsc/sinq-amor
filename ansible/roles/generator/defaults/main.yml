@@ -31,10 +31,8 @@ generator_src: https://github.com/ess-dmsc/sinq-amorsim
 generator_home: "{{amor_dir}}/simfiles"
 generator_branch: master
 
-generator_inc: '"{{nexus}}/include;{{flatbuffers}}/include;{{rapidjson}}/include;{{rdkafka}}/include;{{streaming_data_types}}:{{googletest}}"'
+generator_inc: '"{{nexus}}/include;{{flatbuffers}}/include;{{rapidjson}}/include;{{rdkafka}}/include;{{streaming_data_types}};{{googletest}}"'
 generator_lib: '"{{nexus}}/lib;{{flatbuffers}}/lib;{{rapidjson}}/lib;{{rdkafka}}/lib"'
 generator_exe: "{{flatbuffers}}/bin"
-
-use_stow: false
 
 scl: ""
