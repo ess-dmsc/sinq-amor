@@ -26,3 +26,18 @@
     params:
       NUM_THREADS: 4
 
+- name: Test for flatc
+  stat: 
+    path: "{{flatbuffers}}/bin/flatc"
+  register: flatc
+
+- name: Install flatc manually when above failed to do this
+  block:
+    - file:
+        path: "{{flatbuffers}}/bin"
+        state: directory 
+    - copy:
+        src:  "{{builds}}/flatbuffers-{{flatbuffers_version}}/flatc"
+        dest: "{{flatbuffers}}/bin/flatc"
+        mode: 0755
+  when: not flatc.stat.exists

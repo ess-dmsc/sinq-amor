@@ -19,6 +19,8 @@
     - python-zope-interface
     - pyOpenSSL
     - openssl-devel
+    - automake
+    - autoconf
 
 - name: install python packages
   become : yes
@@ -37,27 +39,32 @@
     name: pyopenssl
     state: absent
 
-- name: download procServ
-  git:
-    repo: 'https://github.com/ralphlange/procServ.git'
-    dest: /tmp/procServ
-    version: V2.6.0
+- name: figure out if procServ exists
+  stat: 
+    path: /usr/local/bin/procServ
+  register: procServ
 
-- name: configure procServ
-  shell: make && ./configure --disable-doc
-  args:
-    chdir: /tmp/procServ
-
-- name: build and install procServ
-  become: yes
-  make: 
-    chdir: /tmp/procServ
-    target: install
-
-- name: be sure procServ directory is absent
-  file:
-    path: /tmp/procServ
-    state: absent
+- name: install procServ but only when it does not exist
+  block:
+    - git:
+        repo: 'https://github.com/ralphlange/procServ.git'
+        dest: /tmp/procServ
+        version: V2.6.0
+    - shell: autoconf
+      args:
+        chdir: /tmp/procServ
+      ignore_errors: yes
+    - shell: make && ./configure --disable-doc
+      args:
+        chdir: /tmp/procServ
+    - make: 
+       chdir: /tmp/procServ
+       target: install
+      become: true
+    - file:
+        path: /tmp/procServ
+        state: absent
+  when: not procServ.stat.exists 
 
 - name: Amorsim source dir
   file: 
@@ -71,3 +78,17 @@
   synchronize:
     src:  "{{role_path}}/../../../."
     dest: "{{amorsim_dir}}"
+
+- name: find out if /nfs exists
+  stat:
+    path: /nfs
+  register: nfs
+
+- name: If nfs does not exists, make a link to /opt
+  block:
+    - file:
+        src: /opt
+        dest: /nfs
+        state: link
+      become: true
+  when: not nfs.stat.exists
