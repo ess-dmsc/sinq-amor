@@ -32,12 +32,14 @@
   register: flatc
 
 - name: Install flatc manually when above failed to do this
-  block:
-    - file:
-        path: "{{flatbuffers}}/bin"
-        state: directory 
-    - copy:
-        src:  "{{builds}}/flatbuffers-{{flatbuffers_version}}/flatc"
-        dest: "{{flatbuffers}}/bin/flatc"
-        mode: 0755
+  file:
+    path: "{{flatbuffers}}/bin"
+    state: directory
+  when: not flatc.stat.exists
+
+- name: Copy the files 
+  copy:
+    src:  "{{builds}}/flatbuffers-{{flatbuffers_version}}/flatc"
+    dest: "{{flatbuffers}}/bin/flatc"
+    mode: 0755
   when: not flatc.stat.exists

@@ -1,0 +1,18 @@
+- git:
+    repo: 'https://github.com/ralphlange/procServ.git'
+    dest: /tmp/procServ
+    version: V2.6.0
+- shell: autoconf
+  args:
+    chdir: /tmp/procServ
+  ignore_errors: yes
+- shell: make && ./configure --disable-doc
+  args:
+    chdir: /tmp/procServ
+- make:
+    chdir: /tmp/procServ
+    target: install
+  become: true
+- file:
+    path: /tmp/procServ
+    state: absent
