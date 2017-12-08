@@ -68,8 +68,13 @@ Command line options are:
 | `source`   | NeXus file to convert into an event stream | 
 | `source-name`   | String tagging the data source in the FlatBuffer buffer | 
 | `multiplier`  | number of repetition of the original data in the event stream  | 
+| `bytes`  | number of bytes in the event stream  | 
 | `rate`   | Number of packets/second to transmit  | 
 | `timestamp-generator`   | Update policy for the timestamp of the events  | 
+
+Warning The parameters `multiplier` and `bytes` conflicts: if the
+latter is specified the message size will be changed according to the specified
+value.
 
 Notes
 * Command line options override the corresponding configuration file option
@@ -89,6 +94,7 @@ The configuration file must be in JSON format. Here an example:
     "producer_uri" : "//129.129.188.59:9092/AMOR.area.detector",
     "source" : "files/amor2015n001774.hdf",
     "multiplier" : 1,
+	[OPTIONAL]"bytes" : 1000,
     "rate" : 10,
     "source_name": "AMOR.event.stream",
     "timestamp_generator" : "const_timestamp",
