@@ -22,6 +22,7 @@ public:
   std::string source_name{"AMOR.event.stream"};
   std::string timestamp_generator{"none"};
   int multiplier{0};
+  int bytes{0};
   int rate{0};
   int report_time{10};
   bool valid{true};

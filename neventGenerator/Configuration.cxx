@@ -102,6 +102,12 @@ int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl(
       }
       config.multiplier = m.value.GetInt();
     }
+    if (m.name.GetString() == std::string("bytes")) {
+      if (!m.value.IsInt()) {
+        return ConfigurationError::error_parsing_json;
+      }
+      config.bytes = m.value.GetInt();
+    }
     if (m.name.GetString() == std::string("rate")) {
       if (!m.value.IsInt()) {
         return ConfigurationError::error_parsing_json;
@@ -189,6 +195,7 @@ SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
       {"source", required_argument, nullptr, 0},
       {"source-name", required_argument, nullptr, 0},
       {"multiplier", required_argument, nullptr, 0},
+      {"bytes", required_argument, nullptr, 0},
       {"rate", required_argument, nullptr, 0},
       {"timestamp-generator", required_argument, nullptr, 0},
       {nullptr, 0, nullptr, 0},
@@ -226,6 +233,10 @@ SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
       if (std::string("multiplier") == lname) {
         std::istringstream buffer(optarg);
         buffer >> result.multiplier;
+      }
+      if (std::string("bytes") == lname) {
+        std::istringstream buffer(optarg);
+        buffer >> result.bytes;
       }
       if (std::string("rate") == lname) {
         std::istringstream buffer(optarg);
@@ -292,6 +303,7 @@ void SINQAmorSim::ConfigurationParser::print() {
   std::cout << "source: " << config.source << "\n"
             << "source_name: " << config.source_name << "\n"
             << "multiplier: " << config.multiplier << "\n"
+            << "bytes: " << config.bytes << "\n"
             << "rate: " << config.rate << "\n"
             << "timestamp_generator: " << config.timestamp_generator << "\n";
   std::cout << "kafka_options:\n";

@@ -140,11 +140,12 @@ size_t KafkaTransmitter<FlatBufferSerialiser>::send(
     std::vector<T> &data, const int nev) {
   if (nev) {
     serialiser->serialise(pid, timestamp.count(), data);
-    RdKafka::ErrorCode resp = producer->produce(
-        topic_name, RdKafka::Topic::PARTITION_UA,
-        RdKafka::Producer::RK_MSG_COPY,
-        reinterpret_cast<void *>(serialiser->get()), serialiser->size(),
-        nullptr, 0, timestamp_now(), nullptr);
+    RdKafka::ErrorCode resp =
+        producer->produce(topic_name, RdKafka::Topic::PARTITION_UA,
+                          RdKafka::Producer::RK_MSG_COPY,
+                          reinterpret_cast<void *>(serialiser->get()),
+                          serialiser->size(), nullptr, 0, // timestamp_now()
+                          timestamp.count(), nullptr);
   }
   return 0;
 }
