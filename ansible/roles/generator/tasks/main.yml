@@ -28,32 +28,10 @@
 - name: checks for files
   include: check.yml
 
-- name: install flatbuffers
-  include: flatbuffers.yml
-  when:
-    st_flatbuffers.stat.exists == False
-  become: yes
-
-- name: install rdkafka
-  include: rdkafka.yml
-  when:
-    st_rdkafka.stat.exists == False
-  become: yes
-
-- name: install rapidjson
-  include: rapidjson.yml
-  when:
-    st_rapidjson.stat.exists == False
-  become: yes
-
 - name: checkout streaming-data-types
   include: streaming_data_types.yml
   when:
-    st_sdt.stat.exists == False
-  become: yes
-
-- name: checkout googletest
-  include: googletest.yml
+    check_streaming_data_types.stat.exists == False
   become: yes
 
 - name: install neventGenerator

@@ -1,2 +1,2 @@
 [simulation]
-192.168.10.12 ansible_user=vagrant
+192.168.10.11 ansible_user=vagrant
