@@ -25,18 +25,17 @@ int main(int argc, char **argv) {
   }
   auto &config = parser.config;
 
-  if(config.bytes > 0 && config.multiplier > 1) {
-    std::cerr<< "Warning: conflict between parameters `bytes` and `multiplier`\n\n";
+  if (config.bytes > 0 && config.multiplier > 1) {
+    std::cerr
+        << "Warning: conflict between parameters `bytes` and `multiplier`\n\n";
   }
   Source stream(config.source, config.multiplier);
   auto data = stream.get();
-  if(config.bytes > 0 && config.multiplier > 1) {
+  if (config.bytes > 0) {
     data.resize(config.bytes);
   }
 
   Generator<Communication, Control, Serialiser> g(config);
-
-  data.resize(10);
   g.run<StreamFormat::value_type>(data);
 
   return 0;

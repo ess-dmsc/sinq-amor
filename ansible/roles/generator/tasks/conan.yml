@@ -1,0 +1,42 @@
+---
+
+- name: Make sure that pip is installed
+  command: easy_install pip
+  become: yes
+
+- name: Install security packages to avoid conan failures
+  pip:
+    name: requests[security]
+  become: yes
+
+- name: Make sure that conan is installed
+  pip: 
+    name: conan
+  become: yes
+
+- name: Add remotes
+  command: 'conan remote add {{item.local_name}} {{item.remote_url}}'
+  with_items:
+    - { local_name: 'ess-dmsc', remote_url: 'https://api.bintray.com/conan/ess-dmsc/conan' }
+    - { local_name: 'conan-community', remote_url: 'https://api.bintray.com/conan/conan-community/conan' }
+  ignore_errors: true
+
+- name: Install conan profiles
+  copy:
+    src: "{{item}}"
+    dest: $HOME/.conan/profiles/
+  with_items:
+    - gcc63
+
+- name: Install local conanfile.txt
+  copy:
+    src: conanfile.txt
+    dest:  /tmp/sinq-amorsim/neventGenerator/conan/
+
+- name: Install conan packages
+  command: '{{scl}} conan install ../conan --profile {{conan_profile}} --build=missing'
+  args:
+    chdir: /tmp/sinq-amorsim/neventGenerator/build
+  register: conan_result
+
+

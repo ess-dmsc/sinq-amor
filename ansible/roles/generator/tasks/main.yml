@@ -1,5 +1,6 @@
 ---
-- name: make sure repositories are installed
+# prerequisites
+- name: Make sure yum repositories are installed
   yum:
     name: '{{item}}'
   with_items:
@@ -7,11 +8,11 @@
     - epel-release
   become: yes
 
-- name: enable repositories
+- name: Enable repositories
   command: yum-config-manager --enable rhel-server-rhscl-7-rpms epel
   become: yes
 
-- name: make sure requirements are installed
+- name: Make sure requirements are installed
   yum:
     name: '{{item}}'
   with_items:
@@ -19,47 +20,35 @@
     - devtoolset-6
   become: yes
 
-- name: create folder {{software_dest}}
+# folder
+- name: Create destination folder {{software_dest}}
   become: yes
   file:
     path: '{{software_dest}}'
     state: directory
 
-- name: checks for files
-  include: check.yml
+# streaming-data-types
+- name: Make sure streaming-data-types is present
+  stat: 
+    path: "{{streaming_data_types}}"
+  register: check_streaming_data_types
 
-- name: install flatbuffers
-  include: flatbuffers.yml
+- name: Download schema repository
+  git:
+    repo: "{{streaming_data_types_src}}"
+    dest: "{{streaming_data_types}}"
+  env:
+    streaming_data_types_dir: "{{streaming_data_types}}"
   when:
-    st_flatbuffers.stat.exists == False
+    check_streaming_data_types.stat.exists == False
   become: yes
 
-- name: install rdkafka
-  include: rdkafka.yml
-  when:
-    st_rdkafka.stat.exists == False
-  become: yes
-
-- name: install rapidjson
-  include: rapidjson.yml
-  when:
-    st_rapidjson.stat.exists == False
-  become: yes
-
-- name: checkout streaming-data-types
-  include: streaming_data_types.yml
-  when:
-    st_sdt.stat.exists == False
-  become: yes
-
-- name: checkout googletest
-  include: googletest.yml
-  become: yes
-
-- name: install neventGenerator
+# install AMORgenerator
+- name: Install neventGenerator
   include: nevent_generator.yml 
 
-- name: make sure generator service file is installed
+# install service files
+- name: Make sure generator service file is installed
   become: yes
   template: 
     src: generator.j2 

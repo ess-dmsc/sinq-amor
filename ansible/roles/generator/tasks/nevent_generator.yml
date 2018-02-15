@@ -24,13 +24,17 @@
     path: /tmp/sinq-amorsim/neventGenerator/build 
     state: directory
 
+- name: Manage dependencies with Conan
+  include: conan.yml
+
 - name: Configure installation
-  command: '{{scl}} cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX={{generator_home}} -DCMAKE_INCLUDE_PATH={{generator_inc}} -DCMAKE_LIBRARY_PATH={{generator_lib}} -DCMAKE_PROGRAM_PATH={{flatbuffers}}/bin ../ '
+  command: '{{scl}} cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX={{generator_home}} -DCMAKE_INCLUDE_PATH={{generator_inc}} ../ '
   args:
     chdir: /tmp/sinq-amorsim/neventGenerator/build
-  environment:
-    PATH: '{{flatbuffers}}/bin:{{ ansible_env.PATH }}'
  
+- name: Install dependencies using conan
+  include: conan.yml
+
 - name: Install
   make: 
     target: install 
