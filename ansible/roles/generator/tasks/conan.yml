@@ -39,6 +39,4 @@
     chdir: /tmp/sinq-amorsim/neventGenerator/build
   register: conan_result
 
-- debug:
-    msg: '{{ conan_result }}'
 
