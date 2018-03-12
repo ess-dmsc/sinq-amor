@@ -111,7 +111,7 @@ public:
   }
 
   template <typename T>
-  size_t send(const uint64_t &, const std::chrono::milliseconds &,
+  size_t send(const uint64_t &, const std::chrono::nanoseconds &,
               std::vector<T> &, const int = 1) {
     return 0;
   }
@@ -136,16 +136,16 @@ template <typename T> class TD;
 template <>
 template <typename T>
 size_t KafkaTransmitter<FlatBufferSerialiser>::send(
-    const uint64_t &pid, const std::chrono::milliseconds &timestamp,
+    const uint64_t &pid, const std::chrono::nanoseconds &pulse_time,
     std::vector<T> &data, const int nev) {
   if (nev) {
-    serialiser->serialise(pid, timestamp.count(), data);
+    serialiser->serialise(pid, pulse_time, data);
     RdKafka::ErrorCode resp =
         producer->produce(topic_name, RdKafka::Topic::PARTITION_UA,
                           RdKafka::Producer::RK_MSG_COPY,
                           reinterpret_cast<void *>(serialiser->get()),
                           serialiser->size(), nullptr, 0, // timestamp_now()
-                          timestamp.count(), nullptr);
+                          pulse_time.count(), nullptr);
   }
   return 0;
 }
@@ -236,12 +236,13 @@ KafkaListener<FlatBufferSerialiser>::recv(std::vector<T> &data) {
     }
   } while (msg->err() != RdKafka::ERR_NO_ERROR);
 
-  uint64_t pid = -1, timestamp = -1;
-  std::string source_nm;
+  uint64_t pid = -1;
+  std::chrono::nanoseconds pulse_time{0};
+  std::string source;
   s.extract(reinterpret_cast<const char *>(msg->payload()), data, pid,
-            timestamp, source_nm);
+            pulse_time, source);
   if (!source_name.empty()) {
-    if (source_name != source_nm) {
+    if (source_name != source) {
       return std::pair<uint64_t, uint64_t>{0, 0};
     }
   }
