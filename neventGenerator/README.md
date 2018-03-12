@@ -1,40 +1,36 @@
-# kafkaGenerator
+# neventGenerator
 
-## Features:
-
-* Convert a NeXus data file in an event stream
-* Serialise the event stream using FlatBuffers
-* Send the serialised event stream via Kafka
-* Data size can be configured to be a multiple of the original data
-* Transmission rate can be adjusted in real time
+Converts a NeXus file generated as a result of a mesurement on AMOR in a event stream. The event stream is serialised using Flatbuffers and repeatedly sent as a Kafka message.
 
 ## Installation
 
-### Requirements:
+The generator can be installed using cmake or the Ansible role [generator](../ansible/roles) 
+
+### Install using ``cmake``
+
+The following dependencies are required:
 
 * Rapidjson
 * RdKafka
 * Flatbuffers
 * HDF5
-* StreamingDataTypes
-* Googletest [optional]
-* ZeroMQ [optional]
+* [StreamingDataTypes](https://github.com/ess-dmsc/streaming-data-types)
 
-### Conan repositories
+The default approach should be using [Conan](https://www.conan.io/) to install all the dependencies but ``StreamingDataTypes``. To do that:
 
-he following remote repositories are required to be configured:
-
-- https://api.bintray.com/conan/ess-dmsc/conan
-- https://api.bintray.com/conan/conan-community/conan
-
-You can add them by running
+1. configure the following remote repositories:
+   * https://api.bintray.com/conan/ess-dmsc/conan
+   * https://api.bintray.com/conan/conan-community/conan
 
 ```
-conan remote add <local-name> <remote-url>
+  conan remote add <local-name> <remote-url>
 ```
 
-where `<local-name>` must be substituted by a locally unique name. Configured
-remotes can be listed with `conan remote list`.
+2. in the build directory install the Conan dependencies
+```
+conan install <path to neventGenerator conanfile> --install missing [--profile <profile>]
+```
+
 
 ### Build
 

@@ -207,7 +207,7 @@ template <class Serialiser> struct KafkaListener {
   }
 
 private:
-  int32_t partition = 0;
+  int32_t partition = RdKafka::Topic::PARTITION_UA;
   int64_t start_offset = RdKafka::Topic::OFFSET_END;
   std::string source_name;
 
