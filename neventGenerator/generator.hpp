@@ -26,6 +26,7 @@
 #include "timestamp_generator.hpp"
 
 using milliseconds = std::chrono::milliseconds;
+using nanoseconds = std::chrono::nanoseconds;
 
 /*! \class Generator
  *  \author Michele Brambilla <mib.mic@gmail.com>
@@ -82,15 +83,15 @@ private:
         std::this_thread::sleep_for(milliseconds(100));
         continue;
       }
-      auto ms =
-          duration_cast<milliseconds>(system_clock::now().time_since_epoch());
-      generate_timestamp(stream, config.rate, ms, config.timestamp_generator);
+      nanoseconds pulse_time =
+          duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
+      generate_timestamp(stream, config.rate, pulse_time, config.timestamp_generator);
 
       if (control->run()) {
-        streamer->send(pulseID, ms, stream, stream.size());
+        streamer->send(pulseID, pulse_time, stream, stream.size());
         ++count;
       } else {
-        streamer->send(pulseID, ms, stream, 0);
+        streamer->send(pulseID, pulse_time, stream, 0);
       }
       ++pulseID;
       if (pulseID % control->rate() == 0) {
@@ -110,7 +111,7 @@ private:
                              from_start)
                              .count()
                   << "MB/s"
-                  << "\t(timestamp : " << ms.count() << ")" << std::endl;
+                  << "\t(timestamp : " << pulse_time.count() << ")" << std::endl;
         streamer->messages() = 0;
         streamer->Mbytes() = 0;
         count = 0;

@@ -122,7 +122,7 @@ The messages are serialised according the schema "ev42":
 {
     source_name : string;    # producer type, for example detector type
     message_id : ulong;      # sequential number of the message
-    pulse_time : ulong;      # time of source pulse, milliseconds since Unix epoch (1 Jan 1970)
+    pulse_time : ulong;      # time of source pulse, nanoseconds since Unix epoch (1 Jan 1970)
     time_of_flight : [uint]; # nanoseconds measured from pulse time
     detector_id : [uint];    # detector id
     facility_specific_data : FacilityData;  # not used

@@ -4,11 +4,10 @@
 
 template <class T>
 void generate_timestamp(std::vector<T> &output, const uint32_t &rate,
-                        const std::chrono::milliseconds &ms,
+                        const std::chrono::nanoseconds &pulse_time,
                         const std::string &generation_type) {
-  auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(ms);
   if (generation_type == "const_timestamp") {
-    std::fill(output.begin(), output.end(), ns.count());
+    std::fill(output.begin(), output.end(), pulse_time.count());
     return;
   }
   if (generation_type == "random_timestamp") {
