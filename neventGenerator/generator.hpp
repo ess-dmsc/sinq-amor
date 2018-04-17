@@ -86,13 +86,23 @@ private:
         std::this_thread::sleep_for(milliseconds(100));
         continue;
       }
+      nanoseconds PulseTime =
+          duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
+      generateTimestamp(Events, Config.rate, PulseTime,
+                        Config.timestamp_generator);
 
       if (Streaming->run()) {
-        Stream->sendExistingBuffer();
+        Stream->send(PulseID, PulseTime, Events, Events.size());
       } else {
         Stream->send(PulseID, PulseTime, Events, 0);
       }
       ++PulseID;
+      if (PulseID % Streaming->rate() == 0) {
+        ++Timeout->tm_sec;
+        std::this_thread::sleep_until(
+            system_clock::from_time_t(mktime(Timeout)));
+        Stream->poll(1);
+      }
 
       auto ElapsedTime = system_clock::now() - StartTime;
       if (std::chrono::duration_cast<std::chrono::seconds>(ElapsedTime)
