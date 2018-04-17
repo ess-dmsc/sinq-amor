@@ -1,11 +1,11 @@
 #pragma once
 
-#include<chrono>
+#include <chrono>
 
 template <class T>
-void generate_timestamp(std::vector<T> &output, const uint32_t &rate,
-                        const std::chrono::nanoseconds &pulse_time,
-                        const std::string &generation_type) {
+void generateTimestamp(std::vector<T> &output, const uint32_t &rate,
+                       const std::chrono::nanoseconds &pulse_time,
+                       const std::string &generation_type) {
   if (generation_type == "const_timestamp") {
     std::fill(output.begin(), output.end(), pulse_time.count());
     return;
