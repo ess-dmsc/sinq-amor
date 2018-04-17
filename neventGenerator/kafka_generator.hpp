@@ -64,7 +64,7 @@ public:
     }
 
     std::string Error;
-    Configuration->set("Metadata.broker.list", Brokers, Error);
+    Configuration->set("metadata.broker.list", Brokers, Error);
     if (!Error.empty()) {
       std::cerr << Error << std::endl;
     }
@@ -101,6 +101,12 @@ public:
     SerialiserWorker.reset(new Serialiser{Source});
   }
 
+  template <typename T>
+  size_t serialiseAndStore(const uint64_t &, const std::chrono::nanoseconds &,
+                           std::vector<T> &, const int = 1) {
+    return 0;
+  }
+
   template <typename T> size_t send(std::vector<T> &Data, const int nev = -1) {
     RdKafka::ErrorCode resp = Producer->produce(
         Topic, RdKafka::Topic::PARTITION_UA, RdKafka::Producer::RK_MSG_COPY,
@@ -115,10 +121,13 @@ public:
     return 0;
   }
 
+  size_t sendExistingBuffer();
+
   int poll(const int &Seconds = -1) { return Producer->poll(Seconds); }
 
   double &getNumMessages() { return DeliveryCallback.getNumMessages(); }
   double &getMbytes() { return DeliveryCallback.getMbytes(); }
+  double bufferSizeMbytes() { return 1e-6 * Buffer.size(); }
 
 private:
   std::unique_ptr<RdKafka::Metadata> Metadata{nullptr};
@@ -128,7 +137,48 @@ private:
 
   DeliveryReport DeliveryCallback;
   std::unique_ptr<Serialiser> SerialiserWorker{nullptr};
+
+  std::string Buffer;
 };
+
+//------------------------------------------------------------------------------
+/// @brief      Serialise data and copy into a buffer
+///
+/// @param[in]  PacketID   The packet id
+/// @param[in]  PulseTime  The pulse time
+/// @param      Events     The events
+/// @param[in]  NumEvents  The number events
+///
+/// @return     0 if success
+///
+template <>
+template <typename T>
+size_t KafkaTransmitter<FlatBufferSerialiser>::serialiseAndStore(
+    const uint64_t &PacketID, const std::chrono::nanoseconds &PulseTime,
+    std::vector<T> &Events, const int NumEvents) {
+  if (NumEvents) {
+    SerialiserWorker->serialise(PacketID, PulseTime, Events);
+    Buffer.resize(SerialiserWorker->size());
+    Buffer.copy(SerialiserWorker->get(), SerialiserWorker->size());
+  }
+  return 0;
+}
+
+//------------------------------------------------------------------------------
+/// @brief      Sends the existing buffer stored.
+///
+/// @tparam     T     Serialiser type
+///
+/// @return     The number of bytes sent
+///
+template <class T> size_t KafkaTransmitter<T>::sendExistingBuffer() {
+  RdKafka::ErrorCode resp = Producer->produce(
+      Topic, RdKafka::Topic::PARTITION_UA, RdKafka::Producer::RK_MSG_COPY,
+      reinterpret_cast<void *>(&Buffer[0]), Buffer.size(), nullptr,
+      0, // timestamp_now()
+      0, nullptr);
+  return Buffer.size();
+}
 
 template <>
 template <typename T>

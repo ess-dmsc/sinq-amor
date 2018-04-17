@@ -77,6 +77,10 @@ private:
 
     nanoseconds PulseTime =
         duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
+    // Pregenerate serialised buffer: this prevents flatbuffers to be a possible
+    // bottleneck
+    Stream->serialiseAndStore(PulseID, PulseTime, Events, Events.size());
+
     while (!Streaming->exit()) {
       if (Streaming->stop()) {
         std::this_thread::sleep_for(milliseconds(100));
@@ -84,24 +88,18 @@ private:
       }
 
       if (Streaming->run()) {
-        Stream->send(PulseID, PulseTime, Events, Events.size());
+        Stream->sendExistingBuffer();
       } else {
         Stream->send(PulseID, PulseTime, Events, 0);
       }
       ++PulseID;
-      if (PulseID % Streaming->rate() == 0) {
-        ++Timeout->tm_sec;
-        std::this_thread::sleep_until(
-            system_clock::from_time_t(mktime(Timeout)));
-        Stream->poll(0);
-      }
 
       auto ElapsedTime = system_clock::now() - StartTime;
       if (std::chrono::duration_cast<std::chrono::seconds>(ElapsedTime)
               .count() > Config.report_time) {
-        std::cout << "Sent " << Stream->getNumMessages() << "/"
-                  << Streaming->rate() * Config.report_time << " packets @ "
-                  << 1e3 * Stream->getMbytes() /
+        int NumMessages = Stream->poll(-1);
+        std::cout << "Sent " << NumMessages << " packets @ "
+                  << 1e3 * NumMessages * Stream->bufferSizeMbytes() /
                          std::chrono::duration_cast<std::chrono::milliseconds>(
                              ElapsedTime)
                              .count()
