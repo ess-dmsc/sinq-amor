@@ -75,15 +75,13 @@ private:
     std::time_t to_time = system_clock::to_time_t(StartTime);
     auto Timeout = std::localtime(&to_time);
 
+    nanoseconds PulseTime =
+        duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
     while (!Streaming->exit()) {
       if (Streaming->stop()) {
         std::this_thread::sleep_for(milliseconds(100));
         continue;
       }
-      nanoseconds PulseTime =
-          duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
-      generateTimestamp(Events, Config.rate, PulseTime,
-                        Config.timestamp_generator);
 
       if (Streaming->run()) {
         Stream->send(PulseID, PulseTime, Events, Events.size());
@@ -95,22 +93,22 @@ private:
         ++Timeout->tm_sec;
         std::this_thread::sleep_until(
             system_clock::from_time_t(mktime(Timeout)));
-        Stream->poll(1);
+        Stream->poll(0);
       }
 
       auto ElapsedTime = system_clock::now() - StartTime;
       if (std::chrono::duration_cast<std::chrono::seconds>(ElapsedTime)
               .count() > Config.report_time) {
-        std::cout << "Sent " << Stream->messages() << "/"
+        std::cout << "Sent " << Stream->getNumMessages() << "/"
                   << Streaming->rate() * Config.report_time << " packets @ "
-                  << 1e3 * Stream->Mbytes() /
+                  << 1e3 * Stream->getMbytes() /
                          std::chrono::duration_cast<std::chrono::milliseconds>(
                              ElapsedTime)
                              .count()
                   << "MB/s"
                   << "\t(timestamp : " << PulseTime.count() << ")" << std::endl;
-        Stream->messages() = 0;
-        Stream->Mbytes() = 0;
+        Stream->getNumMessages() = 0;
+        Stream->getMbytes() = 0;
         StartTime = system_clock::now();
       }
     }
