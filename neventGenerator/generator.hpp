@@ -37,124 +37,119 @@ class Generator {
 
 public:
   Generator(SINQAmorSim::Configuration &configuration)
-      : config(configuration), control{new Control(configuration)} {
+      : Config(configuration), Streaming{new Control(configuration)} {
 
-    SINQAmorSim::KafkaOptions options;
-    streamer.reset(new Streamer{
-        configuration.producer.broker, configuration.producer.topic,
-        configuration.source_name, configuration.options});
-    if (!streamer) {
-      throw std::runtime_error("Error creating the streamer instance");
+    SINQAmorSim::KafkaOptions Options;
+    Stream.reset(new Streamer{Config.producer.broker, Config.producer.topic,
+                              Config.source_name, Config.options});
+    if (!Stream) {
+      throw std::runtime_error("Error creating the stream instance");
     }
-    if (!control) {
+    if (!Streaming) {
       throw std::runtime_error("Error creating the control instance");
     }
   }
 
-  template <class T> void run(std::vector<T> &stream) {
-    std::thread ts(&self_t::run_impl<T>, this, std::ref(stream));
-    control->update();
+  template <class T> void run(std::vector<T> &EventsData) {
+    std::thread ts(&self_t::runImpl<T>, this, std::ref(EventsData));
+    Streaming->update();
     ts.join();
   }
 
-  template <class T> void listen(std::vector<T> &stream) {
-    std::thread tr(&self_t::listen_impl<T>, this, std::ref(stream));
+  template <class T> void listen(std::vector<T> &EventsData) {
+    std::thread tr(&self_t::listenImpl<T>, this, std::ref(EventsData));
     tr.join();
   }
 
 private:
-  std::unique_ptr<Streamer> streamer{nullptr};
-  std::unique_ptr<Control> control{nullptr};
-  SINQAmorSim::Configuration config;
+  std::unique_ptr<Streamer> Stream{nullptr};
+  std::unique_ptr<Control> Streaming{nullptr};
+  SINQAmorSim::Configuration Config;
 
-  template <class T> void run_impl(std::vector<T> &stream) {
+  template <class T> void runImpl(std::vector<T> &Events) {
     using namespace std::chrono;
-    int nev = stream.size();
-    uint64_t pulseID = 0;
-    int count = 0;
+    uint64_t PulseID = 0;
 
-    using std::chrono::system_clock;
-    auto start = system_clock::now();
-    std::time_t to_time = system_clock::to_time_t(start);
-    auto timeout = std::localtime(&to_time);
+    using system_clock = std::chrono::system_clock;
+    auto StartTime = system_clock::now();
+    std::time_t to_time = system_clock::to_time_t(StartTime);
+    auto Timeout = std::localtime(&to_time);
 
-    while (!control->exit()) {
-      if (control->stop()) {
+    while (!Streaming->exit()) {
+      if (Streaming->stop()) {
         std::this_thread::sleep_for(milliseconds(100));
         continue;
       }
-      nanoseconds pulse_time =
+      nanoseconds PulseTime =
           duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
-      generate_timestamp(stream, config.rate, pulse_time, config.timestamp_generator);
+      generateTimestamp(Events, Config.rate, PulseTime,
+                        Config.timestamp_generator);
 
-      if (control->run()) {
-        streamer->send(pulseID, pulse_time, stream, stream.size());
-        ++count;
+      if (Streaming->run()) {
+        Stream->send(PulseID, PulseTime, Events, Events.size());
       } else {
-        streamer->send(pulseID, pulse_time, stream, 0);
+        Stream->send(PulseID, PulseTime, Events, 0);
       }
-      ++pulseID;
-      if (pulseID % control->rate() == 0) {
-        ++timeout->tm_sec;
+      ++PulseID;
+      if (PulseID % Streaming->rate() == 0) {
+        ++Timeout->tm_sec;
         std::this_thread::sleep_until(
-            system_clock::from_time_t(mktime(timeout)));
-        streamer->poll(1);
+            system_clock::from_time_t(mktime(Timeout)));
+        Stream->poll(1);
       }
 
-      auto from_start = system_clock::now() - start;
-      if (std::chrono::duration_cast<std::chrono::seconds>(from_start).count() >
-          config.report_time) {
-        std::cout << "Sent " << streamer->messages() << "/"
-                  << control->rate() * config.report_time << " packets @ "
-                  << 1e3 * streamer->Mbytes() /
+      auto ElapsedTime = system_clock::now() - StartTime;
+      if (std::chrono::duration_cast<std::chrono::seconds>(ElapsedTime)
+              .count() > Config.report_time) {
+        std::cout << "Sent " << Stream->messages() << "/"
+                  << Streaming->rate() * Config.report_time << " packets @ "
+                  << 1e3 * Stream->Mbytes() /
                          std::chrono::duration_cast<std::chrono::milliseconds>(
-                             from_start)
+                             ElapsedTime)
                              .count()
                   << "MB/s"
-                  << "\t(timestamp : " << pulse_time.count() << ")" << std::endl;
-        streamer->messages() = 0;
-        streamer->Mbytes() = 0;
-        count = 0;
-        start = system_clock::now();
+                  << "\t(timestamp : " << PulseTime.count() << ")" << std::endl;
+        Stream->messages() = 0;
+        Stream->Mbytes() = 0;
+        StartTime = system_clock::now();
       }
     }
   }
 
-  template <class T> void listen_impl(std::vector<T> &stream) {
+  template <class T> void listenImpl(std::vector<T> &Events) {
 
-    int pulseID = -1, missed = -1;
-    uint64_t pid;
-    uint64_t size = 0;
-    int count = 0, nev, maxsize = 0, len;
-    int recvmore;
-    uint32_t rate = 0;
+    int PulseID = -1, MessagesLost = -1;
+    uint64_t PacketID;
+    uint64_t ReceivedBytes = 0;
+    int MessagesReceived = 0;
 
-    using std::chrono::system_clock;
-    auto start = system_clock::now();
+    using system_clock = std::chrono::system_clock;
+    auto StartTime = system_clock::now();
 
     while (1) {
 
-      auto msg = streamer->recv(stream);
-      pid = msg.first;
-      if (pid - pulseID != 0) {
-        pulseID = pid;
-        ++missed;
+      auto Message = Stream->recv(Events);
+      PacketID = Message.first;
+      if (PacketID - PulseID != 0) {
+        PulseID = PacketID;
+        ++MessagesLost;
       } else {
-        ++count;
-        size += msg.second;
+        ++MessagesReceived;
+        ReceivedBytes += Message.second;
       }
       if (std::chrono::duration_cast<std::chrono::seconds>(system_clock::now() -
-                                                           start)
-              .count() > config.report_time) {
-        std::cout << "Missed " << missed << " packets" << std::endl;
-        std::cout << "Received " << count << "packets"
-                  << " @ " << size * 1e-1 * 1e-6 << "MB/s" << std::endl;
-        count = 0;
-        missed = 0;
-        size = 0;
-        start = system_clock::now();
+                                                           StartTime)
+              .count() > Config.report_time) {
+        std::cout << "Missed " << MessagesLost << " packets" << std::endl;
+        std::cout << "Received " << MessagesReceived << "packets"
+                  << " @ " << ReceivedBytes * 1e-1 * 1e-6 << "MB/s"
+                  << std::endl;
+        MessagesReceived = 0;
+        MessagesLost = 0;
+        ReceivedBytes = 0;
+        StartTime = system_clock::now();
       }
-      pulseID++;
+      PulseID++;
     }
   }
 };
