@@ -281,6 +281,9 @@ void SINQAmorSim::ConfigurationParser::override_configuration_with(
   if (other.rate > 0) {
     config.rate = other.rate;
   }
+  if (other.bytes > 0) {
+    config.bytes = other.bytes;
+  }
   if (!other.timestamp_generator.empty()) {
     config.timestamp_generator = other.timestamp_generator;
   }
