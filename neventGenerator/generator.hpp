@@ -86,10 +86,6 @@ private:
         std::this_thread::sleep_for(milliseconds(100));
         continue;
       }
-      nanoseconds PulseTime =
-          duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
-      generateTimestamp(Events, Config.rate, PulseTime,
-                        Config.timestamp_generator);
 
       if (Streaming->run()) {
         Stream->send(PulseID, PulseTime, Events, Events.size());
@@ -101,7 +97,7 @@ private:
         ++Timeout->tm_sec;
         std::this_thread::sleep_until(
             system_clock::from_time_t(mktime(Timeout)));
-        Stream->poll(1);
+        Stream->poll(0);
       }
 
       auto ElapsedTime = system_clock::now() - StartTime;
