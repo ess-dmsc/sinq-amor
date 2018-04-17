@@ -88,17 +88,11 @@ private:
       }
 
       if (Streaming->run()) {
-        Stream->send(PulseID, PulseTime, Events, Events.size());
+        Stream->sendExistingBuffer();
       } else {
         Stream->send(PulseID, PulseTime, Events, 0);
       }
       ++PulseID;
-      if (PulseID % Streaming->rate() == 0) {
-        ++Timeout->tm_sec;
-        std::this_thread::sleep_until(
-            system_clock::from_time_t(mktime(Timeout)));
-        Stream->poll(0);
-      }
 
       auto ElapsedTime = system_clock::now() - StartTime;
       if (std::chrono::duration_cast<std::chrono::seconds>(ElapsedTime)
