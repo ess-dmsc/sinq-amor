@@ -151,78 +151,6 @@ void SINQAmorSim::ConfigurationParser::get_kafka_options(
   }
 }
 
-int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl(
-    rapidjson::Document &&document) {
-  if (!document.IsObject()) {
-    return ConfigurationError::error_parsing_json;
-  }
-  for (auto &m : document.GetObject()) {
-    if (!m.name.IsString()) {
-      continue;
-    }
-    if (m.name.GetString() == std::string("producer_uri")) {
-      if (!m.value.IsString()) {
-        return ConfigurationError::error_parsing_json;
-      }
-      config.producer = parse_string_uri(m.value.GetString());
-    }
-    if (m.name.GetString() == std::string("multiplier")) {
-      if (!m.value.IsInt()) {
-        return ConfigurationError::error_parsing_json;
-      }
-      config.multiplier = m.value.GetInt();
-    }
-    if (m.name.GetString() == std::string("bytes")) {
-      if (!m.value.IsInt()) {
-        return ConfigurationError::error_parsing_json;
-      }
-      config.bytes = m.value.GetInt();
-    }
-    if (m.name.GetString() == std::string("rate")) {
-      if (!m.value.IsInt()) {
-        return ConfigurationError::error_parsing_json;
-      }
-      config.rate = m.value.GetInt();
-    }
-    if (m.name.GetString() == std::string("source")) {
-      if (!m.value.IsString()) {
-        return ConfigurationError::error_parsing_json;
-      }
-      config.source = m.value.GetString();
-    }
-    if (m.name.GetString() == std::string("source_name")) {
-      if (!m.value.IsString()) {
-        return ConfigurationError::error_parsing_json;
-      }
-      config.source_name = m.value.GetString();
-    }
-    if (m.name.GetString() == std::string("timestamp_generator")) {
-      if (!m.value.IsString()) {
-        return ConfigurationError::error_parsing_json;
-      }
-      config.timestamp_generator = m.value.GetString();
-    }
-    if (m.name.GetString() == std::string("report_time")) {
-      if (!m.value.IsInt()) {
-        return ConfigurationError::error_parsing_json;
-      }
-      config.report_time = m.value.GetInt();
-    }
-    if (m.name.GetString() == std::string("kafka")) {
-      if (!m.value.IsObject()) {
-        return ConfigurationError::error_parsing_json;
-      }
-      for (auto &m1 : m.value.GetObject()) {
-        if (m1.name.IsString() && m1.value.IsString()) {
-          config.options.push_back({m1.name.GetString(), m1.value.GetString()});
-        }
-      }
-    }
-  }
-
-  return ConfigurationError::error_no_configuration_error;
-}
-
 int SINQAmorSim::ConfigurationParser::parse_configuration(int argc,
                                                           char **argv) {
   int error = ConfigurationError::error_no_configuration_error;
@@ -394,6 +322,7 @@ void usage(const std::string &exe) {
             << "\t--source-name:\n"
             << "\t--multiplier:\n"
             << "\t--rate:\n"
+            << "\t--bytes:\n"
             << "\t--timestamp-generator\n"
             << "\n";
   exit(0);

@@ -16,15 +16,13 @@
 
 #include "H5Cpp.h"
 
-#include "uparam.hpp"
 #include "utils.hpp"
 
 namespace SINQAmorSim {
 
 ///  \author Michele Brambilla <mib.mic@gmail.com>
 ///  \date Wed Jun 08 16:49:17 2016
-template <typename Instrument, typename Format>
-class NeXusSource {
+template <typename Instrument, typename Format> class NeXusSource {
 public:
   using self_t = NeXusSource;
   using value_type = typename Format::value_type;
@@ -53,17 +51,13 @@ private:
   Instrument instrum;
   std::vector<value_type> data;
 
-  void read(H5::H5File& file) {
-    instrum(file, data);
-  }
-
+  void read(H5::H5File &file) { instrum(file, data); }
 };
 
 ///  \author Michele Brambilla <mib.mic@gmail.com>
 ///  \date Thu Jun 09 16:43:08 2016
 class Rita2 {
 public:
-
   Rita2() {
     path.push_back("/entry1/RITA-2/detector/counts");
     path.push_back("random");
@@ -78,14 +72,14 @@ public:
       H5::DataSpace dataspace = dataset.getSpace();
       int rank = dataspace.getSimpleExtentNdims();
       dim.resize(rank);
-      int ndims = dataspace.getSimpleExtentDims( &dim[0], nullptr);
-      
-      H5::DataSpace memspace( rank, &dim[0] );
+      int ndims = dataspace.getSimpleExtentDims(&dim[0], nullptr);
+
+      H5::DataSpace memspace(rank, &dim[0]);
       data.resize(memspace.getSelectNpoints());
-      
-      dataset.read( &data[0], H5::PredType::NATIVE_INT, memspace, dataspace);
+
+      dataset.read(&data[0], H5::PredType::NATIVE_INT, memspace, dataspace);
     }
-    
+
     toEventFmt<T>(stream);
   }
 
@@ -94,7 +88,7 @@ public:
 private:
   std::vector<int32_t> data;
   std::vector<hsize_t> dim;
-  
+
   template <typename T> void toEventFmt(std::vector<T> &signal) {
     int offset, nCount;
     union {
@@ -146,31 +140,31 @@ struct Amor {
       H5::DataSpace dataspace = dataset.getSpace();
       int rank = dataspace.getSimpleExtentNdims();
       dim.resize(rank);
-      int ndims = dataspace.getSimpleExtentDims( &dim[0], nullptr);
-      H5::DataSpace memspace( rank, &dim[0] );
+      int ndims = dataspace.getSimpleExtentDims(&dim[0], nullptr);
+      H5::DataSpace memspace(rank, &dim[0]);
       data.resize(memspace.getSelectNpoints());
-      dataset.read( &data[0], H5::PredType::NATIVE_INT, memspace, dataspace);
+      dataset.read(&data[0], H5::PredType::NATIVE_INT, memspace, dataspace);
     }
     {
       H5::DataSet dataset = file.openDataSet(path[1]);
       H5::DataSpace dataspace = dataset.getSpace();
       int rank = dataspace.getSimpleExtentNdims();
       hsize_t tof_dim{0};
-      int ndims = dataspace.getSimpleExtentDims( &tof_dim, nullptr);
-      if(tof_dim != dim[2]) {
-        throw std::runtime_error("Time extent in histogram differs from ToF length");
+      int ndims = dataspace.getSimpleExtentDims(&tof_dim, nullptr);
+      if (tof_dim != dim[2]) {
+        throw std::runtime_error(
+            "Time extent in histogram differs from ToF length");
       }
       dim.push_back(tof_dim);
 
-      H5::DataSpace memspace( rank, &tof_dim );
+      H5::DataSpace memspace(rank, &tof_dim);
       tof.resize(memspace.getSelectNpoints());
-      dataset.read( &tof[0], H5::PredType::NATIVE_FLOAT, memspace, dataspace);
+      dataset.read(&tof[0], H5::PredType::NATIVE_FLOAT, memspace, dataspace);
     }
-    
+
     toEventFmt<T>(stream);
   }
 
-  
   std::vector<std::string> path;
 
 private:
@@ -231,11 +225,11 @@ void Amor::toEventFmt<ESSformat::value_type>(
       offset = dim[2] * (j + dim[1] * i);
       for (int k = 0; k < dim[2]; ++k) {
         nCount = data[offset + k];
-              for (int l = 0; l < nCount; ++l) {
-                signal[counter] = std::round(tof[k] / 10.);
-                signal[counter + nEvents] = detID;
-                counter++;
-              }
+        for (int l = 0; l < nCount; ++l) {
+          signal[counter] = std::round(tof[k] / 10.);
+          signal[counter + nEvents] = detID;
+          counter++;
+        }
       }
     }
     detID++;
