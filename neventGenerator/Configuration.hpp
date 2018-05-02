@@ -40,7 +40,6 @@ public:
   int validate();
   void print();
 
-  int parse_configuration_file_impl(rapidjson::Document &&); // deprecated
   int parse_configuration_file_impl();
   void get_kafka_options(nlohmann::json &);
 

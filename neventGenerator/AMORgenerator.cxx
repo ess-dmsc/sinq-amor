@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 #if 0
   Source stream(config.source, config.multiplier);
   data = stream.get();
-#endif
+#else
   if (config.bytes > 0) {
     data.resize(config.bytes / sizeof(StreamFormat::value_type));
   }

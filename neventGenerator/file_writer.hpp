@@ -4,13 +4,11 @@
 #include <fstream>
 #include <string>
 
-#include "uparam.hpp"
-
 ///  \author Michele Brambilla <mib.mic@gmail.com>
 ///  \date Fri Jun 17 12:21:46 2016
 struct FileWriterGen {
 
-  FileWriterGen(uparam::Param) {
+  FileWriterGen() {
     of.open("output.bin", std::ofstream::binary);
     if (!of.good()) {
       throw std::runtime_error("Error opening file");
