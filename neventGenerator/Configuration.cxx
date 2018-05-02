@@ -1,9 +1,5 @@
 #include "Configuration.hpp"
 
-#include "rapidjson/istreamwrapper.h"
-#include "json.h"
-
-
 #include <fstream>
 #include <getopt.h>
 #include <iostream>
@@ -18,10 +14,9 @@ std::string get_protocol(const std::string &s, const std::string &deft = "") {
   return std::move(deft);
 }
 
-std::string get_broker_topic(const std::string &s,
-                             const std::string &deft = "") {
+std::string get_broker(const std::string &s, const std::string &deft = "") {
   std::smatch m;
-  if (std::regex_search(s, m, std::regex("//[A-Za-z0-9.,:]+/"))) {
+  if (std::regex_search(s, m, std::regex("//.*/"))) {
     auto result = std::string(m[0]).substr(2);
     result.pop_back();
     return std::move(result);
@@ -55,10 +50,11 @@ SINQAmorSim::ConfigurationParser::parse_string_uri(const std::string &uri,
                                                    const bool use_defaults) {
   KafkaConfiguration configuration;
   if (use_defaults) {
-    configuration.broker = get_broker_topic(uri, "localhost:9092");
+    configuration.broker = get_broker(uri, "//localhost:9092/");
     configuration.topic = get_topic(uri, "empty-topic");
   } else {
-    configuration.broker = get_broker_topic(uri);
+    std::cout << "parse_string_uri : " << uri << "\n";
+    configuration.broker = get_broker(uri);
     configuration.topic = get_topic(uri);
     if (!broker_topic_is_valid(configuration.broker, configuration.topic)) {
       throw ConfigurationParsingException();
@@ -69,18 +65,90 @@ SINQAmorSim::ConfigurationParser::parse_string_uri(const std::string &uri,
 
 int SINQAmorSim::ConfigurationParser::parse_configuration_file(
     const std::string &input) {
+  using json = nlohmann::json;
   std::ifstream ifs(input);
   if (!ifs.good()) {
     return ConfigurationError::error_input_file;
   }
-  rapidjson::IStreamWrapper isw(ifs);
-  rapidjson::Document d;
-  d.ParseStream(isw);
-  if (d.HasParseError()) {
-    return d.GetParseError();
+  std::stringstream buffer;
+  buffer << ifs.rdbuf();
+  configuration = json::parse(buffer.str());
+
+  return parse_configuration_file_impl();
+}
+
+int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl() {
+  {
+    auto x = find<std::string>("producer_uri", configuration);
+    if (x) {
+      config.producer = parse_string_uri(x.inner());
+    }
+  }
+  {
+    auto x = find<std::string>("source", configuration);
+    if (x) {
+      config.source = x.inner();
+    }
+  }
+  {
+    auto x = find<std::string>("source_name", configuration);
+    if (x) {
+      config.source_name = x.inner();
+    }
+  }
+  {
+    auto x = find<int>("rate", configuration);
+    if (x) {
+      config.rate = x.inner();
+    }
+  }
+  {
+    auto x = find<int>("bytes", configuration);
+    if (x) {
+      config.bytes = x.inner();
+    }
+  }
+  {
+    auto x = find<int>("multiplier", configuration);
+    if (x) {
+      config.multiplier = x.inner();
+    }
+  }
+  {
+    auto x = find<std::string>("timestamp_generator", configuration);
+    if (x) {
+      config.timestamp_generator = x.inner();
+    }
+  }
+  {
+    auto x = find<int>("report_time", configuration);
+    if (x) {
+      config.report_time = x.inner();
+    }
+  }
+  auto x = find<nlohmann::json>("kafka", configuration);
+  if (x) {
+    nlohmann::json kafka = x.inner();
+    get_kafka_options(kafka);
   }
 
-  return parse_configuration_file_impl(std::move(d));
+  return ConfigurationError::error_no_configuration_error;
+}
+
+void SINQAmorSim::ConfigurationParser::get_kafka_options(
+    nlohmann::json &kafka) {
+  for (nlohmann::json::iterator it = kafka.begin(); it != kafka.end(); ++it) {
+    if (it.value().is_number()) {
+      int value = it.value();
+      config.options.push_back({it.key(), std::to_string(value)});
+      continue;
+    }
+    if (it.value().is_string()) {
+      std::string value = it.value();
+      config.options.push_back({it.key(), value});
+      continue;
+    }
+  }
 }
 
 int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl(
@@ -140,7 +208,7 @@ int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl(
       }
       config.report_time = m.value.GetInt();
     }
-    if (m.name.GetString() == std::string("kafka_options")) {
+    if (m.name.GetString() == std::string("kafka")) {
       if (!m.value.IsObject()) {
         return ConfigurationError::error_parsing_json;
       }
