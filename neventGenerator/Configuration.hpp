@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Errors.hpp"
+#include "json.h"
 #include "utils.hpp"
-
-#include "rapidjson/document.h"
 
 namespace SINQAmorSim {
 
@@ -41,12 +40,18 @@ public:
   int validate();
   void print();
 
-  int parse_configuration_file_impl(rapidjson::Document &&d);
+  int parse_configuration_file_impl(rapidjson::Document &&); // deprecated
+  int parse_configuration_file_impl();
+  void get_kafka_options(nlohmann::json &);
+
   Configuration parse_command_line(int argc, char **argv);
 
   KafkaConfiguration parse_string_uri(const std::string &uri,
                                       const bool use_defaults = false);
 
   Configuration config;
+
+private:
+  nlohmann::json configuration;
 };
 } // namespace SINQAmorSim
