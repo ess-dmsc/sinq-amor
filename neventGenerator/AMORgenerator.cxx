@@ -29,11 +29,12 @@ int main(int argc, char **argv) {
     throw std::runtime_error(
         "Conflict between parameters `bytes` and `multiplier`");
   }
+
+  std::vector<StreamFormat::value_type> data;
 #if 0
   Source stream(config.source, config.multiplier);
-  auto data = stream.get();
-#else
-  std::vector<StreamFormat::value_type> data;
+  data = stream.get();
+#endif
   if (config.bytes > 0) {
     data.resize(config.bytes / sizeof(StreamFormat::value_type));
   }
