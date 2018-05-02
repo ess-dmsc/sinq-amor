@@ -1,6 +1,8 @@
 #include "Configuration.hpp"
 
 #include "rapidjson/istreamwrapper.h"
+#include "json.h"
+
 
 #include <fstream>
 #include <getopt.h>
