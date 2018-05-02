@@ -8,7 +8,7 @@ using StreamFormat = SINQAmorSim::ESSformat;
 
 using Instrument = SINQAmorSim::Amor;
 using Source = SINQAmorSim::NeXusSource<Instrument, StreamFormat>;
-using Control = SINQAmorSim::CommandlineControl;
+using Control = SINQAmorSim::NoControl;
 
 using Serialiser = SINQAmorSim::FlatBufferSerialiser;
 using Communication = SINQAmorSim::KafkaTransmitter<Serialiser>;
@@ -36,9 +36,11 @@ int main(int argc, char **argv) {
   data = stream.get();
 #endif
   if (config.bytes > 0) {
-    data.resize(config.bytes / sizeof(StreamFormat::value_type));
+    data.resize(
+        static_cast<int>(config.bytes / sizeof(StreamFormat::value_type)));
   }
-#endif
+  std::cout << config.bytes << "\t" << data.size() << "\t"
+            << sizeof(StreamFormat::value_type) << "\n";
 
   Generator<Communication, Control, Serialiser> g(config);
   g.run<StreamFormat::value_type>(data);
