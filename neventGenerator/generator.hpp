@@ -5,6 +5,7 @@
 #include <random>
 
 #include "Configuration.hpp"
+#include "Stats.hpp"
 
 #if HAVE_ZMQ
 #include "zmq_generator.hpp"
@@ -45,6 +46,7 @@ public:
       throw std::runtime_error("Error creating the control instance");
       return;
     }
+    Statistics.setNumThreads(Config.num_threads);
   }
 
   template <class T> void run(std::vector<T> &EventsData) {
@@ -55,6 +57,7 @@ public:
                                   std::ref(EventsData), tid));
     }
     Streaming->update();
+    std::async(std::launch::async, [&]() { Statistics.report(); });
     try {
       for (auto &h : Handle) {
         h.get();
@@ -81,6 +84,7 @@ private:
   std::vector<std::unique_ptr<Streamer>> Stream;
   std::unique_ptr<Control> Streaming{nullptr};
   SINQAmorSim::Configuration Config;
+  Stats Statistics;
 
   template <class T> void runImpl(std::vector<T> &Events, int tid) {
     using namespace std::chrono;
@@ -116,14 +120,19 @@ private:
       if (std::chrono::duration_cast<std::chrono::seconds>(ElapsedTime)
               .count() > Config.report_time) {
         int NumMessages = Stream[tid]->poll(-1);
-        std::cout << "Sent " << NumMessages << " packets @ "
-                  << 1e3 * NumMessages * Stream[tid]->bufferSizeMbytes() /
-                         std::chrono::duration_cast<std::chrono::milliseconds>(
-                             ElapsedTime)
-                             .count()
-                  << " "
-                  << "MB/s"
-                  << "\t(timestamp : " << PulseTime.count() << ")" << std::endl;
+        // std::cout << "Sent " << NumMessages << " packets @ "
+        //           << 1e3 * NumMessages * Stream[tid]->bufferSizeMbytes() /
+        //                  std::chrono::duration_cast<std::chrono::milliseconds>(
+        //                      ElapsedTime)
+        //                      .count()
+        //           << "MB/s"
+        //           << "\t(timestamp : " << PulseTime.count() << ")" <<
+        //           std::endl;
+
+        // update stats
+        Statistics.add(Stream[tid]->getNumMessages(), Stream[tid]->getMbytes(),
+                       tid);
+
         Stream[tid]->getNumMessages() = 0;
         Stream[tid]->getMbytes() = 0;
         StartTime = system_clock::now();
