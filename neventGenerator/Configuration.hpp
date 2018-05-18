@@ -24,6 +24,7 @@ public:
   int bytes{0};
   int rate{0};
   int report_time{10};
+  int num_threads{0};
   bool valid{true};
   KafkaOptions options;
 };

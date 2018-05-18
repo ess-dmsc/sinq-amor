@@ -115,6 +115,12 @@ int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl() {
     }
   }
   {
+    auto x = find<int>("num_threads", configuration);
+    if (x) {
+      config.num_threads = x.inner();
+    }
+  }
+  {
     auto x = find<std::string>("timestamp_generator", configuration);
     if (x) {
       config.timestamp_generator = x.inner();
@@ -193,6 +199,7 @@ SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
       {"source", required_argument, nullptr, 0},
       {"source-name", required_argument, nullptr, 0},
       {"multiplier", required_argument, nullptr, 0},
+      {"threads", required_argument, nullptr, 0},
       {"bytes", required_argument, nullptr, 0},
       {"rate", required_argument, nullptr, 0},
       {"timestamp-generator", required_argument, nullptr, 0},
@@ -231,6 +238,10 @@ SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
       if (std::string("multiplier") == lname) {
         std::istringstream buffer(optarg);
         buffer >> result.multiplier;
+      }
+      if (std::string("threads") == lname) {
+        std::istringstream buffer(optarg);
+        buffer >> result.num_threads;
       }
       if (std::string("bytes") == lname) {
         std::istringstream buffer(optarg);
@@ -276,6 +287,9 @@ void SINQAmorSim::ConfigurationParser::override_configuration_with(
   if (other.multiplier > 0) {
     config.multiplier = other.multiplier;
   }
+  if (other.num_threads > 0) {
+    config.num_threads = other.num_threads;
+  }
   if (other.rate > 0) {
     config.rate = other.rate;
   }
@@ -289,7 +303,8 @@ void SINQAmorSim::ConfigurationParser::override_configuration_with(
 
 int SINQAmorSim::ConfigurationParser::validate() {
   if (config.producer.broker.empty() || config.producer.topic.empty() ||
-      config.source.empty() || config.multiplier <= 0 || config.rate <= 0 ||
+      config.source.empty() || config.multiplier <= 0 ||
+      config.num_threads <= 0 || config.rate <= 0 ||
       config.source_name.empty()) {
     return ConfigurationError::error_configuration_invalid;
   } else {
@@ -304,6 +319,7 @@ void SINQAmorSim::ConfigurationParser::print() {
   std::cout << "source: " << config.source << "\n"
             << "source_name: " << config.source_name << "\n"
             << "multiplier: " << config.multiplier << "\n"
+            << "threads: " << config.num_threads << "\n"
             << "bytes: " << config.bytes << "\n"
             << "rate: " << config.rate << "\n"
             << "timestamp_generator: " << config.timestamp_generator << "\n";
@@ -321,6 +337,7 @@ void usage(const std::string &exe) {
             << "\t--source:\n"
             << "\t--source-name:\n"
             << "\t--multiplier:\n"
+            << "\t--threads:\n"
             << "\t--rate:\n"
             << "\t--bytes:\n"
             << "\t--timestamp-generator\n"

@@ -16,8 +16,6 @@
 #include "control.hpp"
 #include "timestamp_generator.hpp"
 
-const int num_threads = 2;
-
 using milliseconds = std::chrono::milliseconds;
 using nanoseconds = std::chrono::nanoseconds;
 
@@ -33,7 +31,7 @@ public:
       : Config(configuration), Streaming{new Control(configuration)} {
 
     SINQAmorSim::KafkaOptions Options;
-    for (int tid = 0; tid < num_threads; ++tid) {
+    for (int tid = 0; tid < Config.num_threads; ++tid) {
       Stream.emplace_back(
           new Streamer(Config.producer.broker,
                        Config.producer.topic + "-" + std::to_string(tid),
@@ -52,7 +50,7 @@ public:
   template <class T> void run(std::vector<T> &EventsData) {
     std::vector<std::future<void>> Handle;
 
-    for (int tid = 0; tid < num_threads; ++tid) {
+    for (int tid = 0; tid < Config.num_threads; ++tid) {
       Handle.push_back(std::async(std::launch::async, &self_t::runImpl<T>, this,
                                   std::ref(EventsData), tid));
     }
