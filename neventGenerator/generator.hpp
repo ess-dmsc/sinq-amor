@@ -119,16 +119,10 @@ private:
       auto ElapsedTime = system_clock::now() - StartTime;
       if (std::chrono::duration_cast<std::chrono::seconds>(ElapsedTime)
               .count() > Config.report_time) {
-        int NumMessages = Stream[tid]->poll(-1);
-        // std::cout << "Sent " << NumMessages << " packets @ "
-        //           << 1e3 * NumMessages * Stream[tid]->bufferSizeMbytes() /
-        //                  std::chrono::duration_cast<std::chrono::milliseconds>(
-        //                      ElapsedTime)
-        //                      .count()
-        //           << "MB/s"
-        //           << "\t(timestamp : " << PulseTime.count() << ")" <<
-        //           std::endl;
 
+        int NumMessages = Stream[tid]->poll(-1);
+        std::cout << PulseID << "\t" << Stream[tid]->getNumMessages() << "\t"
+                  << NumMessages << "\n";
         // update stats
         Statistics.add(Stream[tid]->getNumMessages(), Stream[tid]->getMbytes(),
                        tid);
