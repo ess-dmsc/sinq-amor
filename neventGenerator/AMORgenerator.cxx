@@ -42,8 +42,11 @@ int main(int argc, char **argv) {
   std::cout << config.bytes << "\t" << data.size() << "\t"
             << sizeof(StreamFormat::value_type) << "\n";
 
-  Generator<Communication, Control, Serialiser> g(config);
-  g.run<StreamFormat::value_type>(data);
-
+  try {
+    Generator<Communication, Control, Serialiser> g(config);
+    g.run<StreamFormat::value_type>(data);
+  } catch (std::exception e) {
+    std::cout << e.what() << "\n";
+  }
   return 0;
 }

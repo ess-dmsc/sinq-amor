@@ -1,17 +1,8 @@
 #pragma once
 
-#include <chrono>
 #include <ctime>
-#include <fstream>
-#include <iostream>
-#include <map>
+#include <future>
 #include <random>
-#include <thread>
-
-#include <assert.h>
-
-#include <stdlib.h>
-#include <time.h>
 
 #include "Configuration.hpp"
 
@@ -24,6 +15,8 @@
 
 #include "control.hpp"
 #include "timestamp_generator.hpp"
+
+const int num_threads = 2;
 
 using milliseconds = std::chrono::milliseconds;
 using nanoseconds = std::chrono::nanoseconds;
@@ -40,33 +33,58 @@ public:
       : Config(configuration), Streaming{new Control(configuration)} {
 
     SINQAmorSim::KafkaOptions Options;
-    Stream.reset(new Streamer{Config.producer.broker, Config.producer.topic,
-                              Config.source_name, Config.options});
-    if (!Stream) {
-      throw std::runtime_error("Error creating the stream instance");
+    for (int tid = 0; tid < num_threads; ++tid) {
+      Stream.emplace_back(
+          new Streamer(Config.producer.broker,
+                       Config.producer.topic + "-" + std::to_string(tid),
+                       Config.source_name, Config.options));
+      if (!Stream[tid]) {
+        throw std::runtime_error("Error creating the stream instance");
+        return;
+      }
     }
     if (!Streaming) {
       throw std::runtime_error("Error creating the control instance");
+      return;
     }
   }
 
   template <class T> void run(std::vector<T> &EventsData) {
-    std::thread ts(&self_t::runImpl<T>, this, std::ref(EventsData));
+    std::vector<std::future<void>> Handle;
+
+    for (int tid = 0; tid < num_threads; ++tid) {
+      Handle.push_back(std::async(std::launch::async, &self_t::runImpl<T>, this,
+                                  std::ref(EventsData), tid));
+    }
     Streaming->update();
-    ts.join();
+    try {
+      for (auto &h : Handle) {
+        h.get();
+      }
+    } catch (std::exception e) {
+      std::cout << e.what() << "\n";
+      return;
+    }
   }
 
   template <class T> void listen(std::vector<T> &EventsData) {
-    std::thread tr(&self_t::listenImpl<T>, this, std::ref(EventsData));
-    tr.join();
+    std::future<void> Handle;
+    Handle = std::async(std::launch::async, &self_t::listenImpl<T>, this,
+                        std::ref(EventsData));
+    try {
+      Handle.get();
+    } catch (std::exception e) {
+      std::cout << e.what() << "\n";
+      return;
+    }
   }
 
 private:
-  std::unique_ptr<Streamer> Stream{nullptr};
+  std::vector<std::unique_ptr<Streamer>> Stream;
   std::unique_ptr<Control> Streaming{nullptr};
   SINQAmorSim::Configuration Config;
 
-  template <class T> void runImpl(std::vector<T> &Events) {
+  template <class T> void runImpl(std::vector<T> &Events, int tid) {
     using namespace std::chrono;
     uint64_t PulseID = 0;
 
@@ -77,9 +95,10 @@ private:
 
     nanoseconds PulseTime =
         duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
-    // Pregenerate serialised buffer: this prevents flatbuffers to be a possible
+    // Pregenerate serialised buffer: this prevents flatbuffers to be a
+    // possible
     // bottleneck
-    Stream->serialiseAndStore(PulseID, PulseTime, Events, Events.size());
+    Stream[tid]->serialiseAndStore(PulseID, PulseTime, Events, Events.size());
     while (!Streaming->exit()) {
       if (Streaming->stop()) {
         std::this_thread::sleep_for(milliseconds(100));
@@ -87,31 +106,25 @@ private:
       }
 
       if (Streaming->run()) {
-        Stream->sendExistingBuffer();
+        Stream[tid]->sendExistingBuffer();
       } else {
-        Stream->send(PulseID, PulseTime, Events, 0);
+        Stream[tid]->send(PulseID, PulseTime, Events, 0);
       }
       ++PulseID;
       auto ElapsedTime = system_clock::now() - StartTime;
       if (std::chrono::duration_cast<std::chrono::seconds>(ElapsedTime)
               .count() > Config.report_time) {
-        int NumMessages = Stream->poll(-1);
-        std::cout << "Sent " << NumMessages 
-		  << "/" << Stream->getNumMessages()
-		  << " packets @ "
-                  // << 1e3 * NumMessages * Stream->bufferSizeMbytes() /
-                  //        std::chrono::duration_cast<std::chrono::milliseconds>(
-                  //            ElapsedTime)
-                  //            .count()
-		  // << "/" 
-		  << 1e3 * Stream->getMbytes()/
+        int NumMessages = Stream[tid]->poll(-1);
+        std::cout << "Sent " << NumMessages << " packets @ "
+                  << 1e3 * NumMessages * Stream[tid]->bufferSizeMbytes() /
                          std::chrono::duration_cast<std::chrono::milliseconds>(
                              ElapsedTime)
-                             .count() << " "
+                             .count()
+                  << " "
                   << "MB/s"
                   << "\t(timestamp : " << PulseTime.count() << ")" << std::endl;
-        Stream->getNumMessages() = 0;
-        Stream->getMbytes() = 0;
+        Stream[tid]->getNumMessages() = 0;
+        Stream[tid]->getMbytes() = 0;
         StartTime = system_clock::now();
       }
     }
@@ -129,7 +142,7 @@ private:
 
     while (1) {
 
-      auto Message = Stream->recv(Events);
+      auto Message = Stream[0]->recv(Events);
       PacketID = Message.first;
       if (PacketID - PulseID != 0) {
         PulseID = PacketID;
