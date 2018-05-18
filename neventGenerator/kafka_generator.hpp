@@ -124,6 +124,7 @@ public:
   size_t sendExistingBuffer();
 
   int poll(const int &Seconds = -1) { return Producer->poll(Seconds); }
+  void flush() { Producer->flush(-1); }
 
   double &getNumMessages() { return DeliveryCallback.getNumMessages(); }
   double &getMbytes() { return DeliveryCallback.getMbytes(); }
