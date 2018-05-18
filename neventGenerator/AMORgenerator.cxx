@@ -40,8 +40,11 @@ int main(int argc, char **argv) {
   }
 #endif
 
-  Generator<Communication, Control, Serialiser> g(config);
-  g.run<StreamFormat::value_type>(data);
-
+  try {
+    Generator<Communication, Control, Serialiser> g(config);
+    g.run<StreamFormat::value_type>(data);
+  } catch (std::exception e) {
+    std::cout << e.what() << "\n";
+  }
   return 0;
 }
