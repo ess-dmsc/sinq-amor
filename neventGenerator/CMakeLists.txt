@@ -28,7 +28,6 @@ add_custom_target(
   COMMAND make
 )
 
-find_package(Rapidjson REQUIRED)
 find_package(RdKafka REQUIRED)
 find_package(Flatbuffers REQUIRED)
 find_package(HDF5 REQUIRED)
@@ -47,7 +46,6 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 include_directories(
   ${RDKAFKA_INCLUDE_DIR}
   ${FLATBUFFERS_INCLUDE_DIR}
-  ${RAPIDJSON_INCLUDE_DIR}
   ${HDF5_INCLUDE_DIR}
   ${ZMQ_INCLUDE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}

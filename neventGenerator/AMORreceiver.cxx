@@ -2,7 +2,7 @@
 
 #include "Configuration.hpp"
 #include "generator.hpp"
-#include "mcstas_reader.hpp"
+//#include "mcstas_reader.hpp"
 #include "nexus_reader.hpp"
 
 using Instrument = SINQAmorSim::Amor;

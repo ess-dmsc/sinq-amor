@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "generator.hpp"
-#include "mcstas_reader.hpp"
+//#include "mcstas_reader.hpp"
 #include "nexus_reader.hpp"
 
 using StreamFormat = SINQAmorSim::ESSformat;
