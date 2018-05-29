@@ -30,7 +30,7 @@ find_package(Rapidjson REQUIRED)
 find_package(RdKafka REQUIRED)
 find_package(Flatbuffers REQUIRED)
 find_package(HDF5 REQUIRED)
-find_package(StreamingDataTypes COMPONENTS d2247ffd906ebeeb68c9b8a2ea9f1d36c1d88a46)
+find_package(StreamingDataTypes COMPONENTS d2247ffd906ebeeb68c9b8a2ea9f1d36c1d88a46 REQUIRED)
 find_package(Googletest)
 
 option(HAVE_ZMQ "Enable 0MQ" FALSE)
