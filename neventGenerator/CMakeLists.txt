@@ -19,7 +19,9 @@ if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
   conan_basic_setup(NO_OUTPUT_DIRS)
 endif()
 
-set (CMAKE_CXX_FLAGS "-std=c++11 -pthread -D_GLIBCXX_USE_NANOSLEEP ${CMAKE_CXX_FLAGS}")
+set (CMAKE_CXX_FLAGS "-std=c++11 -D_GLIBCXX_USE_NANOSLEEP ${CMAKE_CXX_FLAGS}")
+set (CMAKE_CXX_FLAGS_DEBUG "-Wall -O0 -ggdb ${CMAKE_CXX_FLAGS}")
+set (CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 ${CMAKE_CXX_FLAGS}")
 
 add_custom_target(
   extern_lib
