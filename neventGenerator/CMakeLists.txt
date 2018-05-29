@@ -19,7 +19,9 @@ if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
   conan_basic_setup(NO_OUTPUT_DIRS)
 endif()
 
-set (CMAKE_CXX_FLAGS "-std=c++11 -pthread -D_GLIBCXX_USE_NANOSLEEP ${CMAKE_CXX_FLAGS}")
+set (CMAKE_CXX_FLAGS "-std=c++11 -D_GLIBCXX_USE_NANOSLEEP ${CMAKE_CXX_FLAGS}")
+set (CMAKE_CXX_FLAGS_DEBUG "-Wall -O0 -ggdb ${CMAKE_CXX_FLAGS}")
+set (CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 ${CMAKE_CXX_FLAGS}")
 
 add_custom_target(
   extern_lib
@@ -30,7 +32,7 @@ find_package(Rapidjson REQUIRED)
 find_package(RdKafka REQUIRED)
 find_package(Flatbuffers REQUIRED)
 find_package(HDF5 REQUIRED)
-find_package(StreamingDataTypes COMPONENTS d2247ffd906ebeeb68c9b8a2ea9f1d36c1d88a46)
+find_package(StreamingDataTypes COMPONENTS d2247ffd906ebeeb68c9b8a2ea9f1d36c1d88a46 REQUIRED)
 find_package(Googletest)
 
 option(HAVE_ZMQ "Enable 0MQ" FALSE)
