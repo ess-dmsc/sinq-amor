@@ -124,7 +124,7 @@ public:
   size_t sendExistingBuffer();
 
   int poll(const int &Seconds = -1) { return Producer->poll(Seconds); }
-  void flush() { Producer->flush(-1); }
+  int outqLen() { return Producer->outq_len(); }
 
   double &getNumMessages() { return DeliveryCallback.getNumMessages(); }
   double &getMbytes() { return DeliveryCallback.getMbytes(); }
@@ -178,6 +178,9 @@ template <class T> size_t KafkaTransmitter<T>::sendExistingBuffer() {
       reinterpret_cast<void *>(&Buffer[0]), Buffer.size(), nullptr,
       0, // timestamp_now()
       0, nullptr);
+  if (resp != RdKafka::ERR_NO_ERROR) {
+    throw std::runtime_error(RdKafka::err2str(resp) + " : " + Topic);
+  }
   return Buffer.size();
 }
 

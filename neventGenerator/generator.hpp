@@ -108,7 +108,18 @@ private:
       }
 
       if (Streaming->run()) {
-        Stream[tid]->sendExistingBuffer();
+        try {
+          Stream[tid]->sendExistingBuffer();
+        } catch (std::exception &e) {
+          std::cout << e.what() << "\n";
+          break;
+        }
+        // Make sure that messages have been sent to prevent queue full
+        if (PulseID % 1000 == 1) {
+          while (Stream[tid]->outqLen()) {
+            Stream[tid]->poll();
+          }
+        }
       } else {
         Stream[tid]->send(PulseID, PulseTime, Events, 0);
       }
@@ -116,10 +127,13 @@ private:
       auto ElapsedTime = system_clock::now() - StartTime;
       if (std::chrono::duration_cast<std::chrono::seconds>(ElapsedTime)
               .count() > Config.report_time) {
+        // Make sure that messages have been sent before collecting stats and
+        // recompute (real) time
+        while (Stream[tid]->outqLen()) {
+          Stream[tid]->poll(-1);
+        }
+        auto ElapsedTime = system_clock::now() - StartTime;
 
-        int NumMessages = Stream[tid]->poll(-1);
-        std::cout << PulseID << "\t" << Stream[tid]->getNumMessages() << "\t"
-                  << NumMessages << "\n";
         // update stats
         Statistics.add(Stream[tid]->getNumMessages(), Stream[tid]->getMbytes(),
                        tid);
