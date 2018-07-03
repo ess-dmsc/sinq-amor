@@ -64,7 +64,7 @@ public:
     }
 
     std::string Error;
-    Configuration->set("Metadata.broker.list", Brokers, Error);
+    Configuration->set("metadata.broker.list", Brokers, Error);
     if (!Error.empty()) {
       std::cerr << Error << std::endl;
     }
@@ -116,7 +116,7 @@ public:
   }
 
   int poll(const int &Seconds = -1) { return Producer->poll(Seconds); }
-  void flush() { Producer->flush(-1); }
+  int outqLen() { return Producer->outq_len(); }
 
   double &getNumMessages() { return DeliveryCallback.getNumMessages(); }
   double &getMbytes() { return DeliveryCallback.getMbytes(); }
@@ -136,15 +136,20 @@ template <typename T>
 size_t KafkaTransmitter<FlatBufferSerialiser>::send(
     const uint64_t &PacketID, const std::chrono::nanoseconds &PulseTime,
     std::vector<T> &Events, const int NumEvents) {
+  size_t BufferSize;
   if (NumEvents) {
     SerialiserWorker->serialise(PacketID, PulseTime, Events);
+    BufferSize = SerialiserWorker->size();
     RdKafka::ErrorCode resp = Producer->produce(
         Topic, RdKafka::Topic::PARTITION_UA, RdKafka::Producer::RK_MSG_COPY,
         reinterpret_cast<void *>(SerialiserWorker->get()),
         SerialiserWorker->size(), nullptr, 0, // timestamp_now()
         PulseTime.count(), nullptr);
+    if (resp != RdKafka::ERR_NO_ERROR) {
+      throw std::runtime_error(RdKafka::err2str(resp) + " : " + Topic);
+    }
   }
-  return 0;
+  return BufferSize;
 }
 
 ////////////////

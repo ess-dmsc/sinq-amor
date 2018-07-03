@@ -14,5 +14,5 @@
         "fetch.message.max.bytes" :   1010010,
         "api.version.request" : "true"
     },
-    "num_threads" : 2
+    "num_threads" : 1
 }

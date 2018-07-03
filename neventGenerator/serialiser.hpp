@@ -1,12 +1,12 @@
 #pragma once
 
+#include <chrono>
 #include <fstream>
 #include <inttypes.h>
 #include <iostream>
 #include <iterator>
 #include <string>
 #include <type_traits>
-#include <chrono>
 
 #include "Errors.hpp"
 #include "schemas/ev42_events_generated.h"
@@ -22,11 +22,11 @@ namespace SINQAmorSim {
 ///  \date Thu Jul 28 14:32:29 2016
 class FlatBufferSerialiser {
 public:
-  FlatBufferSerialiser(const std::string& source_name = "AMOR.event.stream") : source{source_name} {}
-  FlatBufferSerialiser(const FlatBufferSerialiser& other) = default;
-  FlatBufferSerialiser(FlatBufferSerialiser&& other) = default;
+  FlatBufferSerialiser(const std::string &source_name = "AMOR.event.stream")
+      : source{source_name} {}
+  FlatBufferSerialiser(const FlatBufferSerialiser &other) = default;
+  FlatBufferSerialiser(FlatBufferSerialiser &&other) = default;
   ~FlatBufferSerialiser() = default;
-
 
   // WARNING: template parameter has to match schema data type
   template <class T>
@@ -38,8 +38,9 @@ public:
     auto source_name = builder.CreateString(source);
     auto time_of_flight = builder.CreateVector(&message[0], nev);
     auto detector_id = builder.CreateVector(&message[nev], nev);
-    auto event = CreateEventMessage(builder, source_name, message_id,
-                                    pulse_time.count(), time_of_flight, detector_id);
+    auto event =
+        CreateEventMessage(builder, source_name, message_id, pulse_time.count(),
+                           time_of_flight, detector_id);
     FinishEventMessageBuffer(builder, event);
     buffer_.resize(builder.GetSize());
     buffer_.assign(builder.GetBufferPointer(),
@@ -49,19 +50,21 @@ public:
 
   template <class T>
   void extract(const std::vector<char> &message, std::vector<T> &data,
-               uint64_t &pid, std::chrono::nanoseconds &pulse_time, std::string & source_name) {
+               uint64_t &pid, std::chrono::nanoseconds &pulse_time,
+               std::string &source_name) {
     extract_impl<T>(static_cast<const void *>(&message[0]), data, pid,
-                    pulse_time,source_name);
+                    pulse_time, source_name);
   }
 
   template <class T>
   void extract(const char *msg, std::vector<T> &data, uint64_t &pid,
-               std::chrono::nanoseconds &pulse_time, std::string & source_name) {
-    extract_impl<T>(static_cast<const void *>(msg), data, pid, pulse_time,source_name);
+               std::chrono::nanoseconds &pulse_time, std::string &source_name) {
+    extract_impl<T>(static_cast<const void *>(msg), data, pid, pulse_time,
+                    source_name);
   }
 
   char *get() { return &buffer_[0]; }
-  const int size() { return buffer_.size(); }
+  size_t size() { return buffer_.size(); }
 
   const std::vector<char> &buffer() { return buffer_; }
 
@@ -81,7 +84,8 @@ public:
 private:
   template <class T>
   void extract_impl(const void *msg, std::vector<T> &data, uint64_t &pid,
-                    std::chrono::nanoseconds &pulse_time, std::string & source_name ) {
+                    std::chrono::nanoseconds &pulse_time,
+                    std::string &source_name) {
     auto event = GetEventMessage(msg);
     data.resize(2 * event->time_of_flight()->size());
     std::copy(event->time_of_flight()->begin(), event->time_of_flight()->end(),
@@ -103,9 +107,9 @@ private:
 ///  \date Fri Jun 17 12:22:01 2016
 class NoSerialiser {
 public:
-  NoSerialiser(const std::string& = "") {}
-  NoSerialiser(const NoSerialiser& other) = default;
-  NoSerialiser(NoSerialiser&& other) = default;
+  NoSerialiser(const std::string & = "") {}
+  NoSerialiser(const NoSerialiser &other) = default;
+  NoSerialiser(NoSerialiser &&other) = default;
   ~NoSerialiser() = default;
 
   NoSerialiser() : buf(nullptr){};
