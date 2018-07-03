@@ -1,5 +1,5 @@
-#ifndef _MCSTAS_READER_H
-#define _MCSTAS_READER_H
+#pragma once
+
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -13,7 +13,7 @@
 #include <cstring>
 #include <stdlib.h>
 
-#include "uparam.hpp"
+#include "utils.hpp"
 
 /*! creates an event stream from a mcstas simulation output
  *
@@ -31,7 +31,9 @@ template <typename Instrument> struct McStasSource {
   std::vector<value_type>::const_iterator begin() const { return data.begin(); }
   std::vector<value_type>::const_iterator end() const { return data.end(); }
 
-  McStasSource(uparam::Param p) : instrum(p) { instrum.fill(data); }
+  McStasSource(std::map<std::string, std::string> p) : instrum(p) {
+    instrum.fill(data);
+  }
 
   int count() const { return data.size(); }
 
@@ -132,7 +134,8 @@ private:
 
 struct Rita2 {
 
-  Rita2(uparam::Param &p) : tof(p["1D"], t), area(p["2D"], pos) {}
+  Rita2(std::map<std::string, std::string> &p)
+      : tof(p["1D"], t), area(p["2D"], pos) {}
 
   template <class T> void fill(std::vector<T> &data) {
     load();
@@ -176,5 +179,3 @@ private:
 };
 
 } // namespace
-
-#endif // MCSTAS_READER_H
