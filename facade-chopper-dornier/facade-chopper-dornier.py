@@ -125,6 +125,8 @@ class FacadeEpicsDriver(pcaspy.Driver):
         super(FacadeEpicsDriver, self).__init__()
         self.chopper = chopper
         self.pvdb = pvdb
+        for pv in pvdb:
+            self.setParamStatus(pv, 0, 0)
 
     def write(self, pv, value):
         log('Write: {} = {}'.format(pv, value))
