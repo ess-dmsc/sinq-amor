@@ -9,7 +9,6 @@
 
 #include "header.hpp"
 #include "serialiser.hpp"
-#include "uparam.hpp"
 
 namespace generator {
 
@@ -24,23 +23,18 @@ template <int mode_selector> struct ZmqGen {
   static const int max_header_size = 10000;
   static const int max_recv_size = 100000000;
 
-  ZmqGen(uparam::Param p) {
-    /*! @param p see uparam::Param for description. Must contain "port"
-     * key-value */
-    /*! Generates the 0MQ context and bind PULL socket to "port". If binding
-      fails throws an error */
+  ZmqGen(const std::string &SocketAddress) {
     context = zmq_ctx_new();
     int rc;
     if (!mode_selector) {
       socket = zmq_socket(context, ZMQ_PUSH);
-      std::cout << "tcp://*:" + p["port"] << std::endl;
-      rc = zmq_bind(socket, ("tcp://*:" + p["port"]).c_str());
+      std::cout << "tcp://" << SocketAddress << "\n";
+      rc = zmq_bind(socket, ("tcp://" + SocketAddress).c_str());
       //    socket.setsockopt(zmq::SNDHWM, 100);
     } else {
       socket = zmq_socket(context, ZMQ_PULL);
-      std::cout << "tcp://" << p["host"] << ":" << p["port"] << std::endl;
-      rc =
-          zmq_connect(socket, ("tcp://" + p["host"] + ":" + p["port"]).c_str());
+      std::cout << "tcp://" << SocketAddress << "\n";
+      rc = zmq_connect(socket, ("tcp://" + SocketAddress).c_str());
     }
     assert(rc == 0);
   }

@@ -12,7 +12,7 @@
 
 ### Requirements:
 
-* Rapidjson
+* jsonformoderncpp
 * RdKafka
 * Flatbuffers
 * HDF5
@@ -164,4 +164,3 @@ A failure is reported with Conan trying to buld hdf5. This is connected with htt
             verify=False
         )
 ```
-

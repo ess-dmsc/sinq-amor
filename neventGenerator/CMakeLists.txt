@@ -28,7 +28,6 @@ add_custom_target(
   COMMAND make
 )
 
-find_package(Rapidjson REQUIRED)
 find_package(RdKafka REQUIRED)
 find_package(Flatbuffers REQUIRED)
 find_package(HDF5 REQUIRED)

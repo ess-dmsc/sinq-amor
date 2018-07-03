@@ -1,17 +1,22 @@
 #pragma once
 
-#include <utility>
+#include "json.h"
 
-#include <rapidjson/document.h>
-#include <rapidjson/filereadstream.h>
-#include <rapidjson/ostreamwrapper.h>
-#include <rapidjson/stringbuffer.h>
+std::pair<int, int> parse_header(const std::string &Header) {
+  std::pair<int, int> Result;
 
-std::pair<int, int> parse_header(const std::string &s) {
-  std::pair<int, int> result;
-  rapidjson::Document d;
-  d.Parse(s.c_str());
-  result.first = d["value"].GetInt();
-  result.second = d["ds"][1].GetInt();
-  return result;
+  nlohmann::json Document(Header);
+  {
+    auto x = find<int>("value", Document);
+    if (x) {
+      Result.first = x.inner();
+    }
+  }
+  {
+    auto x = find<int>("ds", Document);
+    if (x) {
+      Result.second = x.inner();
+    }
+  }
+  return Result;
 }
