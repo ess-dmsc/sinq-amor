@@ -3,6 +3,7 @@
 #include "Errors.hpp"
 #include "json.h"
 #include "utils.hpp"
+#include <map>
 
 namespace SINQAmorSim {
 
@@ -30,28 +31,27 @@ public:
 };
 
 class ConfigurationParser {
-  // Looks into command line if any configuration file is specified. If so
-  // generates an initial configuration based on it, else looks for a default
-  // config file. If the latter is missing expects that all the relevant
-  // informations have been provided as command line argument.
+  // Parse the content of the configuration file and the command line options
 public:
-  int parse_configuration_file(const std::string &input);
   int parse_configuration(int argc, char **argv);
-  void override_configuration_with(const Configuration &other);
-  int validate();
+
   void print();
-
-  int parse_configuration_file_impl();
-  void get_kafka_options(nlohmann::json &);
-
-  Configuration parse_command_line(int argc, char **argv);
-
-  KafkaConfiguration parse_string_uri(const std::string &uri,
-                                      const bool use_defaults = false);
 
   Configuration config;
 
 private:
-  nlohmann::json configuration;
+  std::map<std::string, std::string> parse_command_line(int argc, char **argv);
+
+  void parse_configuration_file(const std::string &input);
+
+  void parse_configuration_file_impl(nlohmann::json &);
+
+  KafkaConfiguration parse_string_uri(const std::string &uri,
+                                      const bool use_defaults = false);
+  void get_kafka_options(nlohmann::json &);
+
+  void override_configuration_with(std::map<std::string, std::string> &);
+
+  void validate();
 };
 } // namespace SINQAmorSim
