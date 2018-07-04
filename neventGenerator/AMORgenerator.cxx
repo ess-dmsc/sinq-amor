@@ -37,14 +37,17 @@ int main(int argc, char **argv) {
   }
 
   std::vector<StreamFormat::value_type> data;
-#if 1
-  Source stream(config.source, config.multiplier);
-  data = stream.get();
-#else
+
+  try {
+    Source stream(config.source, config.multiplier);
+    data = stream.get();
+  } catch (std::exception &e) {
+    std::cout << e.what() << "\n";
+    return -1;
+  }
   if (config.bytes > 0) {
     data.resize(config.bytes / sizeof(StreamFormat::value_type));
   }
-#endif
 
   try {
     Generator<Communication, Control, Serialiser> g(config);
