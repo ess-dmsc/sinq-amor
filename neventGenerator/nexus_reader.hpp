@@ -35,8 +35,13 @@ public:
   const_iterator end() const { return data.end(); }
 
   NeXusSource(const std::string &filename, const int multiplier = 1) {
-    H5::H5File file(filename, H5F_ACC_RDONLY);
-    read(file);
+    try {
+      H5::H5File file(filename, H5F_ACC_RDONLY);
+      read(file);
+    } catch (std::exception &e) {
+      throw std::runtime_error(e.what());
+    }
+
     if (multiplier > 1) {
       int nelem = data.size();
       for (int m = 1; m < multiplier; ++m)
@@ -236,6 +241,6 @@ void Amor::toEventFmt<ESSformat::value_type>(
   }
 }
 
-} // namespace
+} // namespace SINQAmorSim
 
 #endif // NEXUS_READER_H
