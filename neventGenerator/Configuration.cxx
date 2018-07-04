@@ -192,7 +192,7 @@ SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
       {"source", required_argument, nullptr, 0},
       {"source-name", required_argument, nullptr, 0},
       {"multiplier", required_argument, nullptr, 0},
-      {"threads", required_argument, nullptr, 0},
+      {"num-threads", required_argument, nullptr, 0},
       {"bytes", required_argument, nullptr, 0},
       {"rate", required_argument, nullptr, 0},
       {"timestamp-generator", required_argument, nullptr, 0},
@@ -313,7 +313,7 @@ void SINQAmorSim::ConfigurationParser::print() {
   std::cout << "source: " << config.source << "\n"
             << "source_name: " << config.source_name << "\n"
             << "multiplier: " << config.multiplier << "\n"
-            << "threads: " << config.num_threads << "\n"
+            << "num-threads: " << config.num_threads << "\n"
             << "bytes: " << config.bytes << "\n"
             << "rate: " << config.rate << "\n"
             << "timestamp_generator: " << config.timestamp_generator << "\n";
