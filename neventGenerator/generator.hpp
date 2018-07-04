@@ -119,6 +119,12 @@ private:
       auto ElapsedTime = system_clock::now() - StartTime;
       if (std::chrono::duration_cast<std::chrono::seconds>(ElapsedTime)
               .count() > Config.report_time) {
+        // Make sure that messages have been sent before collecting ortstats
+        // and recompute (real) time
+        while (Stream[tid]->outqLen()) {
+          Stream[tid]->poll(-1);
+        }
+        auto ElapsedTime = system_clock::now() - StartTime;
 
         int NumMessages = Stream[tid]->poll(-1);
         std::cout << PulseID << "\t" << Stream[tid]->getNumMessages() << "\t"
