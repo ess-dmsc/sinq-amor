@@ -27,6 +27,7 @@ public:
   int report_time{10};
   int num_threads{0};
   bool valid{true};
+  size_t BufferSize{1000000000};
   KafkaOptions options;
 };
 

@@ -130,6 +130,12 @@ void SINQAmorSim::ConfigurationParser::parse_configuration_file_impl(
       config.report_time = x.inner();
     }
   }
+  {
+    auto x = find<int>("message_buffer_size", Configuration);
+    if (x) {
+      config.BufferSize = x.inner();
+    }
+  }
   auto x = find<nlohmann::json>("kafka", Configuration);
   if (x) {
     nlohmann::json kafka = x.inner();
@@ -196,6 +202,7 @@ SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
       {"bytes", required_argument, nullptr, 0},
       {"rate", required_argument, nullptr, 0},
       {"timestamp-generator", required_argument, nullptr, 0},
+      {"message-buffer-size", required_argument, nullptr, 0},
       {nullptr, 0, nullptr, 0},
   };
   std::string cmd;
@@ -277,6 +284,10 @@ void SINQAmorSim::ConfigurationParser::override_configuration_with(
   if (!Value.empty()) {
     config.timestamp_generator = Value;
   }
+  Value = findMap("message-buffer-size", CommandLineOptions);
+  if (!Value.empty()) {
+    config.BufferSize = to_int(Value);
+  }
 }
 
 void SINQAmorSim::ConfigurationParser::validate() {
@@ -304,6 +315,9 @@ void SINQAmorSim::ConfigurationParser::validate() {
   if (config.bytes <= 0) {
     throw std::runtime_error("Error: bytes <= 0");
   }
+  if (config.BufferSize <= 0) {
+    throw std::runtime_error("Error: message buffer size <= 0");
+  }
 }
 
 void SINQAmorSim::ConfigurationParser::print() {
@@ -316,7 +330,8 @@ void SINQAmorSim::ConfigurationParser::print() {
             << "num-threads: " << config.num_threads << "\n"
             << "bytes: " << config.bytes << "\n"
             << "rate: " << config.rate << "\n"
-            << "timestamp_generator: " << config.timestamp_generator << "\n";
+            << "timestamp_generator: " << config.timestamp_generator << "\n"
+            << "message-buffer-size: " << config.BufferSize << "\n";
   std::cout << "kafka:\n";
   for (auto &o : config.options) {
     std::cout << "\t" << o.first << ": " << o.second << "\n";
@@ -335,6 +350,7 @@ void usage(const std::string &exe) {
             << "\t--rate:\n"
             << "\t--bytes:\n"
             << "\t--timestamp-generator\n"
+            << "\t--message-buffer-size\n"
             << "\n";
   exit(0);
 }

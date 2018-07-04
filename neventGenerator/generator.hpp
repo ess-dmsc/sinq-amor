@@ -101,6 +101,10 @@ private:
     // possible
     // bottleneck
     Stream[tid]->serialiseAndStore(PulseID, PulseTime, Events, Events.size());
+
+    const size_t MaxPacketsBeforePoll{Config.BufferSize /
+                                      (Events.size() * sizeof(T))};
+
     while (!Streaming->exit()) {
       if (Streaming->stop()) {
         std::this_thread::sleep_for(milliseconds(100));
@@ -115,7 +119,7 @@ private:
           break;
         }
         // Make sure that messages have been sent to prevent queue full
-        if (PulseID % 1000 == 1) {
+        if (PulseID % MaxPacketsBeforePoll == 1) {
           while (Stream[tid]->outqLen()) {
             Stream[tid]->poll();
           }
