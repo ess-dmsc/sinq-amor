@@ -1,6 +1,9 @@
 #include "Stats.hpp"
+
 #include <iostream>
 #include <numeric>
+
+#include <nlohmann/json.hpp>
 
 Stats::~Stats() { Run = false; }
 uint64_t Stats::getCurrentTimestamp() {
@@ -40,13 +43,24 @@ void Stats::report() {
     std::fill(NumMessages.begin(), NumMessages.end(), 0);
     std::fill(MBytes.begin(), MBytes.end(), 0);
 
-    std::cout << "Sent " << Messages << " packets @ "
-              << 1e3 * MB /
-                     std::chrono::duration_cast<std::chrono::milliseconds>(
-                         Now - StartTime)
-                         .count()
-              << "MB/s"
-              << "\t(timestamp : " << getCurrentTimestamp() << ")" << std::endl;
+    nlohmann::json Message;
+    Message["packets"] = Messages;
+    Message["MB"] = MB;
+    Message["MB/s"] =
+        1e3 * MB /
+        std::chrono::duration_cast<std::chrono::milliseconds>(Now - StartTime)
+            .count();
+    Message["timestamp"] = getCurrentTimestamp();
+    Message["num_threads"] = MBytes.size();
+    std::cout << Message.dump(4) << "\n";
+    // std::cout << "Sent " << Messages << " packets @ "
+    //           << 1e3 * MB /
+    //                  std::chrono::duration_cast<std::chrono::milliseconds>(
+    //                      Now - StartTime)
+    //                      .count()
+    //           << "MB/s"
+    //           << "\t(timestamp : " < < < <
+    // ")" << std::endl;
     StartTime = Now;
   }
 }

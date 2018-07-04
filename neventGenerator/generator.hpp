@@ -127,8 +127,8 @@ private:
       auto ElapsedTime = system_clock::now() - StartTime;
       if (std::chrono::duration_cast<std::chrono::seconds>(ElapsedTime)
               .count() > Config.report_time) {
-        // Make sure that messages have been sent before collecting stats and
-        // recompute (real) time
+        // Make sure that messages have been sent before collecting ortstats
+        // and recompute (real) time
         while (Stream[tid]->outqLen()) {
           Stream[tid]->poll(-1);
         }
