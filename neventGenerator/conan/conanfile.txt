@@ -12,7 +12,3 @@ cmake
 virtualrunenv
 
 [options]
-FlatBuffers:shared=True
-gtest:shared=True
-hdf5:shared=True
-librdkafka:shared=True

@@ -53,7 +53,6 @@ SINQAmorSim::ConfigurationParser::parse_string_uri(const std::string &uri,
     configuration.broker = get_broker(uri, "//localhost:9092/");
     configuration.topic = get_topic(uri, "empty-topic");
   } else {
-    std::cout << "parse_string_uri : " << uri << "\n";
     configuration.broker = get_broker(uri);
     configuration.topic = get_topic(uri);
     if (!broker_topic_is_valid(configuration.broker, configuration.topic)) {
@@ -63,82 +62,79 @@ SINQAmorSim::ConfigurationParser::parse_string_uri(const std::string &uri,
   return configuration;
 }
 
-int SINQAmorSim::ConfigurationParser::parse_configuration_file(
+void SINQAmorSim::ConfigurationParser::parse_configuration_file(
     const std::string &input) {
-  using json = nlohmann::json;
-  std::ifstream ifs(input);
-  if (!ifs.good()) {
-    return ConfigurationError::error_input_file;
+  std::ifstream ifs(input, std::ifstream::in);
+  if (ifs.fail()) {
+    throw std::runtime_error("Configuration file doesn't exist");
   }
   std::stringstream buffer;
   buffer << ifs.rdbuf();
-  configuration = json::parse(buffer.str());
+  nlohmann::json Configuration = nlohmann::json::parse(buffer.str());
 
-  return parse_configuration_file_impl();
+  parse_configuration_file_impl(Configuration);
 }
-
-int SINQAmorSim::ConfigurationParser::parse_configuration_file_impl() {
+void SINQAmorSim::ConfigurationParser::parse_configuration_file_impl(
+    nlohmann::json &Configuration) {
   {
-    auto x = find<std::string>("producer_uri", configuration);
+    auto x = find<std::string>("producer_uri", Configuration);
     if (x) {
       config.producer = parse_string_uri(x.inner());
     }
   }
   {
-    auto x = find<std::string>("source", configuration);
+    auto x = find<std::string>("source", Configuration);
     if (x) {
       config.source = x.inner();
     }
   }
   {
-    auto x = find<std::string>("source_name", configuration);
+    auto x = find<std::string>("source_name", Configuration);
     if (x) {
       config.source_name = x.inner();
     }
   }
   {
-    auto x = find<int>("rate", configuration);
+    auto x = find<int>("rate", Configuration);
     if (x) {
       config.rate = x.inner();
     }
   }
   {
-    auto x = find<int>("bytes", configuration);
+    auto x = find<int>("bytes", Configuration);
     if (x) {
       config.bytes = x.inner();
     }
   }
   {
-    auto x = find<int>("multiplier", configuration);
+    auto x = find<int>("multiplier", Configuration);
     if (x) {
       config.multiplier = x.inner();
     }
   }
   {
-    auto x = find<int>("num_threads", configuration);
+    auto x = find<int>("num_threads", Configuration);
     if (x) {
       config.num_threads = x.inner();
     }
   }
   {
-    auto x = find<std::string>("timestamp_generator", configuration);
+    auto x = find<std::string>("timestamp_generator", Configuration);
     if (x) {
       config.timestamp_generator = x.inner();
     }
   }
   {
-    auto x = find<int>("report_time", configuration);
+    auto x = find<int>("report_time", Configuration);
     if (x) {
       config.report_time = x.inner();
     }
   }
-  auto x = find<nlohmann::json>("kafka", configuration);
+  auto x = find<nlohmann::json>("kafka", Configuration);
   if (x) {
     nlohmann::json kafka = x.inner();
     get_kafka_options(kafka);
   }
-
-  return ConfigurationError::error_no_configuration_error;
 }
 
 void SINQAmorSim::ConfigurationParser::get_kafka_options(
@@ -160,35 +156,32 @@ void SINQAmorSim::ConfigurationParser::get_kafka_options(
 int SINQAmorSim::ConfigurationParser::parse_configuration(int argc,
                                                           char **argv) {
   int error = ConfigurationError::error_no_configuration_error;
-  Configuration command_line_config;
-  if (argc > 1) {
-    command_line_config = parse_command_line(argc, argv);
-  }
-
+  std::map<std::string, std::string> CommandLineOptions;
   try {
-    if (command_line_config.configuration_file.empty()) {
-      error = parse_configuration_file("config.json");
-    } else {
-      error = parse_configuration_file(command_line_config.configuration_file);
+    if (argc > 1) {
+      CommandLineOptions = parse_command_line(argc, argv);
     }
-  } catch (const ConfigurationParsingException &e) {
-    std::cout << e.what() << "\n";
+    if (CommandLineOptions.find("config-file") == CommandLineOptions.end()) {
+      parse_configuration_file("config.json");
+    } else {
+      parse_configuration_file(CommandLineOptions["config-file"]);
+    }
+  } catch (const std::exception &e) {
+    throw std::runtime_error(e.what());
   }
 
   if (error == ConfigurationError::error_no_configuration_error) {
-    override_configuration_with(command_line_config);
-    return validate();
-  } else {
-    return error;
+    override_configuration_with(CommandLineOptions);
+    validate();
   }
+  return error;
 }
 
 void usage(const std::string &executable);
 
-SINQAmorSim::Configuration
+std::map<std::string, std::string>
 SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
-  SINQAmorSim::Configuration result;
-  result.timestamp_generator = "";
+  std::map<std::string, std::string> CommandLineOptions;
 
   static struct option long_options[] = {
       {"help", no_argument, nullptr, 'h'},
@@ -221,94 +214,95 @@ SINQAmorSim::ConfigurationParser::parse_command_line(int argc, char **argv) {
       break;
     case 0:
       auto lname = long_options[option_index].name;
-      if (std::string("help") == lname) {
-      }
-      if (std::string("config-file") == lname) {
-        result.configuration_file = optarg;
-      }
-      if (std::string("producer-uri") == lname) {
-        result.producer = parse_string_uri(optarg, true);
-      }
-      if (std::string("source") == lname) {
-        result.source = optarg;
-      }
-      if (std::string("source-name") == lname) {
-        result.source_name = optarg;
-      }
-      if (std::string("multiplier") == lname) {
-        std::istringstream buffer(optarg);
-        buffer >> result.multiplier;
-      }
-      if (std::string("threads") == lname) {
-        std::istringstream buffer(optarg);
-        buffer >> result.num_threads;
-      }
-      if (std::string("bytes") == lname) {
-        std::istringstream buffer(optarg);
-        buffer >> result.bytes;
-      }
-      if (std::string("rate") == lname) {
-        std::istringstream buffer(optarg);
-        buffer >> result.rate;
-      }
-      if (std::string("timestamp-generator") == lname) {
-        result.timestamp_generator = optarg;
-      }
+      CommandLineOptions[lname] = optarg;
       break;
     }
   }
 
   if (getopt_error) {
-    result.valid = false;
-    std::cerr << "ERROR parsing command line options\n";
+    throw std::runtime_error("Error parsing command line options");
   }
 
-  return std::move(result);
+  return CommandLineOptions;
+}
+
+const std::string findMap(std::string Key,
+                          std::map<std::string, std::string> &Map) {
+  auto It = Map.find(Key);
+  if (It != Map.end()) {
+    return Map[Key];
+  }
+  return "";
+}
+
+int to_int(const std::string &Text) {
+  std::stringstream Stream(Text);
+  int Value;
+  Stream >> Value;
+  return Value;
 }
 
 void SINQAmorSim::ConfigurationParser::override_configuration_with(
-    const SINQAmorSim::Configuration &other) {
-
-  if (!other.producer.broker.empty()) {
-    config.producer.broker = other.producer.broker;
+    std::map<std::string, std::string> &CommandLineOptions) {
+  using MapType = std::map<std::string, std::string>;
+  std::string Value = findMap("producer-uri", CommandLineOptions);
+  if (!Value.empty()) {
+    config.producer = parse_string_uri(Value, true);
   }
-  if (!other.producer.topic.empty()) {
-    config.producer.topic = other.producer.topic;
+  Value = findMap("source", CommandLineOptions);
+  if (!Value.empty()) {
+    config.source = Value;
   }
-  if (!other.configuration_file.empty()) {
-    config.configuration_file = other.configuration_file;
+  Value = findMap("source-name", CommandLineOptions);
+  if (!Value.empty()) {
+    config.source_name = Value;
   }
-  if (!other.source.empty()) {
-    config.source = other.source;
+  Value = findMap("multiplier", CommandLineOptions);
+  if (!Value.empty()) {
+    config.multiplier = to_int(Value);
   }
-  if (!other.source_name.empty()) {
-    config.source_name = other.source_name;
+  Value = findMap("num-threads", CommandLineOptions);
+  if (!Value.empty()) {
+    config.num_threads = to_int(Value);
   }
-  if (other.multiplier > 0) {
-    config.multiplier = other.multiplier;
+  Value = findMap("rate", CommandLineOptions);
+  if (!Value.empty()) {
+    config.rate = to_int(Value);
   }
-  if (other.num_threads > 0) {
-    config.num_threads = other.num_threads;
+  Value = findMap("bytes", CommandLineOptions);
+  if (!Value.empty()) {
+    config.bytes = to_int(Value);
   }
-  if (other.rate > 0) {
-    config.rate = other.rate;
-  }
-  if (other.bytes > 0) {
-    config.bytes = other.bytes;
-  }
-  if (!other.timestamp_generator.empty()) {
-    config.timestamp_generator = other.timestamp_generator;
+  Value = findMap("timestamp-generator", CommandLineOptions);
+  if (!Value.empty()) {
+    config.timestamp_generator = Value;
   }
 }
 
-int SINQAmorSim::ConfigurationParser::validate() {
-  if (config.producer.broker.empty() || config.producer.topic.empty() ||
-      config.source.empty() || config.multiplier <= 0 ||
-      config.num_threads <= 0 || config.rate <= 0 ||
-      config.source_name.empty()) {
-    return ConfigurationError::error_configuration_invalid;
-  } else {
-    return ConfigurationError::error_no_configuration_error;
+void SINQAmorSim::ConfigurationParser::validate() {
+  if (config.producer.broker.empty()) {
+    throw std::runtime_error("Error: empty broker");
+  }
+  if (config.producer.topic.empty()) {
+    throw std::runtime_error("Error: empty producer");
+  }
+  if (config.source_name.empty()) {
+    throw std::runtime_error("Error: empty source name");
+  }
+  if (config.source.empty()) {
+    throw std::runtime_error("Error: empty source");
+  }
+  if (config.multiplier <= 0) {
+    throw std::runtime_error("Error: multiplier <= 0");
+  }
+  if (config.num_threads <= 0) {
+    throw std::runtime_error("Error: num threads <= 0");
+  }
+  if (config.rate <= 0) {
+    throw std::runtime_error("Error: rate <= 0");
+  }
+  if (config.bytes <= 0) {
+    throw std::runtime_error("Error: bytes <= 0");
   }
 }
 
@@ -323,7 +317,7 @@ void SINQAmorSim::ConfigurationParser::print() {
             << "bytes: " << config.bytes << "\n"
             << "rate: " << config.rate << "\n"
             << "timestamp_generator: " << config.timestamp_generator << "\n";
-  std::cout << "kafka_options:\n";
+  std::cout << "kafka:\n";
   for (auto &o : config.options) {
     std::cout << "\t" << o.first << ": " << o.second << "\n";
   }

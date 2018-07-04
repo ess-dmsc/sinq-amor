@@ -16,7 +16,13 @@ using Communication = SINQAmorSim::KafkaTransmitter<Serialiser>;
 int main(int argc, char **argv) {
 
   SINQAmorSim::ConfigurationParser parser;
-  auto err = parser.parse_configuration(argc, argv);
+  int err;
+  try {
+    err = parser.parse_configuration(argc, argv);
+  } catch (const std::exception &Error) {
+    std::cout << Error.what() << "\n";
+    return -1;
+  }
   if (!err) {
     parser.print();
   } else {
@@ -31,7 +37,7 @@ int main(int argc, char **argv) {
   }
 
   std::vector<StreamFormat::value_type> data;
-#if 0
+#if 1
   Source stream(config.source, config.multiplier);
   data = stream.get();
 #endif
@@ -39,8 +45,6 @@ int main(int argc, char **argv) {
     data.resize(
         static_cast<int>(config.bytes / sizeof(StreamFormat::value_type)));
   }
-  std::cout << config.bytes << "\t" << data.size() << "\t"
-            << sizeof(StreamFormat::value_type) << "\n";
 
   try {
     Generator<Communication, Control, Serialiser> g(config);
