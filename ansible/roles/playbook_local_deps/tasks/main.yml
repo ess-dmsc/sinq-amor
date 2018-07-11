@@ -7,7 +7,7 @@
 - name: "[auto-fetch-deps] Fetch essiip-fakesinqhw into {{repo_loc_essiip_fakesinqhw}}"
   connection: local
   git:
-    repo: https://bitbucket.org/europeanspallationsource/essiip-fakesinqhw.git
+    repo: https://github.com/ess-dmsc/essiip-fakesinqhw.git
     dest: "{{repo_loc_essiip_fakesinqhw}}"
   when: (st.stat.exists!=true or st.stat.isdir==false) and (auto_fetch_deps is defined and {{auto_fetch_deps|bool}} == true)
   register: task_auto_fetch_deps
@@ -35,11 +35,11 @@
   register: st
 
 # If it does not yet exist, and user want auto_fetch_deps, we try to clone it
-- name: "[auto-fetch-deps] Fetch forward-epics-to-kafka into {{repo_loc_essiip_fakesinqhw}}"
+- name: "[auto-fetch-deps] Fetch forward-epics-to-kafka into {{repo_loc_forward_epics_to_kafka}}"
   connection: local
   git:
-    repo: https://bitbucket.org/europeanspallationsource/forward-epics-to-kafka.git
-    dest: "{{repo_loc_essiip_fakesinqhw}}"
+    repo: https://github.com/ess-dmsc/forward-epics-to-kafka.git
+    dest: "{{repo_loc_forward_epics_to_kafka}}"
   when: (st.stat.exists!=true or st.stat.isdir==false) and (auto_fetch_deps is defined and {{auto_fetch_deps|bool}} == true)
   register: task_auto_fetch_deps
 

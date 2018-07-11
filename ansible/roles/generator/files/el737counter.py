@@ -30,20 +30,25 @@ class EL737Controller(LineReceiver):
         self.pausedTime = 0.
         self.threshold = 0
         self.thresholdcounter = 1
+        self.startFailure = False
+        self.runFailure = False
+        self.atRunFailure = False
+        self.readFailure = False
+        self.recover = False
         self.generator = generator.Generator()
 
     def write(self, data):
 #        print "transmitted:", data
-        if self.transport is not None: 
+        if self.transport is not None:
             self.transport.write(data)
 
     def to_process(self, data):
 #        print "transmitted to process:", data
-        if self.transport is not None: 
+        if self.transport is not None:
             self.proc.transport.write(data)
-    
+
     def calculateCountStatus(self):
-        if self.counting and not self.mypaused :
+        if self.counting and not self.mypaused:
             runtime = time.time() - self.starttime - self.pausedTime
             print(str(runtime) + ' versus ' + str(self.preset))
             if self.mode == 'timer':
@@ -51,11 +56,41 @@ class EL737Controller(LineReceiver):
                     self.counting = False
                     self.endtime = self.starttime + self.preset
                     self.pausedTime = 0
+                elif self.runFailure and not self.recover and runtime >= self.preset*0.2:
+                    self.atRunFailure = True
+
             else:
                 if runtime*1000 >= self.preset:
                     self.counting = False
                     self.endtime = self.starttime + self.preset/1000
+                elif self.runFailure and not self.recover and runtime*1000 >= self.preset*0.2:
+                    self.atRunFailure = True
+
+        if self.atRunFailure:
+            self.write('?92\r')
+            self.counting = False
+            self.endtime = time.time()
+
         print('count flag after calculateCountStatus ' + str(self.counting))
+
+    def calculateFailureStatus(self):
+        if not self.recover:
+            if self.startFailure:
+                self.write('?91\r')
+                return True
+            elif self.atRunFailure:
+                self.write('?92\r')
+                return True
+            elif self.readFailure:
+                self.write('?93\r')
+                return True
+        else:
+            self.startFailure = False
+            self.runFailure = False
+            self.atRunFailure = False
+            self.readFailure = False
+            self.recover = False
+            return False
 
     def lineReceived(self, data):
 #        print "lineReceived:", data
@@ -97,6 +132,11 @@ class EL737Controller(LineReceiver):
                return
 
            if data.startswith('mp'):
+
+               if self.startFailure and not self.recover:
+                   self.write('?91\r')
+                   return
+
                l = data.split()
                self.mode = 'monitor'
                self.preset = float(l[1])
@@ -107,8 +147,13 @@ class EL737Controller(LineReceiver):
                self.write('\r')
                self.to_process('run\r')
                return
-               
+
            if data.startswith('tp'):
+
+               if self.startFailure and not self.recover:
+                   self.write('?91\r')
+                   return
+
                l = data.split()
                self.mode = 'timer'
                self.preset = float(l[1])
@@ -119,13 +164,13 @@ class EL737Controller(LineReceiver):
                self.write('\r')
                self.to_process('run\r')
                return
-               
-           if data.startswith('st'):
+
+           if data.startswith('s'):
                self.counting = False
                self.endtime = time.time()
                self.write('\r')
-               self.to_process('stop\r')
-               self.remotestate = 1
+               #self.to_process('stop\r')
+               #self.remotestate = 1
                return
 
            if data.startswith('ps'):
@@ -169,6 +214,8 @@ class EL737Controller(LineReceiver):
                    self.write(str(self.thresholdcounter) + '\r')
 
            if data.startswith('rs'):
+               if self.calculateFailureStatus():
+                   return
                self.calculateCountStatus()
                if self.counting:
                    if self.mypaused:
@@ -186,6 +233,8 @@ class EL737Controller(LineReceiver):
                return
 
            if data.startswith('ra'):
+               if self.calculateFailureStatus():
+                   return
                self.calculateCountStatus()
                if self.counting:
                    if self.mypaused:
@@ -209,15 +258,36 @@ class EL737Controller(LineReceiver):
                self.write(rastring +'\r')
                return
 
+           if data.startswith('xs'):
+               self.startFailure = True
+               self.write("Start failure activated\r")
+               return
+
+           if data.startswith('xr'):
+               self.runFailure = True
+               self.write("Run failure activated\r")
+               return
+
+           if data.startswith('xd'):
+               self.readFailure = True
+               self.write("Read failure activated\r")
+               return
+
+           if data.startswith('rc'):
+               self.recover = True
+               self.write("Recover activated\r")
+               return
+
            if data.startswith('id'):
                self.write('EL737 Neutron Counter V8.02\r')
                return
 
            self.write('?2\r')
 
-           def connectionLost(self, reason):
-               print "Goodbye..."
-               print reason
+    def connectionLost(self, reason):
+        self.to_process('stop\r')
+        print "Goodbye..."
+        print reason
 
 
 class MyPIPE(protocol.ProcessProtocol):
