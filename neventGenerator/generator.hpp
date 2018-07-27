@@ -47,6 +47,7 @@ public:
       return;
     }
     Statistics.setNumThreads(Config.num_threads);
+    Statistics.setControl(Streaming);
   }
 
   template <class T> void run(std::vector<T> &EventsData) {
@@ -56,12 +57,18 @@ public:
       Handle.push_back(std::async(std::launch::async, &self_t::runImpl<T>, this,
                                   std::ref(EventsData), tid));
     }
+    auto Report =
+        std::async(std::launch::async, [&]() { Statistics.report(); });
     Streaming->update();
-    std::async(std::launch::async, [&]() { Statistics.report(); });
     try {
+      std::cout << "Handle ";
       for (auto &h : Handle) {
         h.get();
+        std::cout << ".";
       }
+      std::cout << " done\nReport ";
+      Report.get();
+      std::cout << " done\n";
     } catch (std::exception e) {
       std::cout << e.what() << "\n";
       return;
@@ -82,9 +89,9 @@ public:
 
 private:
   std::vector<std::unique_ptr<Streamer>> Stream;
-  std::unique_ptr<Control> Streaming{nullptr};
+  std::shared_ptr<Control> Streaming{nullptr};
   SINQAmorSim::Configuration Config;
-  Stats Statistics;
+  Stats<Control> Statistics;
 
   template <class T> void runImpl(std::vector<T> &Events, int tid) {
     using namespace std::chrono;
@@ -95,14 +102,14 @@ private:
     std::time_t to_time = system_clock::to_time_t(StartTime);
     auto Timeout = std::localtime(&to_time);
 
-    nanoseconds PulseTime =
-        duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
     while (!Streaming->exit()) {
       if (Streaming->stop()) {
         std::this_thread::sleep_for(milliseconds(100));
         continue;
       }
 
+      nanoseconds PulseTime =
+          duration_cast<nanoseconds>(system_clock::now().time_since_epoch());
       try {
         if (Streaming->run()) {
 

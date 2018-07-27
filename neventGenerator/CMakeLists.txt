@@ -65,7 +65,6 @@ set(tgt "nevent-generator__objects")
 add_library(${tgt} OBJECT
 Configuration.cxx
 Errors.cxx
-Stats.cxx
 )
 
 foreach(tgt AMORgenerator AMORreceiver)
