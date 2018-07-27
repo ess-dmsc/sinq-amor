@@ -9,7 +9,7 @@
 std::string get_protocol(const std::string &s, const std::string &deft = "") {
   std::smatch m;
   if (std::regex_search(s, m, std::regex("^[A-Za-z]+"))) {
-    return std::move(std::string(m[0]));
+    return std::string(m[0]);
   }
   return std::move(deft);
 }
@@ -19,7 +19,7 @@ std::string get_broker(const std::string &s, const std::string &deft = "") {
   if (std::regex_search(s, m, std::regex("//.*/"))) {
     auto result = std::string(m[0]).substr(2);
     result.pop_back();
-    return std::move(result);
+    return result;
   }
   return std::move(deft);
 }

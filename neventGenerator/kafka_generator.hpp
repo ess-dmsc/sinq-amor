@@ -27,7 +27,7 @@ struct KafkaGeneratorInfo {
 
 class DeliveryReport : public RdKafka::DeliveryReportCb {
 public:
-  void dr_cb(RdKafka::Message &Message) {
+  void dr_cb(RdKafka::Message &Message) override {
     if (Message.errstr() == "Success") {
       Info.NumMessages++;
       Info.Mbytes += Message.len() * 1e-6;
@@ -92,7 +92,7 @@ public:
     }
 
     RdKafka::Metadata *md;
-    auto Err = Producer->metadata(1, nullptr, &md, 1000);
+    auto Err = Producer->metadata(true, nullptr, &md, 1000);
     if (Err == RdKafka::ERR__TIMED_OUT) {
       throw std::runtime_error("Failed to retrieve Metadata: " + Error);
     }
@@ -106,6 +106,9 @@ public:
         Topic, RdKafka::Topic::PARTITION_UA, RdKafka::Producer::RK_MSG_COPY,
         &Data[0], Data.size() * sizeof(T), nullptr, 0, getCurrentTimestamp(),
         nullptr);
+    if (resp != RdKafka::ERR_NO_ERROR) {
+      throw std::runtime_error(RdKafka::err2str(resp) + " : " + Topic);
+    }
     return int(Producer->poll(10));
   }
 
@@ -136,7 +139,7 @@ template <typename T>
 size_t KafkaTransmitter<FlatBufferSerialiser>::send(
     const uint64_t &PacketID, const std::chrono::nanoseconds &PulseTime,
     std::vector<T> &Events, const int NumEvents) {
-  size_t BufferSize;
+  size_t BufferSize{0};
   if (NumEvents) {
     SerialiserWorker->serialise(PacketID, PulseTime, Events);
     BufferSize = SerialiserWorker->size();

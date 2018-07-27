@@ -23,15 +23,15 @@ int main(int argc, char **argv) {
     std::cout << Error.what() << "\n";
     return -1;
   }
-  if (!err) {
-    parser.print();
-  } else {
+  if (err) {
     std::cout << SINQAmorSim::Err2Str(err) << "\n";
     return -1;
   }
+  parser.print();
+
   auto &config = parser.config;
 
-  if (config.bytes > 0 && config.multiplier > 1) {
+  if ((config.bytes > 0) && (config.multiplier > 1)) {
     throw std::runtime_error(
         "Conflict between parameters `bytes` and `multiplier`");
   }

@@ -1,20 +1,5 @@
 #pragma once
 
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <stdexcept>
-#include <string>
-#include <vector>
-
-#include <iterator>
-
-#include <cstring>
-#include <stdlib.h>
-
-#include "utils.hpp"
-
 /*! creates an event stream from a mcstas simulation output
  *
  *  \author Michele Brambilla <mib.mic@gmail.com>
@@ -23,8 +8,8 @@
 namespace mcstas {
 
 template <typename Instrument> struct McStasSource {
-  typedef McStasSource self_t;
-  typedef uint64_t value_type;
+  using self_t = McStasSource;
+  using value_type = uint64_t;
 
   std::vector<value_type>::iterator begin() { return data.begin(); }
   std::vector<value_type>::iterator end() { return data.end(); }
@@ -43,7 +28,7 @@ private:
 };
 
 struct D1 {
-  typedef int value_type;
+  using value_type = int;
 
   std::vector<value_type>::iterator begin() { return v.begin(); }
   std::vector<value_type>::iterator end() { return v.end(); }
@@ -73,19 +58,19 @@ private:
       n_col++;
       int counter = 0;
       char *token = std::strtok(&value[0], " ");
-      while (token != NULL) {
+      while (token) {
         if (counter == n) {
           v.push_back(atoi(token));
         }
         ++counter;
-        token = std::strtok(NULL, " ");
+        token = std::strtok(nullptr, " ");
       }
     }
   }
 };
 
 struct D2 {
-  typedef int value_type;
+  using value_type = int;
 
   std::vector<value_type>::iterator begin() { return v.begin(); }
   std::vector<value_type>::iterator end() { return v.end(); }
@@ -121,10 +106,10 @@ private:
         continue;
       n_row++;
       char *token = std::strtok(&value[0], " ");
-      while (token != NULL) {
+      while (token) {
         v.push_back(atoi(token));
         //          std::cout << atof(token) << "\t";
-        token = std::strtok(NULL, " ");
+        token = std::strtok(nullptr, " ");
         n_col++;
       }
     }
@@ -156,7 +141,7 @@ private:
   }
 
   template <typename T> void toEventFmt(std::vector<T> &signal) {
-    int row = 0, col = 0, pos = 0;
+    int pos = 0;
 
     union {
       uint64_t value;

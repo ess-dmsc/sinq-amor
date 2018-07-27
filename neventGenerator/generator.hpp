@@ -61,14 +61,10 @@ public:
         std::async(std::launch::async, [&]() { Statistics.report(); });
     Streaming->update();
     try {
-      std::cout << "Handle ";
       for (auto &h : Handle) {
         h.get();
-        std::cout << ".";
       }
-      std::cout << " done\nReport ";
       Report.get();
-      std::cout << " done\n";
     } catch (std::exception e) {
       std::cout << e.what() << "\n";
       return;
@@ -143,12 +139,9 @@ private:
         while (Stream[tid]->outqLen()) {
           Stream[tid]->poll(-1);
         }
-        auto ElapsedTime = system_clock::now() - StartTime;
-
         // update stats
         Statistics.add(Stream[tid]->getNumMessages(), Stream[tid]->getMbytes(),
                        tid);
-
         Stream[tid]->getNumMessages() = 0;
         Stream[tid]->getMbytes() = 0;
         StartTime = system_clock::now();
@@ -166,7 +159,7 @@ private:
     using system_clock = std::chrono::system_clock;
     auto StartTime = system_clock::now();
 
-    while (1) {
+    while (true) {
 
       auto Message = Stream[0]->recv(Events);
       PacketID = Message.first;

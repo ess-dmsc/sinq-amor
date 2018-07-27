@@ -1,8 +1,4 @@
-#include <atomic>
-#include <iostream>
-#include <stdlib.h>
-
-#include "Configuration.hpp"
+#pragma once
 
 namespace SINQAmorSim {
 
@@ -23,8 +19,8 @@ static std::string Status2Str(const int value) {
 }
 
 struct NoControl {
-  NoControl() {}
-  NoControl(Configuration &) {}
+  NoControl() = default;
+  NoControl(Configuration &){};
 
   NoControl(const NoControl &other) = default;
 
@@ -69,7 +65,7 @@ private:
   std::atomic<int> status;
   SINQAmorSim::Configuration &config;
 
-  int &&update_impl() {
+  int update_impl() {
     std::cout << "status : " << Status2Str(status) << "\t"
               << "tr : " << std::to_string(config.rate) << "\n";
     std::string value;
@@ -95,7 +91,7 @@ private:
       std::cout << "status : " << Status2Str(status) << "\t"
                 << "tr : " << std::to_string(config.rate) << "\n";
     }
-    return std::move(status.load());
+    return status.load();
   }
 };
 

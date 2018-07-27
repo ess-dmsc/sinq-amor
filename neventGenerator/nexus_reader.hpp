@@ -1,22 +1,6 @@
-#ifndef _NEXUS_READER_H
-#define _NEXUS_READER_H
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <stdexcept>
-#include <string>
 #pragma once
 
-#include <vector>
-
-#include <cstring>
-#include <ctime>
-#include <stdlib.h>
-
 #include "H5Cpp.h"
-
-#include "utils.hpp"
 
 namespace SINQAmorSim {
 
@@ -26,8 +10,8 @@ template <typename Instrument, typename Format> class NeXusSource {
 public:
   using self_t = NeXusSource;
   using value_type = typename Format::value_type;
-  typedef typename std::vector<value_type>::iterator iterator;
-  typedef typename std::vector<value_type>::const_iterator const_iterator;
+  using iterator = typename std::vector<value_type>::iterator;
+  using const_iterator = typename std::vector<value_type>::const_iterator;
 
   iterator begin() { return data.begin(); }
   iterator end() { return data.end(); }
@@ -63,25 +47,19 @@ private:
 ///  \date Thu Jun 09 16:43:08 2016
 class Rita2 {
 public:
-  Rita2() {
-    path.push_back("/entry1/RITA-2/detector/counts");
-    path.push_back("random");
-  }
+  Rita2() { path.emplace_back("/entry1/RITA-2/detector/counts"); }
 
   template <typename T>
   void operator()(const H5::H5File &file, std::vector<T> &stream) {
 
     {
       H5::DataSet dataset = file.openDataSet(path[0]);
-
       H5::DataSpace dataspace = dataset.getSpace();
       int rank = dataspace.getSimpleExtentNdims();
       dim.resize(rank);
-      int ndims = dataspace.getSimpleExtentDims(&dim[0], nullptr);
-
+      dataspace.getSimpleExtentDims(&dim[0], nullptr);
       H5::DataSpace memspace(rank, &dim[0]);
       data.resize(memspace.getSelectNpoints());
-
       dataset.read(&data[0], H5::PredType::NATIVE_INT, memspace, dataspace);
     }
 
@@ -104,7 +82,7 @@ private:
       };
     } x;
 
-    srand(time(NULL));
+    srand(time(nullptr));
     for (int i = 0; i < dim[0]; ++i) {
       for (int j = 0; j < dim[1]; ++j) {
         offset = dim[2] * (j + dim[1] * i);
@@ -133,8 +111,8 @@ struct Amor {
   std::vector<std::string>::const_iterator end() const { return path.end(); }
 
   Amor() {
-    path.push_back("/entry1/AMOR/area_detector/data");
-    path.push_back("/entry1/AMOR/area_detector/time_binning");
+    path.emplace_back("/entry1/AMOR/area_detector/data");
+    path.emplace_back("/entry1/AMOR/area_detector/time_binning");
   }
 
   template <typename T>
@@ -176,7 +154,6 @@ private:
   std::vector<int32_t> data;
   std::vector<float> tof;
   std::vector<hsize_t> dim;
-  uint32_t size;
 
   template <typename T> void toEventFmt(std::vector<T> &signal) {
     throw std::runtime_error("Error, stream format unknown");
@@ -242,5 +219,3 @@ void Amor::toEventFmt<ESSformat::value_type>(
 }
 
 } // namespace SINQAmorSim
-
-#endif // NEXUS_READER_H

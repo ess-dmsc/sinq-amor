@@ -1,16 +1,6 @@
 #pragma once
 
-#include <chrono>
-#include <fstream>
-#include <inttypes.h>
-#include <iostream>
-#include <iterator>
-#include <string>
-#include <type_traits>
-
-#include "Errors.hpp"
 #include "schemas/ev42_events_generated.h"
-#include "utils.hpp"
 
 // WARNING:
 // the schema has to match to the serialise template type
@@ -98,7 +88,6 @@ private:
     source_name = std::string{event->source_name()->c_str()};
   }
 
-  int _size = 0;
   std::vector<char> buffer_;
   std::string source;
 };
@@ -112,14 +101,10 @@ public:
   NoSerialiser(NoSerialiser &&other) = default;
   ~NoSerialiser() = default;
 
-  NoSerialiser() : buf(nullptr){};
+  NoSerialiser() = default;
   char *get() { return nullptr; }
 
-  const int size() { return _size; }
-
-private:
-  const int _size = 0;
-  const uint8_t *buf;
+  const int size() { return 0; }
 };
 
 } // serialiser
