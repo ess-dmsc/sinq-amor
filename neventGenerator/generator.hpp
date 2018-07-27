@@ -29,7 +29,7 @@ class Generator {
 
 public:
   Generator(SINQAmorSim::Configuration &configuration)
-      : Config(configuration), Streaming{new Control(configuration)} {
+      : Streaming{new Control(configuration)}, Config{configuration} {
 
     SINQAmorSim::KafkaOptions Options;
     for (int tid = 0; tid < Config.num_threads; ++tid) {

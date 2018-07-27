@@ -244,7 +244,6 @@ int to_int(const std::string &Text) {
 
 void SINQAmorSim::ConfigurationParser::override_configuration_with(
     std::map<std::string, std::string> &CommandLineOptions) {
-  using MapType = std::map<std::string, std::string>;
   std::string Value = findMap("producer-uri", CommandLineOptions);
   if (!Value.empty()) {
     config.producer = parse_string_uri(Value, true);

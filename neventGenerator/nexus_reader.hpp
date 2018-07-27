@@ -145,7 +145,7 @@ struct Amor {
       H5::DataSpace dataspace = dataset.getSpace();
       int rank = dataspace.getSimpleExtentNdims();
       dim.resize(rank);
-      int ndims = dataspace.getSimpleExtentDims(&dim[0], nullptr);
+      dataspace.getSimpleExtentDims(&dim[0], nullptr);
       H5::DataSpace memspace(rank, &dim[0]);
       data.resize(memspace.getSelectNpoints());
       dataset.read(&data[0], H5::PredType::NATIVE_INT, memspace, dataspace);
@@ -155,7 +155,7 @@ struct Amor {
       H5::DataSpace dataspace = dataset.getSpace();
       int rank = dataspace.getSimpleExtentNdims();
       hsize_t tof_dim{0};
-      int ndims = dataspace.getSimpleExtentDims(&tof_dim, nullptr);
+      dataspace.getSimpleExtentDims(&tof_dim, nullptr);
       if (tof_dim != dim[2]) {
         throw std::runtime_error(
             "Time extent in histogram differs from ToF length");
@@ -186,7 +186,7 @@ private:
 template <>
 void Amor::toEventFmt<PSIformat::value_type>(
     std::vector<PSIformat::value_type> &signal) {
-  unsigned long nEvents = std::accumulate(data.begin(), data.end(), 0);
+  // unsigned long nEvents = std::accumulate(data.begin(), data.end(), 0);
   int offset, nCount;
   int detID = 0;
 
@@ -198,11 +198,11 @@ void Amor::toEventFmt<PSIformat::value_type>(
     };
   } x;
 
-  for (int i = 0; i < dim[0]; ++i) {
-    for (int j = 0; j < dim[1]; ++j) {
+  for (hsize_t i = 0; i < dim[0]; ++i) {
+    for (hsize_t j = 0; j < dim[1]; ++j) {
       detID++;
       offset = dim[2] * (j + dim[1] * i);
-      for (int k = 0; k < dim[2]; ++k) {
+      for (hsize_t k = 0; k < dim[2]; ++k) {
         nCount = data[offset + k];
         x.high = std::round(tof[k] / 10.);
         x.low = 1 << 31 | 1 << 30 | 1 << 29 | 1 << 28 | 2 << 24 | detID;
@@ -225,10 +225,10 @@ void Amor::toEventFmt<ESSformat::value_type>(
   std::cout << "ESSformat : " << nEvents << " events\n";
 
   signal.resize(2 * nEvents);
-  for (int i = 0; i < dim[0]; ++i) {
-    for (int j = 0; j < dim[1]; ++j) {
+  for (hsize_t i = 0; i < dim[0]; ++i) {
+    for (hsize_t j = 0; j < dim[1]; ++j) {
       offset = dim[2] * (j + dim[1] * i);
-      for (int k = 0; k < dim[2]; ++k) {
+      for (hsize_t k = 0; k < dim[2]; ++k) {
         nCount = data[offset + k];
         for (int l = 0; l < nCount; ++l) {
           signal[counter] = std::round(tof[k] / 10.);

@@ -92,8 +92,7 @@ struct D2 {
   std::vector<value_type>::const_iterator begin() const { return v.begin(); }
   std::vector<value_type>::const_iterator end() const { return v.end(); }
 
-  D2(std::string &s, std::vector<int> &dest)
-      : in(s), v(dest), n_row(0), n_col(0) {}
+  D2(std::string &s, std::vector<int> &dest) : in(s), v(dest) {}
 
   void operator()(const int n) { extract_values(n); }
 
