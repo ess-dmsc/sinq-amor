@@ -2,15 +2,15 @@ file "$(TOP)/db/basic_asyn_motor.db"
 {
 pattern
 {P,             N,     M,          DTYP,  PORT, ADDR, DESC,  EGU,      DIR,   VELO,  VBAS, ACCL, BDST, BVEL, BACC,   MRES, PREC, DHLM, DLLM,     INIT}
-{SQ:AMOR:motb:, 1, "aom",   "asynMotor",  motb,  1, "aom",   degree,   Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   5,      -5,     ""}
-{SQ:AMOR:motb:, 2, "aoz",   "asynMotor",  motb,  2, "aoz",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   105,  -150.,    ""}
-{SQ:AMOR:motb:, 3, "atz",   "asynMotor",  motb,  3, "atz",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   48,    -48,     ""}
-{SQ:AMOR:motb:, 4, "mom",   "asynMotor",  motb,  5, "mom",   degree,   Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   1.435,  -1.565, ""}
-{SQ:AMOR:motb:, 5, "moz",   "asynMotor",  motb,  6, "moz",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   20.6, -9.4,     ""}
-{SQ:AMOR:motb:, 6, "mtz",   "asynMotor",  motb,  7, "mtz",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   20,      -6,    ""}
-{SQ:AMOR:motb:, 7, "mty",   "asynMotor",  motb,  8, "mty",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,    97,    -100,   ""}
-{SQ:AMOR:motb:, 8, "fom",   "asynMotor",  motb,  9, "fom",   degree,   Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3, 4.803, -5.197,    ""}
-{SQ:AMOR:motb:, 9, "ftz",   "asynMotor",  motb,  11, "ftz",   mm,      Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   69.49, -28.51,  ""}
+{SQ:AMOR:motb:, 1, "aom",   "asynMotor",  motb,  1, "aom",   degree,   Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   7.265,      -4.834,     ""}
+{SQ:AMOR:motb:, 2, "aoz",   "asynMotor",  motb,  2, "aoz",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   198.710,  -1087.53.,    ""}
+{SQ:AMOR:motb:, 3, "atz",   "asynMotor",  motb,  3, "atz",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   26,    -70,     ""}
+{SQ:AMOR:motb:, 4, "mom",   "asynMotor",  motb,  5, "mom",   degree,   Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   2.967,  -3.033, ""}
+{SQ:AMOR:motb:, 5, "moz",   "asynMotor",  motb,  6, "moz",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   59.400, -50.60,     ""}
+{SQ:AMOR:motb:, 6, "mtz",   "asynMotor",  motb,  7, "mtz",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   41.920,      -79.330,    ""}
+{SQ:AMOR:motb:, 7, "mty",   "asynMotor",  motb,  8, "mty",   mm,       Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,    20,    -100,   ""}
+{SQ:AMOR:motb:, 8, "fom",   "asynMotor",  motb,  9, "fom",   degree,   Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3, 5.000, -4.164,    ""}
+{SQ:AMOR:motb:, 9, "ftz",   "asynMotor",  motb,  11, "ftz",   mm,      Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,   43.500, -8.500,  ""}
 {SQ:AMOR:motb:, 10,"dbs",   "asynMotor",  motb,  12, "dbs",   mm,      Pos,    2.0,   0.1,  .2,    0,    1,   .2,    .001,    3,  72.8,  -47.2,    ""}
 }
 
