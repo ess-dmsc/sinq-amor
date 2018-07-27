@@ -38,10 +38,10 @@ public:
     }
 
     while (Ctrl->run() || Ctrl->pause()) {
-      // if (Ctrl->pause()) {
-      //   std::this_thread::sleep_for(std::chrono::milliseconds(100));
-      //   continue;
-      // }
+      if (Ctrl->pause()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        continue;
+      }
       std::chrono::time_point<std::chrono::system_clock> StartTime =
           system_clock::now();
       std::unique_lock<std::mutex> Lock(CountGuard);
