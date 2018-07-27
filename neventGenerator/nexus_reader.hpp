@@ -76,10 +76,10 @@ private:
     int offset, nCount;
     union {
       uint64_t value;
-      struct {
+      struct LoHi {
         uint32_t low;
         uint32_t high;
-      };
+      } part;
     } x;
 
     srand(time(nullptr));
@@ -90,7 +90,7 @@ private:
           nCount = data[offset + k];
           x.low = 1 << 31 | 1 << 30 | 1 << 29 | 1 << 28 | 2 << 24 | i << 12 | j;
           for (int l = 0; l < nCount; ++l) {
-            x.high = rand();
+            x.part.high = rand();
             signal.push_back(x.value);
           }
         }
@@ -169,10 +169,10 @@ void Amor::toEventFmt<PSIformat::value_type>(
 
   union {
     uint64_t value;
-    struct {
+    struct LoHi {
       uint32_t low;
       uint32_t high;
-    };
+    } part;
   } x;
 
   for (hsize_t i = 0; i < dim[0]; ++i) {
@@ -181,8 +181,8 @@ void Amor::toEventFmt<PSIformat::value_type>(
       offset = dim[2] * (j + dim[1] * i);
       for (hsize_t k = 0; k < dim[2]; ++k) {
         nCount = data[offset + k];
-        x.high = std::round(tof[k] / 10.);
-        x.low = 1 << 31 | 1 << 30 | 1 << 29 | 1 << 28 | 2 << 24 | detID;
+        x.part.high = std::round(tof[k] / 10.);
+        x.part.low = 1 << 31 | 1 << 30 | 1 << 29 | 1 << 28 | 2 << 24 | detID;
         for (int l = 0; l < nCount; ++l) {
           signal.push_back(x.value);
         }

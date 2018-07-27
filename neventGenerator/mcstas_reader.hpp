@@ -145,17 +145,17 @@ private:
 
     union {
       uint64_t value;
-      struct {
+      struct LoHi {
         uint32_t low;
         uint32_t high;
-      };
+      } parts;
     } x;
 
     for (auto it = area.begin(); it != area.end(); ++it, ++pos) {
       for (int count = 0; count < (*it); ++count) {
-        x.high = rand();
-        x.low = (1 << 31 | 1 << 30 | 1 << 29 | 1 << 28 | 2 << 24 |
-                 pos / area.n_col << 12 | pos % area.n_col);
+        x.parts.high = rand();
+        x.parts.low = (1 << 31 | 1 << 30 | 1 << 29 | 1 << 28 | 2 << 24 |
+                       pos / area.n_col << 12 | pos % area.n_col);
         signal.push_back(x.value);
       }
     }
