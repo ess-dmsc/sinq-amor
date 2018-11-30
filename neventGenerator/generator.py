@@ -4,31 +4,29 @@ class Generator:
 
     # This list has to be in the favorite order: if multiple
     # executables are find the first will be used
-    default_paths = [ '.',
-                      './build/',
-                      '/opt/amor/simfiles/',
-                      '/opt/software/sinq-amorsim/',
-                      '/opt/amor/simfiles/']
-    exe = [];
+    exe = None;
 
     def find_impl(self,pattern, path):
-        result = []
         for root, dirs, files in os.walk(path):
             for name in files:
                 if fnmatch.fnmatch(name, pattern):
-                    result.append(os.path.join(root, name))
-        return result
+                    return os.path.join(root, name)
+        return None
 
-    def find(self,path):
-        exe = self.find_impl('AMORgenerator', path)
-        if exe != []:
-            self.exe = exe
-            return
-        for i in self.default_paths:
-            exe = self.find_impl('AMORgenerator', i)
-            if exe != []:
+    def find(self,path=None):
+        paths = [ './build/',
+                  '.',
+                  '/opt/amor/simfiles/',
+                  '/opt/software/sinq-amorsim/',
+                  '/opt/amor/simfiles/']
+        if path is not None:
+            paths.insert(0,path)
+
+        for p in paths:
+            exe = self.find_impl('AMORgenerator', p)
+            if exe :
                 self.exe = exe
-                return
+                return exe
 
     def validate(self, param) :
         pos = [i for i, j in enumerate(param) if j == '-b']

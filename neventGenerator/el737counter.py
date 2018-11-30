@@ -14,7 +14,7 @@ import subprocess as sp
 import os
 
 import generator
-
+generator_path = None
 
 class EL737Controller(LineReceiver):
     def __init__(self):
@@ -76,13 +76,9 @@ class EL737Controller(LineReceiver):
         if self.remotestate == 1:
             if data.startswith('echo 2'):
 
-                g.find('./build')
+                g.find(generator_path)
                 print orig.split()[2:]
-#                if not g.validate(orig.split()[2:]):
-#                    self.remotestate = 1
-#                    return
-
-                reactor.spawnProcess(self.proc,g.exe[0],args=orig.split()[2:],env=os.environ)
+                reactor.spawnProcess(self.proc,g.exe,args=orig.split()[2:],env=os.environ)
 
                 self.remotestate = 2
                 self.write("\r")
@@ -268,6 +264,8 @@ def main(argv):
         port = int(argv[1])
     else:
         port = 62000
+    if len(argv) > 2:
+        generator_path = argv[2]
 
     factory = protocol.ServerFactory()
     factory.protocol = EL737Controller
