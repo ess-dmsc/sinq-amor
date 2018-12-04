@@ -89,7 +89,7 @@ class EL737Controller(LineReceiver):
                     reactor.spawnProcess(self.proc, g.exe, args=orig.split()[2:], env=os.environ)
                 except Exception as what:
                     logging.error(what, exc_info=True)
-                    self.remotestate == 0
+                    self.remotestate = 0
 
                 self.remotestate = 2
                 self.write("\r")
@@ -209,7 +209,7 @@ class EL737Controller(LineReceiver):
                     diff = time.time() - self.starttime - pausetime
                 else:
                     diff = self.endtime - self.starttime
-                rlist = List()
+                rlist = []
                 rlist.append(str(diff))
                 rlist.append(str(int(diff * 1000)))
                 rlist.append(str(int(diff * 1500)))
